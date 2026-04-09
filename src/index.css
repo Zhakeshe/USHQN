@@ -269,8 +269,11 @@ html.dark .ushqn-navbar {
 }
 
 html.dark .ushqn-mobilenav {
-  border-top-color: var(--color-ushqn-border);
-  background: rgba(30, 41, 59, 0.97);
+  border-color: var(--color-ushqn-border);
+  background: rgba(30, 41, 59, 0.94) !important;
+  box-shadow:
+    0 16px 48px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset;
 }
 
 html.reduce-motion *,

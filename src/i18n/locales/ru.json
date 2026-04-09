@@ -44,6 +44,9 @@
     "settings": "Настройки",
     "admin": "Админка",
     "communities": "Группы",
+    "menu": "Меню",
+    "primary": "Основное",
+    "discover": "Ещё",
     "home": "Главная",
     "logout": "Выйти"
   },

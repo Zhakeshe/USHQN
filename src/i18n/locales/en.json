@@ -44,6 +44,9 @@
     "settings": "Settings",
     "admin": "Admin",
     "communities": "Groups",
+    "menu": "Menu",
+    "primary": "Main",
+    "discover": "More",
     "home": "Home",
     "logout": "Log out"
   },

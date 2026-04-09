@@ -24,7 +24,7 @@ export function AppLayout() {
         id="main-content"
         className="mx-auto max-w-6xl px-4 py-7 sm:px-5 sm:py-9 outline-none"
         tabIndex={-1}
-        style={{ paddingBottom: 'calc(5rem + env(safe-area-inset-bottom, 0px))' }}
+        style={{ paddingBottom: 'calc(5.5rem + env(safe-area-inset-bottom, 0px))' }}
       >
         <Outlet />
       </main>
