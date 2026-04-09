@@ -88,7 +88,7 @@ export function RatingPage() {
                   >
                     <span className={podiumConfig.size}>{podiumConfig.emoji}</span>
                     {u.avatar_url ? (
-                      <img src={u.avatar_url} alt="" className="h-14 w-14 rounded-full object-cover shadow-md" />
+                      <img src={u.avatar_url} alt="" loading="lazy" className="h-14 w-14 rounded-full object-cover shadow-md" />
                     ) : (
                       <div className={`flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br ${grad} text-lg font-bold text-white shadow-md`}>
                         {getInitials(u.display_name)}
@@ -127,7 +127,7 @@ export function RatingPage() {
                       {u.rank}
                     </span>
                     {u.avatar_url ? (
-                      <img src={u.avatar_url} alt="" className="h-10 w-10 shrink-0 rounded-full object-cover" />
+                      <img src={u.avatar_url} alt="" loading="lazy" className="h-10 w-10 shrink-0 rounded-full object-cover" />
                     ) : (
                       <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br ${grad} text-sm font-bold text-white`}>
                         {getInitials(u.display_name)}

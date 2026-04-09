@@ -1,8 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
+import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
 import { QueryState } from '../components/QueryState'
+import { trackEvent } from '../lib/analytics'
 
 async function countRows(table: string) {
   const { count, error } = await supabase.from(table).select('*', { count: 'exact', head: true })
@@ -13,6 +15,9 @@ async function countRows(table: string) {
 
 export function AdminPage() {
   const { t } = useTranslation()
+  const [search, setSearch] = useState('')
+  const [page, setPage] = useState(1)
+  const pageSize = 10
 
   const statsQuery = useQuery({
     queryKey: ['admin-stats'],
@@ -41,6 +46,16 @@ export function AdminPage() {
       return data ?? []
     },
   })
+
+  const recentFiltered = useMemo(() => {
+    const q = search.trim().toLowerCase()
+    if (!q) return recentQuery.data ?? []
+    return (recentQuery.data ?? []).filter((r) => r.display_name.toLowerCase().includes(q) || r.role.toLowerCase().includes(q))
+  }, [recentQuery.data, search])
+
+  const totalPages = Math.max(1, Math.ceil(recentFiltered.length / pageSize))
+  const safePage = Math.min(page, totalPages)
+  const pagedRows = recentFiltered.slice((safePage - 1) * pageSize, safePage * pageSize)
 
   const stats = statsQuery.data
 
@@ -86,6 +101,18 @@ export function AdminPage() {
       <div className="ushqn-card overflow-hidden p-0">
         <div className="border-b border-[var(--color-ushqn-border)] px-5 py-4">
           <h2 className="text-lg font-bold text-[var(--color-ushqn-text)]">{t('admin.recentUsers')}</h2>
+          <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <input
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value)
+                setPage(1)
+              }}
+              placeholder="Search by name or role"
+              className="ushqn-input w-full sm:max-w-xs"
+            />
+            <p className="text-xs text-[var(--color-ushqn-muted)]">{recentFiltered.length} users</p>
+          </div>
         </div>
         <QueryState
           query={recentQuery}
@@ -102,7 +129,7 @@ export function AdminPage() {
                 </tr>
               </thead>
               <tbody>
-                {(recentQuery.data ?? []).map((row) => (
+                {pagedRows.map((row) => (
                   <tr key={row.id} className="border-b border-[var(--color-ushqn-border)]">
                     <td className="px-4 py-2">
                       <span className="font-medium text-[var(--color-ushqn-text)]">{row.display_name}</span>
@@ -117,7 +144,11 @@ export function AdminPage() {
                       {row.created_at ? new Date(row.created_at).toLocaleDateString() : '—'}
                     </td>
                     <td className="px-4 py-2">
-                      <Link to={`/u/${row.id}`} className="font-semibold text-[var(--color-ushqn-primary)] hover:underline">
+                      <Link
+                        to={`/u/${row.id}`}
+                        className="font-semibold text-[var(--color-ushqn-primary)] hover:underline"
+                        onClick={() => trackEvent('admin_open_profile')}
+                      >
                         {t('admin.openProfile')}
                       </Link>
                     </td>
@@ -125,6 +156,29 @@ export function AdminPage() {
                 ))}
               </tbody>
             </table>
+          </div>
+          <div className="flex items-center justify-between border-t border-[var(--color-ushqn-border)] px-4 py-3 text-xs">
+            <span className="text-[var(--color-ushqn-muted)]">
+              Page {safePage} / {totalPages}
+            </span>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                disabled={safePage <= 1}
+                className="rounded border border-[var(--color-ushqn-border)] px-2 py-1 disabled:opacity-50"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+              >
+                Prev
+              </button>
+              <button
+                type="button"
+                disabled={safePage >= totalPages}
+                className="rounded border border-[var(--color-ushqn-border)] px-2 py-1 disabled:opacity-50"
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              >
+                Next
+              </button>
+            </div>
           </div>
         </QueryState>
       </div>

@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
 import { getAppBaseUrl } from '../lib/siteUrl'
+import { trackEvent } from '../lib/analytics'
 
 function makeSchema(t: (k: string) => string) {
   return z.object({
@@ -63,6 +64,7 @@ export function LoginPage() {
       password: values.password,
     })
     if (e) {
+      trackEvent('login_failed', { method: 'password' })
       if (isEmailNotConfirmed(e)) {
         setNeedsConfirm(true)
         setPendingEmail(values.email)
@@ -72,6 +74,7 @@ export function LoginPage() {
       setError(e.message)
       return
     }
+    trackEvent('login_success', { method: 'password' })
     navigate('/home', { replace: true })
   }
 
@@ -87,9 +90,12 @@ export function LoginPage() {
       },
     })
     if (e) {
+      trackEvent('login_failed', { method: 'google' })
       setError(e.message)
       setGoogleLoading(false)
+      return
     }
+    trackEvent('oauth_start', { provider: 'google', source: 'login' })
   }
 
   async function resendConfirmation() {

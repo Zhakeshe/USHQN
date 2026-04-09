@@ -194,7 +194,7 @@ export function PeoplePage() {
               <div key={p.id} className="ushqn-card flex flex-col p-5 transition-shadow hover:shadow-md">
                 <div className="flex items-start gap-3">
                   {p.avatar_url ? (
-                    <img src={p.avatar_url} alt="" className="h-12 w-12 shrink-0 rounded-full object-cover" />
+                    <img src={p.avatar_url} alt="" loading="lazy" className="h-12 w-12 shrink-0 rounded-full object-cover" />
                   ) : (
                     <div
                       className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br ${grad} text-base font-bold text-white`}

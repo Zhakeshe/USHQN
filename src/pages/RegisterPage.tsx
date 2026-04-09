@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next'
 import type { AuthError } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import { getAppBaseUrl } from '../lib/siteUrl'
+import { trackEvent } from '../lib/analytics'
 import type { UserRole } from '../types/database'
 
 function formatRegisterError(e: AuthError, t: (k: string) => string): string {
@@ -113,7 +114,13 @@ export function RegisterPage() {
         queryParams: { prompt: 'select_account' },
       },
     })
-    if (e) { setError(e.message); setGoogleLoading(false) }
+    if (e) {
+      trackEvent('register_failed', { method: 'google' })
+      setError(e.message)
+      setGoogleLoading(false)
+      return
+    }
+    trackEvent('oauth_start', { provider: 'google', source: 'register' })
   }
 
   async function onSubmit(values: Form) {
@@ -128,9 +135,14 @@ export function RegisterPage() {
         data: { display_name: values.display_name, role: values.role },
       },
     })
-    if (e) { setError(formatRegisterError(e, t)); return }
+    if (e) {
+      trackEvent('register_failed', { method: 'email' })
+      setError(formatRegisterError(e, t))
+      return
+    }
     if (data.session) { navigate('/home', { replace: true }); return }
     if (data.user) {
+      trackEvent('register_success', { method: 'email', role: values.role })
       setInfo(`${t('register.successTitle')} ${t('register.successDesc')} ${values.email}`)
       return
     }

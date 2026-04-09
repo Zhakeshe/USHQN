@@ -13,6 +13,7 @@ import { useToast } from '../lib/toast'
 import { useConfirm } from '../lib/confirm'
 import { getDateFnsLocale } from '../lib/dateLocale'
 import { QueryState } from '../components/QueryState'
+import { trackEvent } from '../lib/analytics'
 
 const JOBS_FILTERS_KEY = 'ushqn_jobs_filters_v1'
 
@@ -201,6 +202,7 @@ export function JobsPage() {
       form.reset()
       setShowForm(false)
       void qc.invalidateQueries({ queryKey: ['jobs'] })
+      trackEvent('job_created')
       toast(t('jobs.toastPublished'))
     },
     onError: () => toast(t('jobs.toastPublishErr'), 'error'),
@@ -236,9 +238,11 @@ export function JobsPage() {
     if (!userId) return
     const { data, error } = await supabase.rpc('get_or_create_dm', { other_id: ownerId })
     if (error) {
+      trackEvent('job_apply_failed')
       toast(t('jobs.chatOpenErr'), 'error')
       return
     }
+    trackEvent('job_applied')
     void navigate(`/chat/${data}`)
   }
 

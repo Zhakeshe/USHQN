@@ -125,6 +125,7 @@ export function ProfileCard({ profile, onEdit, userId }: Props) {
                 <img
                   src={profile.avatar_url}
                   alt=""
+                  loading="lazy"
                   className="h-28 w-28 rounded-full border-[4px] border-white object-cover shadow-md sm:h-[140px] sm:w-[140px]"
                   style={{ boxShadow: `0 0 0 2px ${accent}40, 0 8px 24px rgba(0,0,0,0.08)` }}
                 />

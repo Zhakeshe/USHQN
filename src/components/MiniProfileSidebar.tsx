@@ -125,7 +125,7 @@ export function MiniProfileSidebar() {
       <div className="relative flex flex-col items-center px-4 pb-2 pt-0">
         <div className="-mt-9 flex h-[4.5rem] w-[4.5rem] items-center justify-center rounded-full border-[4px] border-white bg-[#EEF1F4] text-2xl shadow-lg ring-1 ring-black/[0.06]">
           {p.avatar_url ? (
-            <img src={p.avatar_url} alt="" className="h-full w-full rounded-full object-cover" />
+            <img src={p.avatar_url} alt="" loading="lazy" className="h-full w-full rounded-full object-cover" />
           ) : (
             <span aria-hidden>🧑‍🎓</span>
           )}
