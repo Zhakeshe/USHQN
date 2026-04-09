@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
+import { getAppBaseUrl } from '../lib/siteUrl'
 
 function makeSchema(t: (k: string) => string) {
   return z.object({
@@ -77,10 +78,11 @@ export function LoginPage() {
   async function signInWithGoogle() {
     setGoogleLoading(true)
     setError(null)
+    const baseUrl = getAppBaseUrl()
     const { error: e } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/`,
+        redirectTo: `${baseUrl}/`,
         queryParams: { prompt: 'select_account' },
       },
     })

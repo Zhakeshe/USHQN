@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslation } from 'react-i18next'
 import type { AuthError } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
+import { getAppBaseUrl } from '../lib/siteUrl'
 import type { UserRole } from '../types/database'
 
 function formatRegisterError(e: AuthError, t: (k: string) => string): string {
@@ -104,10 +105,11 @@ export function RegisterPage() {
   async function signInWithGoogle() {
     setGoogleLoading(true)
     setError(null)
+    const baseUrl = getAppBaseUrl()
     const { error: e } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/`,
+        redirectTo: `${baseUrl}/`,
         queryParams: { prompt: 'select_account' },
       },
     })
@@ -117,11 +119,12 @@ export function RegisterPage() {
   async function onSubmit(values: Form) {
     setError(null)
     setInfo(null)
+    const baseUrl = getAppBaseUrl()
     const { data, error: e } = await supabase.auth.signUp({
       email: values.email,
       password: values.password,
       options: {
-        emailRedirectTo: typeof window !== 'undefined' ? `${window.location.origin}/` : undefined,
+        emailRedirectTo: baseUrl ? `${baseUrl}/` : undefined,
         data: { display_name: values.display_name, role: values.role },
       },
     })
