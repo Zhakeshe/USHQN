@@ -69,6 +69,54 @@ button, a, [role="button"] {
 
 /* Surfaces & form controls — единый стиль карточек и инпутов */
 @layer components {
+  /* Nav: no grey iOS flash; dropdown / tab micro-motion */
+  .ushqn-tap-clear {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  @keyframes ushqn-nav-dropdown-in {
+    from {
+      opacity: 0;
+      transform: translateY(-0.375rem) scale(0.97);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .ushqn-nav-dropdown {
+    transform-origin: top right;
+    animation: ushqn-nav-dropdown-in 0.26s cubic-bezier(0.34, 1.35, 0.64, 1) both;
+  }
+
+  @keyframes ushqn-mobilenav-pill-in {
+    from {
+      transform: scale(0.88);
+      opacity: 0.88;
+    }
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  .ushqn-mobilenav-pill-in {
+    animation: ushqn-mobilenav-pill-in 0.34s cubic-bezier(0.34, 1.45, 0.64, 1) both;
+  }
+
+  html.reduce-motion .ushqn-nav-dropdown,
+  html.reduce-motion .ushqn-mobilenav-pill-in {
+    animation: none !important;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ushqn-nav-dropdown,
+    .ushqn-mobilenav-pill-in {
+      animation: none !important;
+    }
+  }
+
   .ushqn-card {
     border-radius: 0.75rem;
     border: 1px solid var(--color-ushqn-border);

@@ -12,6 +12,10 @@ const LANGS = [
   { code: 'en', label: 'EN' },
 ]
 
+const NAV_SPRING = 'motion-safe:transition-[transform,box-shadow,background-color,color,opacity] motion-safe:duration-200 motion-safe:ease-[cubic-bezier(0.34,1.35,0.64,1)]'
+
+const NAV_MENU_LINK = `ushqn-tap-clear mx-1 my-0.5 block rounded-xl px-3 py-2.5 text-sm font-semibold ${NAV_SPRING} motion-safe:active:scale-[0.97]`
+
 function LangSwitcher() {
   const { i18n } = useTranslation()
   const [open, setOpen] = useState(false)
@@ -31,7 +35,7 @@ function LangSwitcher() {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex h-9 items-center gap-1 rounded-full border border-[var(--color-ushqn-border)] bg-[var(--color-ushqn-surface-muted)] px-2.5 text-[11px] font-bold uppercase tracking-wide text-[var(--color-ushqn-muted)] shadow-sm transition hover:border-[#93c5fd]/80 hover:text-[var(--color-ushqn-primary)]"
+        className={`ushqn-tap-clear flex h-9 items-center gap-1 rounded-full border border-[var(--color-ushqn-border)] bg-[var(--color-ushqn-surface-muted)] px-2.5 text-[11px] font-bold uppercase tracking-wide text-[var(--color-ushqn-muted)] shadow-sm hover:border-[#93c5fd]/80 hover:text-[var(--color-ushqn-primary)] hover:shadow-md ${NAV_SPRING} motion-safe:active:scale-[0.94] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0052CC] focus-visible:ring-offset-2`}
         aria-label="Change language"
       >
         <span>{current.label}</span>
@@ -40,7 +44,7 @@ function LangSwitcher() {
         </svg>
       </button>
       {open ? (
-        <div className="absolute right-0 top-full z-[60] mt-2 min-w-[10rem] overflow-hidden rounded-2xl border border-[var(--color-ushqn-border)] bg-[var(--color-ushqn-surface)] py-1 shadow-xl shadow-slate-900/10 ring-1 ring-black/5">
+        <div className="ushqn-nav-dropdown absolute right-0 top-full z-[60] mt-2 min-w-[10rem] overflow-hidden rounded-2xl border border-[var(--color-ushqn-border)] bg-[var(--color-ushqn-surface)] py-1 shadow-xl shadow-slate-900/10 ring-1 ring-black/5">
           {LANGS.map((lang) => (
             <button
               key={lang.code}
@@ -49,9 +53,9 @@ function LangSwitcher() {
                 void i18n.changeLanguage(lang.code)
                 setOpen(false)
               }}
-              className={`flex w-full items-center gap-2 px-3.5 py-2.5 text-sm font-semibold transition-colors ${
+              className={`ushqn-tap-clear mx-1 flex w-[calc(100%-0.5rem)] items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-semibold ${NAV_SPRING} motion-safe:active:scale-[0.98] ${
                 i18n.language === lang.code
-                  ? 'bg-[#EFF6FF] text-[#0052CC] dark:bg-blue-950/50 dark:text-[var(--color-ushqn-primary)]'
+                  ? 'bg-[#EFF6FF] text-[#0052CC] shadow-sm shadow-[#0052CC]/8 dark:bg-blue-950/50 dark:text-[var(--color-ushqn-primary)]'
                   : 'text-[var(--color-ushqn-text)] hover:bg-[var(--color-ushqn-surface-muted)]'
               }`}
             >
@@ -77,14 +81,24 @@ function NavPill({ to, end, children }: { to: string; end?: boolean; children: R
       to={to}
       end={end}
       className={({ isActive }) =>
-        `whitespace-nowrap rounded-full px-3.5 py-2 text-sm font-semibold transition-all duration-200 ${
+        `ushqn-tap-clear relative inline-flex items-center justify-center whitespace-nowrap rounded-full px-3.5 py-2 text-sm font-semibold ${NAV_SPRING} motion-safe:active:scale-[0.94] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0052CC] focus-visible:ring-offset-2 ${
           isActive
-            ? 'bg-gradient-to-r from-[#0052CC] to-[#2563EB] text-white shadow-lg shadow-[#0052CC]/28 ring-1 ring-white/25'
-            : 'text-[var(--color-ushqn-text)]/75 hover:bg-[var(--color-ushqn-surface-muted)] hover:text-[var(--color-ushqn-text)]'
+            ? 'bg-gradient-to-r from-[#0052CC] via-[#1d4ed8] to-[#2563EB] text-white shadow-lg shadow-[#0052CC]/32 ring-1 ring-white/30 motion-safe:hover:shadow-xl motion-safe:hover:shadow-[#0052CC]/40 motion-safe:hover:scale-[1.02]'
+            : 'text-[var(--color-ushqn-text)]/75 hover:bg-[var(--color-ushqn-surface-muted)] hover:text-[var(--color-ushqn-text)] motion-safe:hover:scale-[1.04] motion-safe:hover:shadow-sm'
         }`
       }
     >
-      {children}
+      {({ isActive }) => (
+        <>
+          {isActive ? (
+            <span
+              className="pointer-events-none absolute inset-x-2 top-1 z-10 h-px rounded-full bg-gradient-to-r from-transparent via-white/45 to-transparent"
+              aria-hidden
+            />
+          ) : null}
+          <span className="relative z-10">{children}</span>
+        </>
+      )}
     </NavLink>
   )
 }
@@ -184,9 +198,11 @@ export function Navbar() {
       <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4 sm:h-[3.75rem] sm:px-5">
         <Link
           to="/home"
-          className="group flex shrink-0 items-center gap-2.5 rounded-xl py-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0052CC] focus-visible:ring-offset-2"
+          className="ushqn-tap-clear group flex shrink-0 items-center gap-2.5 rounded-xl py-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0052CC] focus-visible:ring-offset-2"
         >
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#0052CC] via-[#1d4ed8] to-[#60a5fa] text-sm font-black tracking-tight text-white shadow-lg shadow-[#0052CC]/30 ring-2 ring-white/40 transition-transform duration-200 group-hover:scale-[1.03] group-active:scale-[0.98]">
+          <span
+            className={`flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#0052CC] via-[#1d4ed8] to-[#60a5fa] text-sm font-black tracking-tight text-white shadow-lg shadow-[#0052CC]/30 ring-2 ring-white/40 ${NAV_SPRING} motion-safe:group-hover:scale-[1.06] motion-safe:group-hover:shadow-xl motion-safe:group-hover:shadow-[#0052CC]/35 motion-safe:group-active:scale-[0.92]`}
+          >
             U
           </span>
           <span className="hidden flex-col leading-none sm:flex">
@@ -201,7 +217,9 @@ export function Navbar() {
           className="hidden min-w-0 flex-1 items-center justify-center gap-1 lg:flex"
           aria-label={t('nav.home')}
         >
-          <div className="flex max-w-full flex-wrap items-center justify-center gap-1 rounded-2xl border border-[var(--color-ushqn-border)]/60 bg-[var(--color-ushqn-surface-muted)]/80 p-1 shadow-inner">
+          <div
+            className={`flex max-w-full flex-wrap items-center justify-center gap-1 rounded-2xl border border-[var(--color-ushqn-border)]/60 bg-[var(--color-ushqn-surface-muted)]/80 p-1 shadow-inner ring-1 ring-black/[0.04] dark:ring-white/[0.06] ${NAV_SPRING} motion-safe:hover:shadow-md motion-safe:hover:ring-black/[0.06]`}
+          >
             <NavPill to="/home" end>
               {t('nav.home')}
             </NavPill>
@@ -221,17 +239,17 @@ export function Navbar() {
                 aria-expanded={moreOpen}
                 aria-haspopup="true"
                 onClick={() => setMoreOpen((v) => !v)}
-                className={`flex h-10 items-center gap-1.5 rounded-full border px-3 text-sm font-bold transition ${
+                className={`group ushqn-tap-clear flex h-10 items-center gap-1.5 rounded-full border px-3 text-sm font-bold shadow-sm ${NAV_SPRING} motion-safe:active:scale-[0.94] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0052CC] focus-visible:ring-offset-2 ${
                   moreOpen || isMoreActive
-                    ? 'border-[#0052CC]/40 bg-[#EFF6FF] text-[#0052CC]'
-                    : 'border-[var(--color-ushqn-border)] bg-[var(--color-ushqn-surface-muted)] text-[var(--color-ushqn-text)] hover:border-[#93c5fd]/70'
+                    ? 'border-[#0052CC]/40 bg-[#EFF6FF] text-[#0052CC] shadow-md shadow-[#0052CC]/12'
+                    : 'border-[var(--color-ushqn-border)] bg-[var(--color-ushqn-surface-muted)] text-[var(--color-ushqn-text)] hover:border-[#93c5fd]/70 hover:shadow-md motion-safe:hover:scale-[1.02]'
                 }`}
               >
-                <MenuTriggerIcon className="h-4 w-4" />
+                <MenuTriggerIcon className={`h-4 w-4 ${NAV_SPRING} motion-safe:group-active:scale-90`} />
                 <span>{t('nav.menu')}</span>
               </button>
               {moreOpen ? (
-                <div className="absolute right-0 top-full z-[60] mt-2 w-[min(18rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-[var(--color-ushqn-border)] bg-[var(--color-ushqn-surface)] shadow-2xl shadow-slate-900/15 ring-1 ring-black/5">
+                <div className="ushqn-nav-dropdown absolute right-0 top-full z-[60] mt-2 w-[min(18rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-[var(--color-ushqn-border)] bg-[var(--color-ushqn-surface)] shadow-2xl shadow-slate-900/15 ring-1 ring-black/5">
                   <div className="h-1 bg-gradient-to-r from-[#0052CC] via-[#4f46e5] to-[#60a5fa]" aria-hidden />
                   <div className="border-b border-[var(--color-ushqn-border)] px-3 py-2 text-[10px] font-black uppercase tracking-wider text-[var(--color-ushqn-muted)]">
                     {t('nav.primary')}
@@ -252,9 +270,9 @@ export function Navbar() {
                       end={'end' in item ? item.end : false}
                       onClick={() => setMoreOpen(false)}
                       className={({ isActive }) =>
-                        `block px-3.5 py-2.5 text-sm font-semibold transition-colors ${
+                        `${NAV_MENU_LINK} ${
                           isActive
-                            ? 'bg-[#EFF6FF] text-[#0052CC]'
+                            ? 'bg-[#EFF6FF] text-[#0052CC] shadow-sm shadow-[#0052CC]/10 dark:bg-blue-950/45 dark:text-[var(--color-ushqn-primary)]'
                             : 'text-[var(--color-ushqn-text)] hover:bg-[var(--color-ushqn-surface-muted)]'
                         }`
                       }
@@ -271,9 +289,9 @@ export function Navbar() {
                       to={item.to}
                       onClick={() => setMoreOpen(false)}
                       className={({ isActive }) =>
-                        `block px-3.5 py-2.5 text-sm font-semibold transition-colors ${
+                        `${NAV_MENU_LINK} ${
                           isActive
-                            ? 'bg-[#EFF6FF] text-[#0052CC]'
+                            ? 'bg-[#EFF6FF] text-[#0052CC] shadow-sm shadow-[#0052CC]/10 dark:bg-blue-950/45 dark:text-[var(--color-ushqn-primary)]'
                             : 'text-[var(--color-ushqn-text)] hover:bg-[var(--color-ushqn-surface-muted)]'
                         }`
                       }
@@ -284,7 +302,7 @@ export function Navbar() {
                   <NavLink
                     to="/notifications"
                     onClick={() => setMoreOpen(false)}
-                    className="flex items-center gap-2 border-t border-[var(--color-ushqn-border)] px-3.5 py-2.5 text-sm font-semibold text-[var(--color-ushqn-text)] hover:bg-[var(--color-ushqn-surface-muted)]"
+                    className={`ushqn-tap-clear mx-1 mb-1 mt-1 flex items-center gap-2 rounded-xl border-t border-[var(--color-ushqn-border)] px-3 py-2.5 text-sm font-semibold text-[var(--color-ushqn-text)] hover:bg-[var(--color-ushqn-surface-muted)] ${NAV_SPRING} motion-safe:active:scale-[0.98]`}
                   >
                     {t('nav.notifications')}
                     {badgeCount ? (
@@ -303,17 +321,17 @@ export function Navbar() {
                 aria-expanded={moreOpen}
                 aria-haspopup="true"
                 onClick={() => setMoreOpen((v) => !v)}
-                className={`flex h-10 items-center gap-1.5 rounded-full border px-3.5 text-sm font-semibold transition ${
+                className={`group ushqn-tap-clear flex h-10 items-center gap-1.5 rounded-full border px-3.5 text-sm font-semibold shadow-sm ${NAV_SPRING} motion-safe:active:scale-[0.94] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0052CC] focus-visible:ring-offset-2 ${
                   moreOpen || isMoreActive
-                    ? 'border-[#0052CC]/45 bg-[#EFF6FF] text-[#0052CC] shadow-sm'
-                    : 'border-[var(--color-ushqn-border)] bg-[var(--color-ushqn-surface)] text-[var(--color-ushqn-text)]/85 hover:border-[#93c5fd]/80 hover:bg-[var(--color-ushqn-surface-muted)]'
+                    ? 'border-[#0052CC]/45 bg-[#EFF6FF] text-[#0052CC] shadow-md shadow-[#0052CC]/12'
+                    : 'border-[var(--color-ushqn-border)] bg-[var(--color-ushqn-surface)] text-[var(--color-ushqn-text)]/85 hover:border-[#93c5fd]/80 hover:bg-[var(--color-ushqn-surface-muted)] hover:shadow-md motion-safe:hover:scale-[1.02]'
                 }`}
               >
-                <MenuTriggerIcon className="h-4 w-4 opacity-90" />
+                <MenuTriggerIcon className={`h-4 w-4 opacity-90 ${NAV_SPRING} motion-safe:group-active:scale-90`} />
                 {t('nav.menu')}
               </button>
               {moreOpen ? (
-                <div className="absolute right-0 top-full z-[60] mt-2 min-w-[13rem] overflow-hidden rounded-2xl border border-[var(--color-ushqn-border)] bg-[var(--color-ushqn-surface)] shadow-2xl shadow-slate-900/12 ring-1 ring-black/5">
+                <div className="ushqn-nav-dropdown absolute right-0 top-full z-[60] mt-2 min-w-[13rem] overflow-hidden rounded-2xl border border-[var(--color-ushqn-border)] bg-[var(--color-ushqn-surface)] py-0.5 shadow-2xl shadow-slate-900/12 ring-1 ring-black/5">
                   <div className="h-1 bg-gradient-to-r from-[#0052CC] via-[#4f46e5] to-[#60a5fa]" aria-hidden />
                   {moreItems.map((item) => (
                     <NavLink
@@ -321,9 +339,9 @@ export function Navbar() {
                       to={item.to}
                       onClick={() => setMoreOpen(false)}
                       className={({ isActive }) =>
-                        `block px-3.5 py-2.5 text-sm font-semibold transition-colors ${
+                        `${NAV_MENU_LINK} ${
                           isActive
-                            ? 'bg-[#EFF6FF] text-[#0052CC]'
+                            ? 'bg-[#EFF6FF] text-[#0052CC] shadow-sm shadow-[#0052CC]/10 dark:bg-blue-950/45 dark:text-[var(--color-ushqn-primary)]'
                             : 'text-[var(--color-ushqn-text)] hover:bg-[var(--color-ushqn-surface-muted)]'
                         }`
                       }
@@ -339,7 +357,7 @@ export function Navbar() {
 
             <Link
               to="/notifications"
-              className="relative flex h-10 w-10 items-center justify-center rounded-full text-[var(--color-ushqn-muted)] transition hover:bg-[var(--color-ushqn-surface-muted)] hover:text-[var(--color-ushqn-text)]"
+              className={`ushqn-tap-clear relative flex h-10 w-10 items-center justify-center rounded-full text-[var(--color-ushqn-muted)] hover:bg-[var(--color-ushqn-surface-muted)] hover:text-[var(--color-ushqn-text)] hover:shadow-md ${NAV_SPRING} motion-safe:active:scale-[0.88] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0052CC] focus-visible:ring-offset-2`}
               title={t('nav.notifications')}
             >
               <BellIcon />
@@ -353,14 +371,14 @@ export function Navbar() {
             <button
               type="button"
               onClick={() => void logout()}
-              className="hidden items-center justify-center rounded-full border border-[var(--color-ushqn-border)] bg-[var(--color-ushqn-surface)] px-4 py-2 text-sm font-semibold text-[var(--color-ushqn-text)]/80 shadow-sm transition hover:border-[#93c5fd]/80 hover:text-[var(--color-ushqn-text)] sm:inline-flex"
+              className={`ushqn-tap-clear hidden items-center justify-center rounded-full border border-[var(--color-ushqn-border)] bg-[var(--color-ushqn-surface)] px-4 py-2 text-sm font-semibold text-[var(--color-ushqn-text)]/80 shadow-sm hover:border-[#93c5fd]/80 hover:text-[var(--color-ushqn-text)] hover:shadow-md sm:inline-flex ${NAV_SPRING} motion-safe:active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0052CC] focus-visible:ring-offset-2`}
             >
               {t('nav.logout')}
             </button>
             <button
               type="button"
               onClick={() => void logout()}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[var(--color-ushqn-border)] text-[var(--color-ushqn-muted)] transition hover:bg-[var(--color-ushqn-surface-muted)] hover:text-[var(--color-ushqn-text)] sm:hidden"
+              className={`ushqn-tap-clear inline-flex h-10 w-10 items-center justify-center rounded-full border border-[var(--color-ushqn-border)] text-[var(--color-ushqn-muted)] hover:bg-[var(--color-ushqn-surface-muted)] hover:text-[var(--color-ushqn-text)] hover:shadow sm:hidden ${NAV_SPRING} motion-safe:active:scale-[0.88] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0052CC] focus-visible:ring-offset-2`}
               title={t('nav.logout')}
             >
               <svg viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5">
