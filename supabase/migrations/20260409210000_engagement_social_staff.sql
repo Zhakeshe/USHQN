@@ -32,7 +32,7 @@ alter table public.user_settings enable row level security;
 
 drop policy if exists "own settings" on public.user_settings;
 create policy "own settings" on public.user_settings
-  for all to authenticated using (auth.uid() = user_id) with check (auth.uid() = user_id);
+  using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
 insert into public.user_settings (user_id)
   select id from public.profiles
