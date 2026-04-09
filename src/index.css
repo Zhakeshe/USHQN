@@ -1,0 +1,313 @@
+@import 'tailwindcss';
+@import 'react-big-calendar/lib/css/react-big-calendar.css';
+
+@theme {
+  --color-ushqn-bg: #f1f3f9;
+  --color-ushqn-surface: #ffffff;
+  --color-ushqn-surface-muted: #f6f8fc;
+  --color-ushqn-border: #e1e6ef;
+  --color-ushqn-primary: #0052cc;
+  --color-ushqn-text: #0f172a;
+  --color-ushqn-muted: #64748b;
+  --font-sans: 'Inter', system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+html {
+  font-family: var(--font-sans);
+  scroll-behavior: smooth;
+  /* Use dynamic viewport height for iOS/Android */
+  height: -webkit-fill-available;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background-color: var(--color-ushqn-bg);
+  background-image:
+    radial-gradient(ellipse 100% 60% at 50% -20%, rgba(0, 82, 204, 0.045), transparent 50%),
+    linear-gradient(180deg, #eef1f8 0%, var(--color-ushqn-bg) 28%, var(--color-ushqn-bg) 100%);
+  background-attachment: fixed;
+  color: var(--color-ushqn-text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Prevent overscroll bounce on iOS */
+  overscroll-behavior: none;
+  /* Fix text size adjustment on iOS */
+  -webkit-text-size-adjust: 100%;
+}
+
+::selection {
+  background-color: rgba(0, 82, 204, 0.18);
+  color: #0d1f3c;
+}
+
+#root {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* Better tap targets for touch devices */
+button, a, [role="button"] {
+  touch-action: manipulation;
+}
+
+/* iOS momentum scroll */
+.overflow-y-auto, .overflow-x-auto, .overflow-auto {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Scrollbar — тонкий, аккуратный */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #c7cdd6 transparent;
+}
+*::-webkit-scrollbar { width: 6px; height: 6px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background-color: #c7cdd6; border-radius: 9999px; }
+*::-webkit-scrollbar-thumb:hover { background-color: #a5adb8; }
+
+/* Surfaces & form controls — единый стиль карточек и инпутов */
+@layer components {
+  .ushqn-card {
+    border-radius: 0.75rem;
+    border: 1px solid var(--color-ushqn-border);
+    background-color: var(--color-ushqn-surface);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px rgba(15, 23, 42, 0.04);
+  }
+
+  .ushqn-input {
+    margin-top: 0.25rem;
+    display: block;
+    width: 100%;
+    border-radius: 0.5rem;
+    border: 1px solid var(--color-ushqn-border);
+    background-color: var(--color-ushqn-surface-muted);
+    padding: 0.625rem 0.875rem;
+    font-size: 0.875rem;
+    line-height: 1.45;
+    color: var(--color-ushqn-text);
+    outline: none;
+    transition:
+      border-color 0.15s ease,
+      box-shadow 0.15s ease,
+      background-color 0.15s ease;
+  }
+
+  .ushqn-input::placeholder {
+    color: #97a0af;
+  }
+
+  .ushqn-input:hover {
+    border-color: #c7cdd6;
+    background-color: #fff;
+  }
+
+  .ushqn-input:focus {
+    border-color: #0052cc;
+    background-color: #fff;
+    box-shadow: 0 0 0 3px rgba(0, 82, 204, 0.16);
+  }
+
+  .ushqn-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.5rem;
+    background-color: #0052cc;
+    padding: 0.625rem 1.25rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0, 82, 204, 0.25);
+    transition:
+      background-color 0.15s ease,
+      box-shadow 0.15s ease,
+      transform 0.1s ease;
+  }
+
+  .ushqn-btn-primary:hover:not(:disabled) {
+    background-color: #0747a6;
+    box-shadow: 0 2px 8px rgba(0, 82, 204, 0.35);
+  }
+
+  .ushqn-btn-primary:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+
+  .ushqn-btn-primary:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  .ushqn-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #eef1f4;
+    padding-bottom: 0.875rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .ushqn-section-title {
+    font-size: 1.125rem;
+    font-weight: 800;
+    color: #172b4d;
+    letter-spacing: -0.01em;
+  }
+
+  .ushqn-label {
+    display: block;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: #172b4d;
+    letter-spacing: 0.01em;
+  }
+
+  .ushqn-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    border-radius: 9999px;
+    background-color: #deebff;
+    color: #0052cc;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.8125rem;
+    font-weight: 700;
+  }
+
+  .ushqn-badge-green {
+    background-color: #e3fcef;
+    color: #006644;
+  }
+
+  .ushqn-badge-purple {
+    background-color: #eae6ff;
+    color: #403294;
+  }
+}
+
+/* ── Page enter animation ──────────────────────────────── */
+@keyframes page-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+main > * {
+  animation: page-in 0.22s ease both;
+}
+
+/* ── Skeleton shimmer ───────────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.animate-pulse {
+  background: linear-gradient(90deg, #eef1f4 25%, #f8f9fb 50%, #eef1f4 75%);
+  background-size: 200% auto;
+  animation: shimmer 1.4s linear infinite;
+}
+
+/* ── Focus ring ─────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid rgba(0, 82, 204, 0.6);
+  outline-offset: 2px;
+}
+
+.ushqn-skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0.75rem;
+  z-index: 100;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  background: #0052cc;
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+.ushqn-skip-link:focus {
+  left: 0.75rem;
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+/* User-selected dark theme (Settings → Appearance) */
+html.dark {
+  color-scheme: dark;
+  --color-ushqn-bg: #0f172a;
+  --color-ushqn-surface: #1e293b;
+  --color-ushqn-surface-muted: #334155;
+  --color-ushqn-border: #475569;
+  --color-ushqn-text: #f1f5f9;
+  --color-ushqn-muted: #94a3b8;
+  --color-ushqn-primary: #60a5fa;
+}
+
+html.dark body {
+  background-color: var(--color-ushqn-bg);
+  background-image: linear-gradient(180deg, #1e293b 0%, var(--color-ushqn-bg) 35%);
+  color: var(--color-ushqn-text);
+}
+
+html.dark .ushqn-section-title,
+html.dark .ushqn-label {
+  color: var(--color-ushqn-text);
+}
+
+html.dark .animate-pulse {
+  background: linear-gradient(90deg, #334155 25%, #475569 50%, #334155 75%);
+  background-size: 200% auto;
+}
+
+html.dark .ushqn-navbar {
+  border-bottom-color: var(--color-ushqn-border);
+  background: rgba(30, 41, 59, 0.92);
+}
+
+html.dark .ushqn-mobilenav {
+  border-top-color: var(--color-ushqn-border);
+  background: rgba(30, 41, 59, 0.97);
+}
+
+html.reduce-motion *,
+html.reduce-motion *::before,
+html.reduce-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* ── Typography improvements ────────────────────────────── */
+h1, h2, h3, h4 {
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+/* ── LinkedIn-style calendar tweaks ──────────────────────── */
+.rbc-calendar {
+  font-family: var(--font-sans);
+  background: var(--color-ushqn-surface);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  color: var(--color-ushqn-text);
+}
+.rbc-header,
+.rbc-time-content {
+  border-color: var(--color-ushqn-border);
+}
+.rbc-today {
+  background-color: color-mix(in srgb, var(--color-ushqn-primary) 12%, transparent);
+}
+.rbc-event {
+  background-color: var(--color-ushqn-primary);
+  border: none;
+  border-radius: 4px;
+}
