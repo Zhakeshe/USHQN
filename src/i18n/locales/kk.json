@@ -22,7 +22,8 @@
     "goTo": "Өту →",
     "online": "Онлайн",
     "points": "ұпай",
-    "viewAll": "Барлығы →"
+    "viewAll": "Барлығы →",
+    "or": "немесе"
   },
   "lang": {
     "ru": "Русский",
@@ -42,6 +43,7 @@
     "notifications": "Хабарламалар",
     "settings": "Параметрлер",
     "admin": "Әкімші",
+    "communities": "Топтар",
     "home": "Басты бет",
     "logout": "Шығу"
   },
@@ -150,14 +152,18 @@
       "addAchievement": "Жетістік қосу",
       "findJob": "Тәжірибе табу",
       "findPeople": "Адам табу",
-      "events": "Іс-шаралар"
+      "events": "Іс-шаралар",
+      "communities": "Қала топтары"
     },
+    "streakTitle": "Платформада қатарғы күндер (UTC)",
+    "streakDays": "күн сериясы",
     "cards": {
       "achievements": { "title": "Жетістіктер", "desc": "Цифрлық портфолио және USHQN-баллдар" },
       "showcase": { "title": "Витрина", "desc": "Қатысушылардың тауарлары мен қызметтері" },
       "jobs": { "title": "Жұмыс биржасы", "desc": "Вакансиялар және тәжірибе" },
       "people": { "title": "Адамдар", "desc": "Қызығушылықтар, байланыстар, тәлімгерлер" },
       "calendar": { "title": "Іс-шаралар", "desc": "Хакатондар, олимпиадалар" },
+      "communities": { "title": "Топтар", "desc": "Қалалық және онлайн қоғамдықтар" },
       "chat": { "title": "Чат", "desc": "Нақты уақыттағы диалогтар" },
       "rating": { "title": "Рейтинг", "desc": "Жаһандық көшбасшылар кестесі" },
       "settings": { "title": "Параметрлер", "desc": "Әлеуметтік желілер, қауіпсіздік" }
@@ -226,7 +232,16 @@
       "accentLabel": "Профильдің акцент түсі",
       "accentHint": "Түймелер мен мұқаба градиенті (сурет болмағанда).",
       "removeBanner": "Мұқабаны алып тастау",
-      "saveFailed": "Сақталмады. Қайта көріңіз."
+      "saveFailed": "Сақталмады. Қайта көріңіз.",
+      "portfolioTitle": "Портфолио сілтемелері",
+      "portfolioHint": "Тек HTTPS: жобалар, GitHub, Figma, бейне (8-ге дейін).",
+      "portfolioLabelPh": "Атауы",
+      "portfolioUrlPh": "https://…",
+      "portfolioAdd": "Сілтеме қосу",
+      "portfolioSave": "Портфолионы сақтау",
+      "portfolioVideo": "Бейне",
+      "portfolioKindLink": "Сайт",
+      "portfolioKindVideo": "Бейне"
     }
   },
   "profileCard": {
@@ -348,6 +363,37 @@
     "bookmarkRemoveTitle": "Буктемеден алу",
     "bookmarkAddTitle": "Буктемеге",
     "chatOpenErr": "Чат ашу қатесі",
+    "featuredBadge": "Жоғарыда",
+    "filterWorkMode": "Жұмыс форматы",
+    "workModeField": "Жұмыс форматы",
+    "workMode": {
+      "all": "Барлық формат",
+      "any": "Кез келген / икемді",
+      "remote": "Қашықтан",
+      "onsite": "Кеңседе",
+      "hybrid": "Гибридті"
+    },
+    "companyName": "Компания немесе ұйым (міндетті емес)",
+    "companyNamePh": "Мысалы: ҮЕҚ, серіктес мектеп…",
+    "hideCompanyUntilApplied": "Атауын үміткер болғанша жасыру",
+    "companyHidden": "Компания: үміткер болғаннан кейін көрінеді",
+    "featuredExplained": "Топта тұруды команда басқарады — органикалық емес.",
+    "myApplicationStatus": "Сіздің кезең",
+    "applicantsTitle": "Өтінімдер мен кезеңдер",
+    "statusUpdated": "Күй жаңартылды",
+    "interviewSlot": "Сұхбат",
+    "interviewSlotSaved": "Сұхбат уақыты сақталды",
+    "openChat": "Чатты ашу",
+    "appStatus": {
+      "submitted": "Жіберілді",
+      "viewed": "Қаралды",
+      "replied": "Жауап",
+      "test_task": "Тест тапсырма",
+      "interview": "Сұхбат",
+      "accepted": "Қабылданды",
+      "rejected": "Бас тартылды",
+      "withdrawn": "Кері алынды"
+    },
     "tag": {
       "internship": "🎓 Тәжірибе",
       "parttime": "⏰ Жартылай",
@@ -412,7 +458,12 @@
     "selectThreadHint": "Сол жақтан диалог ашыңыз немесе «Адамдар» бетінен бастаңыз.",
     "onlineStatus": "Желіде",
     "chatHeader": "Чат",
-    "unknownPeer": "Диалог"
+    "unknownPeer": "Диалог",
+    "sendFailed": "Хабарлама жіберілмеді: желі немесе шектеу — аздан кейін қайталаңыз.",
+    "readReceipt": "Оқылды",
+    "attachment": "Файл",
+    "attachFile": "Тіркеу",
+    "pendingFile": "Тіркеме"
   },
   "calendar": {
     "title": "📅 Іс-шаралар",
@@ -500,6 +551,8 @@
     "pageSub": "Қызмет ұсыныңыз және керек мамандарды табыңыз",
     "listingsCount": "{{count}} жарнама",
     "searchPh": "🔍 Іздеу…",
+    "collectionLabel": "Жинақ / тег",
+    "collectionPh": "мысалы hackathon",
     "filterAll": "📦 Барлығы",
     "filterGood": "🏷️ Тауар",
     "filterService": "🛠️ Қызмет",
@@ -595,6 +648,10 @@
       "messagesDesc": "Чаттағы кіріс хабарламалар",
       "achievements": "Жетістіктер",
       "achievementsDesc": "Жетістік қосылғанда немесе расталғанда",
+      "digestEmail": "Апталық digest email",
+      "digestEmailDesc": "Белсенділік қорытындысы (сервер жіберіп тұрғанда)",
+      "pushOptIn": "Web push (жақында)",
+      "pushOptInDesc": "Келісім сақталады; хабарламалар әлі қосылмаған",
       "saved": "Параметрлер сақталды"
     },
     "privacy": {
@@ -618,6 +675,22 @@
       "active": "Белсенді"
     }
   },
+  "mentorship": {
+    "label": "Тәлімгерлік сұранысы",
+    "placeholder": "Қандай көмек керек? (міндетті емес)",
+    "cta": "Тәлімгер сұрау",
+    "sending": "Жіберілуде…",
+    "requestSent": "Сұраныс жіберілді — екінші тарап алдағы жаңартуларда көреді.",
+    "duplicate": "Осы тәлімгерге күтілетін сұраныс бар."
+  },
+  "communities": {
+    "title": "Қала және онлайн топтар",
+    "subtitle": "Жақын қауымдастық немесе ортақ онлайн шеңбер.",
+    "join": "Қосылу",
+    "leave": "Шығу",
+    "joined": "Топқа қосылдыңыз.",
+    "left": "Топтан шықтыңыз."
+  },
   "publicProfile": {
     "notFound": "Профиль табылмады",
     "notFoundDesc": "Мүмкін, пайдаланушы аккаунтты жойды немесе сілтеме ескірді.",
@@ -630,22 +703,136 @@
   },
   "admin": {
     "title": "Әкімші панелі",
-    "subtitle": "Шолу (тек оқу). Кеңейтілген әрекеттер кейін қосылады.",
-    "grantHintTitle": "Әкімші құқығын беру",
-    "grantHintBody": "Supabase SQL: update public.profiles set is_admin = true where id = 'USER_UUID';",
-    "recentUsers": "Соңғы тіркелгендер",
+    "subtitle": "Статистика, модерация, аудит журналы және топ жұмыс орындары.",
+    "grantHintTitle": "Құқық беру",
+    "grantHintBody": "Толық әкімші: update public.profiles set is_admin = true where id = 'USER_UUID';",
+    "grantHintModerator": "Модератор (шағымдар + аудит): update public.profiles set is_moderator = true where id = 'USER_UUID';",
+    "tab.overview": "Шолу",
+    "tab.reports": "Шағымдар",
+    "tab.audit": "Аудит",
+    "tab.featured": "Топтағы жұмыс",
+    "recentUsers": "Пайдаланушылар",
+    "searchUsersPh": "Аты немесе рөлі бойынша іздеу",
     "openProfile": "Ашу",
     "badgeStaff": "Әкімші",
+    "badgeModerator": "Мод",
+    "badgeBanned": "Бұғат",
     "col.name": "Аты",
     "col.role": "Рөлі",
     "col.joined": "Күні",
-    "col.link": "Сілтеме",
+    "col.link": "Ашу",
+    "col.verify": "Растау",
+    "col.ban": "Бұғаттау",
+    "action.verify": "Растау",
+    "action.unverify": "Шығару",
+    "action.ban": "Бұғаттау",
+    "action.unban": "Шешу",
+    "pageOf": "Бет {{page}} / {{total}}",
+    "prev": "Артқа",
+    "next": "Алға",
+    "reports.when": "Кезі",
+    "reports.target": "Нысан",
+    "reports.reason": "Себеп",
+    "reports.status": "Күй",
+    "reports.resolve": "Шешілді",
+    "reports.dismiss": "Қабылдамау",
+    "reports.exportCsv": "CSV жүктеу",
+    "reports.sla": "Сағат ашық",
+    "reports.hours": "сағ",
+    "audit.when": "Кезі",
+    "audit.action": "Әрекет",
+    "audit.entity": "Нысан",
+    "audit.exportCsv": "CSV жүктеу",
+    "featuredHint": "Вакансияларды уақытша үстіне бекіту.",
+    "featuredUntil": "Дейін",
+    "notFeatured": "Бекітілмеген",
+    "feature7d": "Топ 7 күн",
+    "feature30d": "Топ 30 күн",
+    "unfeature": "Шығару",
     "stat.profiles": "Профильдер",
     "stat.jobs": "Жұмыс орындары",
     "stat.listings": "Жарнамалар",
     "stat.events": "Іс-шаралар",
     "stat.achievements": "Жетістіктер",
     "stat.messages": "Хабарламалар"
+  },
+  "growth": {
+    "onboarding": {
+      "title": "USHQN-да алғашқы қадамдар",
+      "subtitle": "Тізімді аяқтап, «Басқа» санатында бонус ұпай алыңыз.",
+      "subtitleRiver": "Бір ағын: профиль → қызығушылық → алғашқы өтінім немесе чат → бонус.",
+      "skip": "Жасыру",
+      "stepProfile": "Тақырып пен қала толтырыңыз",
+      "stepProfile80": "Профильді ~80%-ке дейін (био, фото, дағды, сілтеме…)",
+      "stepAchievement": "Алғашқы жетістікті қосыңыз",
+      "stepInterests": "Кем дегенде бір қызығушылық таңдаңыз",
+      "stepFirstAction": "Алғашқы әрекет",
+      "stepFirstActionJobs": "Өтінім жіберу",
+      "stepFirstActionChat": "Чат",
+      "profileMeter": "Профиль күші: {{pct}}%",
+      "remindLater": "3 күннен кейін еске салу",
+      "hideForever": "Енді көрсетпеу",
+      "confirmHideForever": "Чеклистті біржолата жасыру керек пе?",
+      "snoozed": "Үш күннен кейін еске саламыз.",
+      "dismissedForever": "Чеклист жасырулы.",
+      "claimBonus": "+50 бонус ұпай алу",
+      "claiming": "Есептелуде…",
+      "bonusSuccess": "Бонус қосылды!",
+      "dismissed": "Блок жасырулы."
+    },
+    "digest": {
+      "title": "Осы аптада",
+      "window": "7 күн",
+      "newJobs": "Жаңа вакансиялар",
+      "unreadNotifications": "Оқылмаған хабарландырулар",
+      "upcomingEvents": "Алдағы іс-шаралар",
+      "openCalendar": "Күнтізбе",
+      "openChat": "Хабарламалар"
+    },
+    "missions": {
+      "title": "Апталық қадамдар",
+      "badge": "Идеялар",
+      "subtitle": "Кіші қадамдар — стрессіз.",
+      "rowa": "Жаңа жетістік немесе сертификат",
+      "rowb": "Жарнама бойынша хабарласу",
+      "rowc": "Салада біреуді бақылау"
+    }
+  },
+  "trust": {
+    "signals": {
+      "title": "Сенім және ашықтық",
+      "orgVerified": "Мектеп/ұйым модераторлар тарапынан расталған",
+      "orgNotVerified": "Ұйым әлі тексерілмеген",
+      "profileFill": "Профиль ~{{pct}}% толықтырылған",
+      "memberSince": "USHQN-да {{date}} бастап",
+      "reportHint": "Баптауларда қауіпсіздік"
+    },
+    "verifiedOrgBadge": "Расталған ұйым",
+    "banned": {
+      "title": "Аккаунт тоқтатылды",
+      "body": "Кіру шектелді.",
+      "signOut": "Шығу"
+    },
+    "report": {
+      "open": "Шағым",
+      "title": "Шағым",
+      "subtitle": "Модераторлар қарайды.",
+      "reasonPh": "Не болды? (қосымша)",
+      "submit": "Жіберу",
+      "sending": "Жіберілуде…",
+      "sent": "Қабылданды."
+    },
+    "recommendation": {
+      "title": "Ұсыныстар",
+      "visibilityHelp": "Қоғамдық мәтін профильді көре алатындарға көрінеді.",
+      "placeholder": "Қысқа ұсыну (500 таңба)",
+      "public": "Барлығына көрінетін",
+      "privateNote": "Тек сіз бен иесі.",
+      "submit": "Сақтау",
+      "sending": "Сақталуда…",
+      "saved": "Сақталды!",
+      "tooShort": "Кем дегенде 2 таңба"
+    }
   },
   "validation": {
     "titleRequired": "Атауын енгізіңіз",
@@ -671,6 +858,9 @@
     "ctaPrimary": "Аккаунт жасау",
     "ctaSecondary": "Мүмкіндіктерді көру",
     "ctaNote": "Тегін тіркелу · деректер қорғалған",
+    "videoKicker": "Бейне",
+    "videoTitle": "Платформа шолуы",
+    "videoSub": "VITE_LANDING_VIDEO_URL орнатыңыз — YouTube немесе embed сілтемесі.",
     "previewUrl": "ushqn.app · басты бет",
     "previewProfile": "Профиліңіз",
     "previewPoints": "балл",
@@ -734,7 +924,7 @@
   "ui": {
     "loadError": "Деректерді жүктеу мүмкін болмады.",
     "retry": "Қайталау",
-    "offline": "Интернет қосылымы жоқ.",
+    "offline": "Желі жоқ — қайта қосылғанда синхрондалады.",
     "backOnline": "Қайта қосылды",
     "skipToContent": "Мазмұнға өту",
     "searchShort": "Іздеу…"

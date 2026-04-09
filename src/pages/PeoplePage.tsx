@@ -73,7 +73,14 @@ export function PeoplePage() {
       if (ids.length === 0) return []
       const { data: profiles, error: e2 } = await supabase.from('profiles').select('*').in('id', ids)
       if (e2) throw e2
-      return profiles ?? []
+      const { data: vis } = await supabase
+        .from('user_settings')
+        .select('user_id, show_in_people_search')
+        .in('user_id', ids)
+      const hidden = new Set(
+        (vis ?? []).filter((v) => v.show_in_people_search === false).map((v) => v.user_id),
+      )
+      return (profiles ?? []).filter((p) => !hidden.has(p.id))
     },
   })
 

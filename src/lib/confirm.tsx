@@ -1,5 +1,8 @@
 import { createContext, useCallback, useContext, useState, type ReactNode } from 'react'
 
+/* Hook is intentionally exported alongside ConfirmProvider (context module). */
+/* eslint-disable react-refresh/only-export-components */
+
 type ConfirmOpts = {
   title: string
   description?: string

@@ -9,7 +9,9 @@ import { ProfileCard } from '../components/ProfileCard'
 import { SkillsCard } from '../components/SkillsCard'
 import { useAuth } from '../hooks/useAuth'
 import { ACCENT_PRESETS, isValidAccentHex } from '../lib/profileTheme'
+import { parsePortfolioLinks, serializePortfolioLinks, type PortfolioLink } from '../lib/portfolio'
 import { supabase } from '../lib/supabase'
+import { useToast } from '../lib/toast'
 import { uploadPublicFile } from '../lib/upload'
 import type { UserRole } from '../types/database'
 
@@ -30,9 +32,11 @@ type EditForm = z.infer<typeof editSchema>
 
 export function ProfilePage() {
   const { t } = useTranslation()
+  const { toast } = useToast()
   const { userId } = useAuth()
   const qc = useQueryClient()
   const [editing, setEditing] = useState(false)
+  const [portfolioRows, setPortfolioRows] = useState<PortfolioLink[]>([])
 
   const profileQuery = useQuery({
     queryKey: ['profile', userId],
@@ -118,6 +122,12 @@ export function ProfilePage() {
   useEffect(() => {
     const p = profileQuery.data
     if (!p) return
+    setPortfolioRows(parsePortfolioLinks((p as { portfolio_links?: unknown }).portfolio_links))
+  }, [profileQuery.data])
+
+  useEffect(() => {
+    const p = profileQuery.data
+    if (!p) return
     form.reset({
       display_name: p.display_name,
       location: p.location ?? '',
@@ -128,6 +138,22 @@ export function ProfilePage() {
       accent_color: isValidAccentHex(p.accent_color) ? p.accent_color : '#0052CC',
     })
   }, [profileQuery.data, form])
+
+  const savePortfolio = useMutation({
+    mutationFn: async () => {
+      const payload = serializePortfolioLinks(portfolioRows)
+      const { error } = await supabase
+        .from('profiles')
+        .update({ portfolio_links: payload })
+        .eq('id', userId!)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['profile', userId] })
+      toast(t('profile.saveSuccess'), 'info')
+    },
+    onError: () => toast(t('profile.edit.saveFailed'), 'error'),
+  })
 
   const updateProfile = useMutation({
     mutationFn: async (values: EditForm) => {
@@ -243,6 +269,77 @@ export function ProfilePage() {
       />
 
       <CategoryScores rows={scoresQuery.data ?? []} />
+
+      <section className="ushqn-card space-y-3 p-5">
+        <div className="ushqn-section-header">
+          <h2 className="ushqn-section-title">{t('profile.edit.portfolioTitle')}</h2>
+        </div>
+        <p className="text-sm text-[#6B778C]">{t('profile.edit.portfolioHint')}</p>
+        <div className="space-y-3">
+          {portfolioRows.map((row, idx) => (
+            <div key={idx} className="flex flex-wrap gap-2 rounded-lg border border-[#eef1f4] bg-[#FAFBFC] p-3">
+              <input
+                className="ushqn-input min-w-[8rem] flex-1"
+                placeholder={t('profile.edit.portfolioLabelPh')}
+                value={row.label}
+                onChange={(e) => {
+                  const v = e.target.value
+                  setPortfolioRows((prev) => prev.map((r, i) => (i === idx ? { ...r, label: v } : r)))
+                }}
+              />
+              <input
+                className="ushqn-input min-w-[10rem] flex-[2]"
+                placeholder={t('profile.edit.portfolioUrlPh')}
+                value={row.url}
+                onChange={(e) => {
+                  const v = e.target.value
+                  setPortfolioRows((prev) => prev.map((r, i) => (i === idx ? { ...r, url: v } : r)))
+                }}
+              />
+              <label className="flex items-center gap-1 text-xs font-medium text-[#6B778C]">
+                <input
+                  type="checkbox"
+                  checked={row.kind === 'video'}
+                  onChange={(e) => {
+                    setPortfolioRows((prev) =>
+                      prev.map((r, i) =>
+                        i === idx ? { ...r, kind: e.target.checked ? ('video' as const) : ('link' as const) } : r,
+                      ),
+                    )
+                  }}
+                />
+                {t('profile.edit.portfolioVideo')}
+              </label>
+              <button
+                type="button"
+                className="text-xs font-semibold text-red-600 hover:underline"
+                onClick={() => setPortfolioRows((prev) => prev.filter((_, i) => i !== idx))}
+              >
+                {t('common.delete')}
+              </button>
+            </div>
+          ))}
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            className="rounded-lg border border-[#DFE1E6] px-3 py-2 text-sm font-semibold text-[#0052CC] hover:bg-[#DEEBFF]/40"
+            onClick={() =>
+              setPortfolioRows((prev) => [...prev, { label: '', url: '', kind: 'link' as const }].slice(0, 8))
+            }
+          >
+            {t('profile.edit.portfolioAdd')}
+          </button>
+          <button
+            type="button"
+            disabled={savePortfolio.isPending}
+            className="ushqn-btn-primary px-4 py-2 text-sm"
+            onClick={() => savePortfolio.mutate()}
+          >
+            {savePortfolio.isPending ? t('profile.saving') : t('profile.edit.portfolioSave')}
+          </button>
+        </div>
+      </section>
 
       <section className="ushqn-card p-5">
         <div className="ushqn-section-header">

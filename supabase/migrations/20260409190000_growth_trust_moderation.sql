@@ -3,6 +3,30 @@
 -- Moderation: ban flag, admin policies, message rate limit
 
 -- ---------------------------------------------------------------------------
+-- Admin helper (same as 20260409140000_theme_and_admin.sql — required here if
+-- that migration was skipped or this file is pasted alone into the SQL editor)
+-- ---------------------------------------------------------------------------
+alter table public.profiles
+  add column if not exists is_admin boolean not null default false;
+
+comment on column public.profiles.is_admin is 'Staff: access /admin dashboard. Grant: update profiles set is_admin=true where id=...';
+
+create or replace function public.current_is_admin()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select coalesce(
+    (select is_admin from public.profiles where id = auth.uid() limit 1),
+    false
+  );
+$$;
+
+grant execute on function public.current_is_admin() to authenticated;
+
+-- ---------------------------------------------------------------------------
 -- Profiles: referral, onboarding skip, verification, ban
 -- ---------------------------------------------------------------------------
 alter table public.profiles

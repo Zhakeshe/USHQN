@@ -1,3 +1,5 @@
+import posthog from 'posthog-js'
+
 declare global {
   interface Window {
     plausible?: (eventName: string, options?: { props?: Record<string, string | number | boolean> }) => void
@@ -15,6 +17,9 @@ export function trackEvent(name: string, props?: Record<string, string | number 
     window.plausible?.(name, props ? { props } : undefined)
     if (window.gtag) {
       window.gtag('event', name, props ?? {})
+    }
+    if (import.meta.env.PROD && import.meta.env.VITE_POSTHOG_KEY) {
+      posthog.capture(name, props)
     }
   } catch {
     // Never block user flow because analytics failed.

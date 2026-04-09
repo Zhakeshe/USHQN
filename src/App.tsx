@@ -24,6 +24,7 @@ const CalendarPage = lazy(() => import('./pages/CalendarPage').then((m) => ({ de
 const ChatPage = lazy(() => import('./pages/ChatPage').then((m) => ({ default: m.ChatPage })))
 const ShowcasePage = lazy(() => import('./pages/ShowcasePage').then((m) => ({ default: m.ShowcasePage })))
 const AdminPage = lazy(() => import('./pages/AdminPage').then((m) => ({ default: m.AdminPage })))
+const CommunitiesPage = lazy(() => import('./pages/CommunitiesPage').then((m) => ({ default: m.CommunitiesPage })))
 
 function RouteFallback() {
   return <div className="ushqn-card h-28 animate-pulse" />
@@ -69,6 +70,14 @@ export default function App() {
             />
             <Route path="/jobs" element={<JobsPage />} />
             <Route path="/people" element={<PeoplePage />} />
+            <Route
+              path="/communities"
+              element={
+                <Suspense fallback={<RouteFallback />}>
+                  <CommunitiesPage />
+                </Suspense>
+              }
+            />
             <Route
               path="/chat"
               element={

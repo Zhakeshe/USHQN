@@ -119,15 +119,16 @@ export function Navbar() {
   const navigate = useNavigate()
   const { t } = useTranslation()
 
-  const { data: isAdmin } = useQuery({
-    queryKey: ['profile-admin-flag', userId],
+  const { data: staff } = useQuery({
+    queryKey: ['profile-staff-flags', userId],
     enabled: Boolean(userId),
     queryFn: async () => {
-      const { data, error } = await supabase.from('profiles').select('is_admin').eq('id', userId!).single()
+      const { data, error } = await supabase.from('profiles').select('is_admin,is_moderator').eq('id', userId!).single()
       if (error) throw error
-      return Boolean(data?.is_admin)
+      return { isAdmin: Boolean(data?.is_admin), isModerator: Boolean(data?.is_moderator) }
     },
   })
+  const showStaffNav = Boolean(staff?.isAdmin || staff?.isModerator)
 
   const { data: unreadCount } = useQuery({
     queryKey: ['notif-count', userId],
@@ -178,7 +179,8 @@ export function Navbar() {
               <TextLink to="/people">{t('nav.people')}</TextLink>
               <TextLink to="/chat">{t('nav.chat')}</TextLink>
               <TextLink to="/calendar">{t('nav.calendar')}</TextLink>
-              {isAdmin ? <TextLink to="/admin">{t('nav.admin')}</TextLink> : null}
+              <TextLink to="/communities">{t('nav.communities')}</TextLink>
+              {showStaffNav ? <TextLink to="/admin">{t('nav.admin')}</TextLink> : null}
             </div>
           </div>
 
@@ -219,9 +221,10 @@ export function Navbar() {
           <TextLink to="/people">{t('nav.people')}</TextLink>
           <TextLink to="/chat">{t('nav.chat')}</TextLink>
           <TextLink to="/calendar">{t('nav.calendar')}</TextLink>
+          <TextLink to="/communities">{t('nav.communities')}</TextLink>
           <TextLink to="/notifications">{t('nav.notifications')}</TextLink>
           <TextLink to="/settings">{t('nav.settings')}</TextLink>
-          {isAdmin ? <TextLink to="/admin">{t('nav.admin')}</TextLink> : null}
+          {showStaffNav ? <TextLink to="/admin">{t('nav.admin')}</TextLink> : null}
         </div>
       </div>
     </header>

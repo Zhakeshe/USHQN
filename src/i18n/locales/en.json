@@ -22,7 +22,8 @@
     "goTo": "Go →",
     "online": "Online",
     "points": "points",
-    "viewAll": "All →"
+    "viewAll": "All →",
+    "or": "or"
   },
   "lang": {
     "ru": "Русский",
@@ -42,6 +43,7 @@
     "notifications": "Notifications",
     "settings": "Settings",
     "admin": "Admin",
+    "communities": "Groups",
     "home": "Home",
     "logout": "Log out"
   },
@@ -150,14 +152,18 @@
       "addAchievement": "Add achievement",
       "findJob": "Find internship",
       "findPeople": "Find people",
-      "events": "Events"
+      "events": "Events",
+      "communities": "City groups"
     },
+    "streakTitle": "Consecutive days active on the platform (UTC)",
+    "streakDays": "day streak",
     "cards": {
       "achievements": { "title": "Achievements", "desc": "Digital portfolio and USHQN points" },
       "showcase": { "title": "Showcase", "desc": "Products and services from members" },
       "jobs": { "title": "Job board", "desc": "Jobs and internships with filters" },
       "people": { "title": "People", "desc": "Interests, connections, mentors" },
       "calendar": { "title": "Events", "desc": "Hackathons, olympiads, meetups" },
+      "communities": { "title": "Groups", "desc": "City and online communities" },
       "chat": { "title": "Chat", "desc": "Real-time messaging" },
       "rating": { "title": "Rating", "desc": "Global leaderboard" },
       "settings": { "title": "Settings", "desc": "Social links, security, privacy" }
@@ -226,7 +232,16 @@
       "accentLabel": "Profile accent color",
       "accentHint": "Used for buttons and banner gradient when no cover image is set.",
       "removeBanner": "Remove cover image",
-      "saveFailed": "Could not save. Please try again."
+      "saveFailed": "Could not save. Please try again.",
+      "portfolioTitle": "Portfolio links",
+      "portfolioHint": "HTTPS links to projects, GitHub, Figma, or video (max 8).",
+      "portfolioLabelPh": "Label",
+      "portfolioUrlPh": "https://…",
+      "portfolioAdd": "Add link",
+      "portfolioSave": "Save portfolio",
+      "portfolioVideo": "Video link",
+      "portfolioKindLink": "Website",
+      "portfolioKindVideo": "Video"
     }
   },
   "profileCard": {
@@ -316,6 +331,7 @@
     "remote": "Remote",
     "salary": "Salary",
     "apply": "Apply",
+    "featuredBadge": "Featured",
     "posted": "Posted",
     "filters": {
       "all": "All",
@@ -348,6 +364,36 @@
     "bookmarkRemoveTitle": "Remove bookmark",
     "bookmarkAddTitle": "Bookmark",
     "chatOpenErr": "Could not open chat",
+    "filterWorkMode": "Work format",
+    "workModeField": "Work format",
+    "workMode": {
+      "all": "All formats",
+      "any": "Any / flexible",
+      "remote": "Remote",
+      "onsite": "On-site",
+      "hybrid": "Hybrid"
+    },
+    "companyName": "Company or organization (optional)",
+    "companyNamePh": "e.g. Local NGO, school partner…",
+    "hideCompanyUntilApplied": "Hide company name until someone applies (shown after apply & to you)",
+    "companyHidden": "Company: visible after you apply",
+    "featuredExplained": "Promoted placement — managed by the team, not organic order.",
+    "myApplicationStatus": "Your pipeline",
+    "applicantsTitle": "Responses & pipeline",
+    "statusUpdated": "Status updated",
+    "interviewSlot": "Interview",
+    "interviewSlotSaved": "Interview time saved",
+    "openChat": "Open chat",
+    "appStatus": {
+      "submitted": "Submitted",
+      "viewed": "Viewed",
+      "replied": "Replied",
+      "test_task": "Test task",
+      "interview": "Interview",
+      "accepted": "Accepted",
+      "rejected": "Declined",
+      "withdrawn": "Withdrawn"
+    },
     "tag": {
       "internship": "🎓 Internship",
       "parttime": "⏰ Part-time",
@@ -412,7 +458,12 @@
     "selectThreadHint": "Open a thread on the left or start a chat from People.",
     "onlineStatus": "Online",
     "chatHeader": "Chat",
-    "unknownPeer": "Conversation"
+    "unknownPeer": "Conversation",
+    "sendFailed": "Message not sent. Your connection may be unstable or you hit a safety limit — try again shortly.",
+    "readReceipt": "Read",
+    "attachment": "File",
+    "attachFile": "Attach file",
+    "pendingFile": "Attachment"
   },
   "calendar": {
     "title": "📅 Events",
@@ -500,6 +551,8 @@
     "pageSub": "Offer your skills and find the right specialists",
     "listingsCount": "{{count}} listings",
     "searchPh": "🔍 Search…",
+    "collectionLabel": "Collection tag",
+    "collectionPh": "e.g. hackathon",
     "filterAll": "📦 All",
     "filterGood": "🏷️ Product",
     "filterService": "🛠️ Service",
@@ -529,6 +582,7 @@
     "saved": "Saved",
     "sections": {
       "profile": "Profile & social",
+      "invite": "Invite friends",
       "appearance": "Appearance",
       "security": "Security",
       "notifications": "Notifications",
@@ -544,6 +598,11 @@
       "themeHint": "Syncs when you use the app signed in. “System” follows your device.",
       "reduceMotion": "Reduce motion",
       "reduceMotionDesc": "Less animation in the interface."
+    },
+    "invite": {
+      "title": "Invite friends",
+      "desc": "Share this link. When someone creates an account from it, we store the referral on their profile for analytics.",
+      "copy": "Copy invite link"
     },
     "profile": {
       "title": "👤 Profile & social",
@@ -595,6 +654,10 @@
       "messagesDesc": "Incoming chat messages",
       "achievements": "Achievements",
       "achievementsDesc": "When an achievement is added or confirmed",
+      "digestEmail": "Weekly digest email",
+      "digestEmailDesc": "Summary of activity (when email delivery is enabled server-side)",
+      "pushOptIn": "Web push (coming soon)",
+      "pushOptInDesc": "Save your preference for browser notifications — delivery is not wired yet",
       "saved": "Settings saved"
     },
     "privacy": {
@@ -618,6 +681,22 @@
       "active": "Active"
     }
   },
+  "mentorship": {
+    "label": "Mentorship request",
+    "placeholder": "What would you like help with? (optional)",
+    "cta": "Request mentorship",
+    "sending": "Sending…",
+    "requestSent": "Request sent — the other person will see it in future updates.",
+    "duplicate": "You already have a pending request to this mentor."
+  },
+  "communities": {
+    "title": "City & online groups",
+    "subtitle": "Find people near you or join the online circle.",
+    "join": "Join",
+    "leave": "Leave",
+    "joined": "You joined the group.",
+    "left": "You left the group."
+  },
   "publicProfile": {
     "notFound": "Profile not found",
     "notFoundDesc": "The user may have deleted their account or the link is outdated.",
@@ -630,22 +709,136 @@
   },
   "admin": {
     "title": "Administration",
-    "subtitle": "Read-only overview. Actions and moderation tools can be extended later.",
+    "subtitle": "Stats, moderation queue, audit log, and featured jobs.",
     "grantHintTitle": "How to grant admin access",
-    "grantHintBody": "Run in Supabase SQL Editor: update public.profiles set is_admin = true where id = 'USER_UUID';",
-    "recentUsers": "Recent registrations",
+    "grantHintBody": "Admin (full dashboard): update public.profiles set is_admin = true where id = 'USER_UUID';",
+    "grantHintModerator": "Moderator (reports + audit only): update public.profiles set is_moderator = true where id = 'USER_UUID';",
+    "tab.overview": "Overview",
+    "tab.reports": "Reports",
+    "tab.audit": "Audit log",
+    "tab.featured": "Featured jobs",
+    "recentUsers": "Users",
+    "searchUsersPh": "Search by name or role",
     "openProfile": "Open",
     "badgeStaff": "Staff",
+    "badgeModerator": "Mod",
+    "badgeBanned": "Banned",
     "col.name": "Name",
     "col.role": "Role",
     "col.joined": "Joined",
     "col.link": "Open",
+    "col.verify": "Org verify",
+    "col.ban": "Ban",
+    "action.verify": "Verify org",
+    "action.unverify": "Remove verify",
+    "action.ban": "Ban",
+    "action.unban": "Unban",
+    "pageOf": "Page {{page}} / {{total}}",
+    "prev": "Prev",
+    "next": "Next",
+    "reports.when": "When",
+    "reports.target": "Target",
+    "reports.reason": "Reason",
+    "reports.status": "Status",
+    "reports.resolve": "Resolve",
+    "reports.dismiss": "Dismiss",
+    "reports.exportCsv": "Export CSV",
+    "reports.sla": "Hours open",
+    "reports.hours": "h",
+    "audit.when": "When",
+    "audit.action": "Action",
+    "audit.entity": "Entity",
+    "audit.exportCsv": "Export CSV",
+    "featuredHint": "Pin jobs to the top of the board for a limited time.",
+    "featuredUntil": "Until",
+    "notFeatured": "Not featured",
+    "feature7d": "Feature 7 days",
+    "feature30d": "Feature 30 days",
+    "unfeature": "Remove",
     "stat.profiles": "Profiles",
     "stat.jobs": "Jobs",
     "stat.listings": "Listings",
     "stat.events": "Events",
     "stat.achievements": "Achievements",
     "stat.messages": "Messages"
+  },
+  "growth": {
+    "onboarding": {
+      "title": "Get started on USHQN",
+      "subtitle": "Complete the checklist and get bonus points in your portfolio category.",
+      "subtitleRiver": "One flow: strengthen your profile → interests → first conversation or job apply → bonus.",
+      "skip": "Hide for now",
+      "stepProfile": "Fill headline and city in your profile",
+      "stepProfile80": "Bring profile to ~80% (bio, photo, skill, links…)",
+      "stepAchievement": "Add your first achievement",
+      "stepInterests": "Pick at least one interest (People)",
+      "stepFirstAction": "First real action",
+      "stepFirstActionJobs": "Apply to a job",
+      "stepFirstActionChat": "Chat",
+      "profileMeter": "Profile strength: {{pct}}%",
+      "remindLater": "Remind me in 3 days",
+      "hideForever": "Never show this checklist",
+      "confirmHideForever": "Hide the getting-started checklist permanently? You can still finish tasks from Profile and Jobs.",
+      "snoozed": "We’ll nudge you again in three days.",
+      "dismissedForever": "Checklist hidden. Settings still has your privacy controls.",
+      "claimBonus": "Claim +50 bonus points",
+      "claiming": "Claiming…",
+      "bonusSuccess": "Bonus points added!",
+      "dismissed": "Onboarding hidden. You can complete steps anytime."
+    },
+    "missions": {
+      "title": "This week’s moves",
+      "badge": "Ideas",
+      "subtitle": "Small steps that compound — no streak pressure.",
+      "rowa": "Log a new achievement or certificate",
+      "rowb": "Message an employer or peer about a listing",
+      "rowc": "Follow someone in your field of interest"
+    },
+    "digest": {
+      "title": "This week on USHQN",
+      "window": "Last 7 days",
+      "newJobs": "New job posts",
+      "unreadNotifications": "Unread notifications",
+      "upcomingEvents": "Upcoming events",
+      "openCalendar": "Open calendar",
+      "openChat": "Open messages"
+    }
+  },
+  "trust": {
+    "signals": {
+      "title": "Trust & transparency",
+      "orgVerified": "School/org verified by moderators",
+      "orgNotVerified": "Organization not yet verified — be kind and specific in chat",
+      "profileFill": "Profile filled about {{pct}}%",
+      "memberSince": "On USHQN since {{date}}",
+      "reportHint": "See privacy & safety in settings"
+    },
+    "verifiedOrgBadge": "Verified org",
+    "banned": {
+      "title": "Account suspended",
+      "body": "Your access is restricted. If this is a mistake, contact support.",
+      "signOut": "Sign out"
+    },
+    "report": {
+      "open": "Report",
+      "title": "Report content",
+      "subtitle": "Moderators will review this report.",
+      "reasonPh": "What is wrong? (optional)",
+      "submit": "Send report",
+      "sending": "Sending…",
+      "sent": "Report sent. Thank you."
+    },
+    "recommendation": {
+      "title": "Recommendations",
+      "visibilityHelp": "Public text appears on this profile for visitors you allow. Private notes stay between you, the subject, and moderators if reported.",
+      "placeholder": "Short endorsement (max 500 characters)",
+      "public": "Visible to everyone who can see this profile",
+      "privateNote": "Only you and the profile owner see this text.",
+      "submit": "Save recommendation",
+      "sending": "Saving…",
+      "saved": "Saved!",
+      "tooShort": "Write at least 2 characters"
+    }
   },
   "validation": {
     "titleRequired": "Enter a title",
@@ -671,6 +864,9 @@
     "ctaPrimary": "Create account",
     "ctaSecondary": "See features",
     "ctaNote": "Free sign-up · your data is protected",
+    "videoKicker": "Watch",
+    "videoTitle": "Platform overview",
+    "videoSub": "Set VITE_LANDING_VIDEO_URL to a YouTube or embeddable link.",
     "previewUrl": "ushqn.app · home",
     "previewProfile": "Your profile",
     "previewPoints": "points",
@@ -734,7 +930,7 @@
   "ui": {
     "loadError": "Could not load data.",
     "retry": "Retry",
-    "offline": "You appear to be offline.",
+    "offline": "You appear to be offline — actions won’t sync until you reconnect.",
     "backOnline": "Back online",
     "skipToContent": "Skip to content",
     "searchShort": "Search…"

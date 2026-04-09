@@ -1,5 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
 
+/* Hook is intentionally exported alongside ToastProvider (context module). */
+/* eslint-disable react-refresh/only-export-components */
+
 type ToastKind = 'success' | 'error' | 'info' | 'warning'
 
 type Toast = {

@@ -12,6 +12,7 @@ export type ProfileCardData = {
   avatar_url: string | null
   banner_url: string | null
   accent_color?: string | null
+  org_verified?: boolean | null
   bio?: string | null
   github_url?: string | null
   telegram_url?: string | null
@@ -161,6 +162,11 @@ export function ProfileCard({ profile, onEdit, userId }: Props) {
                 >
                   {t(roleKey)}
                 </span>
+                {profile.org_verified ? (
+                  <span className="rounded-md bg-[#E3FCEF] px-2.5 py-0.5 text-xs font-semibold text-[#006644]">
+                    {t('trust.verifiedOrgBadge')}
+                  </span>
+                ) : null}
                 {typeof profile.profile_views === 'number' ? (
                   <span className="text-xs text-[var(--color-ushqn-muted)]">
                     {t('profileCard.views', { count: profile.profile_views })}

@@ -8,6 +8,8 @@ import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
 import { useToast } from '../lib/toast'
 import { useConfirm } from '../lib/confirm'
+import { getAppBaseUrl } from '../lib/siteUrl'
+import { trackEvent } from '../lib/analytics'
 
 const LANG_OPTIONS = [
   { code: 'ru', key: 'settings.language.ru' },
@@ -28,7 +30,7 @@ type PasswordForm = {
   confirm: string
 }
 
-type Section = 'profile' | 'appearance' | 'security' | 'notifications' | 'privacy' | 'language'
+type Section = 'profile' | 'invite' | 'appearance' | 'security' | 'notifications' | 'privacy' | 'language'
 
 type UserSettingsPatch = Partial<{
   notify_follows: boolean
@@ -38,6 +40,8 @@ type UserSettingsPatch = Partial<{
   show_in_people_search: boolean
   theme: 'light' | 'dark' | 'system'
   reduce_motion: boolean
+  digest_email_enabled: boolean
+  push_notify_opt_in: boolean
 }>
 
 function NavIcon({ name }: { name: Section }) {
@@ -79,6 +83,12 @@ function NavIcon({ name }: { name: Section }) {
           <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0ZM1.5 8.5h4.07c.05.99.25 1.94.6 2.83H2.7A6.48 6.48 0 0 1 1.5 8.5Zm0-1a6.48 6.48 0 0 1 1.2-2.83h3.47a12.04 12.04 0 0 0-.6 2.83H1.5Zm11 1c0 1-.2 1.95-.51 2.83h3.01A6.48 6.48 0 0 0 14.5 8.5h-2Zm2-1h-2a12.04 12.04 0 0 0-.51-2.83h2.31c.32.88.51 1.83.51 2.83ZM10.35 1.54A6.97 6.97 0 0 1 12.5 6h-3.15a12.04 12.04 0 0 0-.6-2.83 7.04 7.04 0 0 1 1.6-1.63ZM8.75 6H7.25a10.98 10.98 0 0 1 .53-3h.44c.24.95.4 1.95.53 3ZM6.4 3c-.35.89-.55 1.84-.6 2.83H3.65A6.97 6.97 0 0 1 6.4 3Zm0 7.5c.36.89.85 1.7 1.45 2.39a6.98 6.98 0 0 1-3.2-2.39H6.4Zm2.15 3.46a7.04 7.04 0 0 1-1.6-1.63c.35-.89.55-1.84.6-2.83h3.15a6.97 6.97 0 0 1-2.15 4.46ZM8.75 10c-.13 1.05-.29 2.05-.53 3h-.44a10.98 10.98 0 0 1-.53-3h1.5Z" />
         </svg>
       )
+    case 'invite':
+      return (
+        <svg className={c} viewBox="0 0 16 16" fill="currentColor" aria-hidden>
+          <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM6 5.5a1.5 1.5 0 1 0 3 0 1.5 1.5 0 0 0-3 0Zm5 5.5v-.5a2.5 2.5 0 0 0-2.5-2.5h-3A2.5 2.5 0 0 0 3 10.5v.5h8Zm3.28-6.72a.75.75 0 0 1 0 1.06l-5.25 5.25a.75.75 0 0 1-1.06 0l-2.25-2.25a.75.75 0 1 1 1.06-1.06l1.72 1.72 4.72-4.72a.75.75 0 0 1 1.06 0Z" />
+        </svg>
+      )
     default:
       return null
   }
@@ -95,6 +105,7 @@ export function SettingsPage() {
 
   const SECTIONS: { id: Section; label: string; icon: ReactNode }[] = [
     { id: 'profile', label: t('settings.sections.profile'), icon: <NavIcon name="profile" /> },
+    { id: 'invite', label: t('settings.sections.invite'), icon: <NavIcon name="invite" /> },
     { id: 'appearance', label: t('settings.sections.appearance'), icon: <NavIcon name="appearance" /> },
     { id: 'security', label: t('settings.sections.security'), icon: <NavIcon name="security" /> },
     { id: 'notifications', label: t('settings.sections.notifications'), icon: <NavIcon name="notifications" /> },
@@ -290,6 +301,30 @@ export function SettingsPage() {
             </form>
           ) : null}
 
+          {section === 'invite' && userId ? (
+            <div className="space-y-3">
+              <h2 className="ushqn-section-title">{t('settings.invite.title')}</h2>
+              <p className="text-sm text-[#6B778C]">{t('settings.invite.desc')}</p>
+              <div className="rounded-xl border border-[#eef1f4] bg-[#FAFBFC] p-3">
+                <p className="break-all text-xs font-mono text-[#172B4D]">
+                  {`${getAppBaseUrl()}/register?ref=${userId}`}
+                </p>
+              </div>
+              <button
+                type="button"
+                className="ushqn-btn-primary px-4 py-2 text-sm"
+                onClick={() => {
+                  void navigator.clipboard.writeText(`${getAppBaseUrl()}/register?ref=${userId}`).then(() => {
+                    trackEvent('referral_link_copied')
+                    toast(t('common.copied'))
+                  })
+                }}
+              >
+                {t('settings.invite.copy')}
+              </button>
+            </div>
+          ) : null}
+
           {/* Appearance */}
           {section === 'appearance' ? (
             <div className="space-y-4">
@@ -397,6 +432,8 @@ export function SettingsPage() {
                 { key: 'notify_follows' as const, label: t('settings.notificationsSection.follows'), desc: t('settings.notificationsSection.followsDesc') },
                 { key: 'notify_messages' as const, label: t('settings.notificationsSection.messages'), desc: t('settings.notificationsSection.messagesDesc') },
                 { key: 'notify_achievements' as const, label: t('settings.notificationsSection.achievements'), desc: t('settings.notificationsSection.achievementsDesc') },
+                { key: 'digest_email_enabled' as const, label: t('settings.notificationsSection.digestEmail'), desc: t('settings.notificationsSection.digestEmailDesc') },
+                { key: 'push_notify_opt_in' as const, label: t('settings.notificationsSection.pushOptIn'), desc: t('settings.notificationsSection.pushOptInDesc') },
               ]).map((item) => (
                 <label key={item.key} className="flex cursor-pointer items-center justify-between rounded-xl border border-[#DFE1E6] p-4 hover:border-[#0052CC]/30 transition">
                   <div>
@@ -406,7 +443,13 @@ export function SettingsPage() {
                   <input
                     type="checkbox"
                     className="h-4 w-4 accent-[#0052CC]"
-                    checked={s?.[item.key] ?? true}
+                    checked={
+                      item.key === 'digest_email_enabled'
+                        ? (s?.digest_email_enabled ?? true)
+                        : item.key === 'push_notify_opt_in'
+                          ? Boolean(s?.push_notify_opt_in)
+                          : (s?.[item.key] ?? true)
+                    }
                     onChange={(e) => updateSettings.mutate({ [item.key]: e.target.checked })}
                   />
                 </label>

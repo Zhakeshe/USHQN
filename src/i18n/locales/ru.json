@@ -22,7 +22,8 @@
     "goTo": "Перейти →",
     "online": "Онлайн",
     "points": "очков",
-    "viewAll": "Все →"
+    "viewAll": "Все →",
+    "or": "или"
   },
   "lang": {
     "ru": "Русский",
@@ -42,6 +43,7 @@
     "notifications": "Уведомления",
     "settings": "Настройки",
     "admin": "Админка",
+    "communities": "Группы",
     "home": "Главная",
     "logout": "Выйти"
   },
@@ -150,14 +152,18 @@
       "addAchievement": "Добавить достижение",
       "findJob": "Найти стажировку",
       "findPeople": "Найти людей",
-      "events": "События"
+      "events": "События",
+      "communities": "Группы по городам"
     },
+    "streakTitle": "Дней подряд на платформе (UTC)",
+    "streakDays": "дн. серия",
     "cards": {
       "achievements": { "title": "Достижения", "desc": "Цифровое портфолио и USHQN-баллы" },
       "showcase": { "title": "Витрина", "desc": "Товары и услуги участников" },
       "jobs": { "title": "Биржа", "desc": "Вакансии и стажировки с фильтрами" },
       "people": { "title": "Люди", "desc": "Интересы, связи, наставники" },
       "calendar": { "title": "События", "desc": "Мероприятия, хакатоны, олимпиады" },
+      "communities": { "title": "Группы", "desc": "Городские и онлайн-сообщества" },
       "chat": { "title": "Чат", "desc": "Диалоги в реальном времени" },
       "rating": { "title": "Рейтинг", "desc": "Глобальная таблица лидеров" },
       "settings": { "title": "Настройки", "desc": "Соцсети, безопасность, приватность" }
@@ -226,7 +232,16 @@
       "accentLabel": "Акцентный цвет профиля",
       "accentHint": "Кнопки и градиент обложки, если нет своего изображения.",
       "removeBanner": "Убрать обложку",
-      "saveFailed": "Не удалось сохранить. Попробуйте ещё раз."
+      "saveFailed": "Не удалось сохранить. Попробуйте ещё раз.",
+      "portfolioTitle": "Ссылки портфолио",
+      "portfolioHint": "Только HTTPS: проекты, GitHub, Figma, видео (до 8 шт.).",
+      "portfolioLabelPh": "Название",
+      "portfolioUrlPh": "https://…",
+      "portfolioAdd": "Добавить ссылку",
+      "portfolioSave": "Сохранить портфолио",
+      "portfolioVideo": "Видео",
+      "portfolioKindLink": "Сайт",
+      "portfolioKindVideo": "Видео"
     }
   },
   "profileCard": {
@@ -316,6 +331,7 @@
     "remote": "Удалённо",
     "salary": "Зарплата",
     "apply": "Откликнуться",
+    "featuredBadge": "В топе",
     "posted": "Опубликовано",
     "filters": {
       "all": "Все",
@@ -348,6 +364,36 @@
     "bookmarkRemoveTitle": "Убрать из закладок",
     "bookmarkAddTitle": "В закладки",
     "chatOpenErr": "Ошибка открытия чата",
+    "filterWorkMode": "Формат работы",
+    "workModeField": "Формат работы",
+    "workMode": {
+      "all": "Все форматы",
+      "any": "Любой / гибкий",
+      "remote": "Удалённо",
+      "onsite": "В офисе",
+      "hybrid": "Гибрид"
+    },
+    "companyName": "Компания или организация (необязательно)",
+    "companyNamePh": "Например: НКО, партнёрская школа…",
+    "hideCompanyUntilApplied": "Скрыть название до отклика (видно вам и откликнувшимся)",
+    "companyHidden": "Компания: видно после отклика",
+    "featuredExplained": "Продвижение командой — не органическая сортировка.",
+    "myApplicationStatus": "Ваш этап",
+    "applicantsTitle": "Отклики и этапы",
+    "statusUpdated": "Статус обновлён",
+    "interviewSlot": "Собеседование",
+    "interviewSlotSaved": "Время собеседования сохранено",
+    "openChat": "Открыть чат",
+    "appStatus": {
+      "submitted": "Отправлено",
+      "viewed": "Просмотрено",
+      "replied": "Ответ",
+      "test_task": "Тестовое",
+      "interview": "Собеседование",
+      "accepted": "Принято",
+      "rejected": "Отказ",
+      "withdrawn": "Отозвано"
+    },
     "tag": {
       "internship": "🎓 Стажировка",
       "parttime": "⏰ Частичная",
@@ -412,7 +458,12 @@
     "selectThreadHint": "Откройте переписку слева или начните чат со страницы «Люди».",
     "onlineStatus": "В сети",
     "chatHeader": "Чат",
-    "unknownPeer": "Диалог"
+    "unknownPeer": "Диалог",
+    "sendFailed": "Сообщение не отправлено: сеть или лимит безопасности — попробуйте чуть позже.",
+    "readReceipt": "Прочитано",
+    "attachment": "Файл",
+    "attachFile": "Вложение",
+    "pendingFile": "Вложение"
   },
   "calendar": {
     "title": "📅 События",
@@ -500,6 +551,8 @@
     "pageSub": "Предлагайте свои услуги и находите нужных специалистов",
     "listingsCount": "{{count}} объявлений",
     "searchPh": "🔍 Поиск…",
+    "collectionLabel": "Коллекция / тег",
+    "collectionPh": "например hackathon",
     "filterAll": "📦 Все",
     "filterGood": "🏷️ Товар",
     "filterService": "🛠️ Услуга",
@@ -529,6 +582,7 @@
     "saved": "Сохранено",
     "sections": {
       "profile": "Профиль и соцсети",
+      "invite": "Пригласить друзей",
       "appearance": "Внешний вид",
       "security": "Безопасность",
       "notifications": "Уведомления",
@@ -544,6 +598,11 @@
       "themeHint": "Сохраняется в аккаунте. «Как в системе» следует настройкам устройства.",
       "reduceMotion": "Уменьшить анимацию",
       "reduceMotionDesc": "Меньше движения в интерфейсе."
+    },
+    "invite": {
+      "title": "Пригласить друзей",
+      "desc": "Поделитесь ссылкой. При регистрации по ней реферер сохранится в профиле для аналитики.",
+      "copy": "Скопировать ссылку"
     },
     "profile": {
       "title": "👤 Профиль и соцсети",
@@ -595,6 +654,10 @@
       "messagesDesc": "Входящие сообщения в чате",
       "achievements": "Достижения",
       "achievementsDesc": "Когда достижение добавлено или подтверждено",
+      "digestEmail": "Еженедельный дайджест на почту",
+      "digestEmailDesc": "Сводка активности (когда на сервере будет рассылка)",
+      "pushOptIn": "Web push (скоро)",
+      "pushOptInDesc": "Сохраняем согласие; доставка уведомлений пока не подключена",
       "saved": "Настройки сохранены"
     },
     "privacy": {
@@ -618,6 +681,22 @@
       "active": "Выбрано"
     }
   },
+  "mentorship": {
+    "label": "Запрос на наставничество",
+    "placeholder": "С чем хотели бы помощь? (по желанию)",
+    "cta": "Запросить наставника",
+    "sending": "Отправка…",
+    "requestSent": "Запрос отправлен — второй участник увидит его в следующих обновлениях.",
+    "duplicate": "У вас уже есть ожидающий запрос этому наставнику."
+  },
+  "communities": {
+    "title": "Город и онлайн",
+    "subtitle": "Сообщества рядом с вами или общий онлайн-круг.",
+    "join": "Вступить",
+    "leave": "Выйти",
+    "joined": "Вы вступили в группу.",
+    "left": "Вы вышли из группы."
+  },
   "publicProfile": {
     "notFound": "Профиль не найден",
     "notFoundDesc": "Возможно, пользователь удалил аккаунт или ссылка устарела.",
@@ -630,22 +709,136 @@
   },
   "admin": {
     "title": "Администрирование",
-    "subtitle": "Обзор (только чтение). Расширенные действия — позже.",
+    "subtitle": "Статистика, жалобы, журнал действий и закрепление вакансий.",
     "grantHintTitle": "Как выдать права администратора",
-    "grantHintBody": "В Supabase SQL: update public.profiles set is_admin = true where id = 'USER_UUID';",
-    "recentUsers": "Последние регистрации",
+    "grantHintBody": "Админ (полный доступ): update public.profiles set is_admin = true where id = 'USER_UUID';",
+    "grantHintModerator": "Модератор (только жалобы и журнал): update public.profiles set is_moderator = true where id = 'USER_UUID';",
+    "tab.overview": "Обзор",
+    "tab.reports": "Жалобы",
+    "tab.audit": "Журнал",
+    "tab.featured": "Вакансии в топе",
+    "recentUsers": "Пользователи",
+    "searchUsersPh": "Поиск по имени или роли",
     "openProfile": "Открыть",
     "badgeStaff": "Админ",
+    "badgeModerator": "Мод",
+    "badgeBanned": "Бан",
     "col.name": "Имя",
     "col.role": "Роль",
     "col.joined": "Дата",
     "col.link": "Ссылка",
+    "col.verify": "Верификация",
+    "col.ban": "Бан",
+    "action.verify": "Подтвердить",
+    "action.unverify": "Снять",
+    "action.ban": "Забанить",
+    "action.unban": "Разбанить",
+    "pageOf": "Стр. {{page}} / {{total}}",
+    "prev": "Назад",
+    "next": "Далее",
+    "reports.when": "Когда",
+    "reports.target": "Цель",
+    "reports.reason": "Причина",
+    "reports.status": "Статус",
+    "reports.resolve": "Решено",
+    "reports.dismiss": "Отклонить",
+    "reports.exportCsv": "Экспорт CSV",
+    "reports.sla": "Часов открыто",
+    "reports.hours": "ч",
+    "audit.when": "Когда",
+    "audit.action": "Действие",
+    "audit.entity": "Сущность",
+    "audit.exportCsv": "Экспорт CSV",
+    "featuredHint": "Закрепляйте вакансии наверху списка на срок.",
+    "featuredUntil": "До",
+    "notFeatured": "Не закреплено",
+    "feature7d": "Топ 7 дней",
+    "feature30d": "Топ 30 дней",
+    "unfeature": "Снять",
     "stat.profiles": "Профили",
     "stat.jobs": "Вакансии",
     "stat.listings": "Объявления",
     "stat.events": "События",
     "stat.achievements": "Достижения",
     "stat.messages": "Сообщения"
+  },
+  "growth": {
+    "onboarding": {
+      "title": "Первые шаги в USHQN",
+      "subtitle": "Выполните чеклист и получите бонусные очки в категории «Другое».",
+      "subtitleRiver": "Один поток: профиль → интересы → первый отклик или чат → бонус.",
+      "skip": "Скрыть",
+      "stepProfile": "Заполните заголовок и город в профиле",
+      "stepProfile80": "Довести профиль до ~80% (био, фото, навык, ссылки…)",
+      "stepAchievement": "Добавьте первое достижение",
+      "stepInterests": "Выберите хотя бы один интерес (раздел «Люди»)",
+      "stepFirstAction": "Первое действие",
+      "stepFirstActionJobs": "Отклик на вакансию",
+      "stepFirstActionChat": "Чат",
+      "profileMeter": "Сила профиля: {{pct}}%",
+      "remindLater": "Напомнить через 3 дня",
+      "hideForever": "Больше не показывать",
+      "confirmHideForever": "Скрыть чеклист навсегда? Задачи всё равно можно выполнять в Профиле и Вакансиях.",
+      "snoozed": "Напомним через три дня.",
+      "dismissedForever": "Чеклист скрыт. Настройки приватности в Параметрах.",
+      "claimBonus": "Получить +50 бонусных очков",
+      "claiming": "Начисление…",
+      "bonusSuccess": "Бонус начислен!",
+      "dismissed": "Блок скрыт. Шаги можно выполнить позже."
+    },
+    "missions": {
+      "title": "Движения на неделю",
+      "badge": "Идеи",
+      "subtitle": "Маленькие шаги без давления «стрика».",
+      "rowa": "Запишите новое достижение или сертификат",
+      "rowb": "Напишите работодателю или коллеге по объявлению",
+      "rowc": "Подпишитесь на человека в интересной сфере"
+    },
+    "digest": {
+      "title": "На этой неделе",
+      "window": "7 дней",
+      "newJobs": "Новых вакансий",
+      "unreadNotifications": "Непрочитанных уведомлений",
+      "upcomingEvents": "Ближайшие события",
+      "openCalendar": "Календарь",
+      "openChat": "Сообщения"
+    }
+  },
+  "trust": {
+    "signals": {
+      "title": "Доверие и прозрачность",
+      "orgVerified": "Школа/организация подтверждена модераторами",
+      "orgNotVerified": "Организация не проверена — будьте конкретны в чате",
+      "profileFill": "Профиль заполнен примерно на {{pct}}%",
+      "memberSince": "В USHQN с {{date}}",
+      "reportHint": "Приватность и безопасность — в настройках"
+    },
+    "verifiedOrgBadge": "Орг. проверена",
+    "banned": {
+      "title": "Аккаунт заблокирован",
+      "body": "Доступ ограничен. Если это ошибка — свяжитесь с поддержкой.",
+      "signOut": "Выйти"
+    },
+    "report": {
+      "open": "Пожаловаться",
+      "title": "Жалоба",
+      "subtitle": "Модераторы рассмотрят обращение.",
+      "reasonPh": "Что не так? (необязательно)",
+      "submit": "Отправить",
+      "sending": "Отправка…",
+      "sent": "Жалоба отправлена. Спасибо."
+    },
+    "recommendation": {
+      "title": "Рекомендации",
+      "visibilityHelp": "Публичный текст виден гостям с доступом к профилю. Приватные заметки — вам, адресату и модераторам при жалобе.",
+      "placeholder": "Короткая рекомендация (до 500 символов)",
+      "public": "Видна всем, у кого есть доступ к профилю",
+      "privateNote": "Только вы и владелец профиля.",
+      "submit": "Сохранить",
+      "sending": "Сохранение…",
+      "saved": "Сохранено!",
+      "tooShort": "Минимум 2 символа"
+    }
   },
   "validation": {
     "titleRequired": "Укажите название",
@@ -671,6 +864,9 @@
     "ctaPrimary": "Создать аккаунт",
     "ctaSecondary": "Смотреть возможности",
     "ctaNote": "Бесплатная регистрация · данные защищены",
+    "videoKicker": "Видео",
+    "videoTitle": "Обзор платформы",
+    "videoSub": "Укажите VITE_LANDING_VIDEO_URL — ссылку YouTube или embed.",
     "previewUrl": "ushqn.app · главная",
     "previewProfile": "Ваш профиль",
     "previewPoints": "баллы",
@@ -734,7 +930,7 @@
   "ui": {
     "loadError": "Не удалось загрузить данные.",
     "retry": "Повторить",
-    "offline": "Нет подключения к интернету.",
+    "offline": "Нет сети — действия синхронизируются после подключения.",
     "backOnline": "Соединение восстановлено",
     "skipToContent": "К содержимому",
     "searchShort": "Поиск…"

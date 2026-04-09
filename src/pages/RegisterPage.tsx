@@ -8,6 +8,7 @@ import type { AuthError } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import { getAppBaseUrl } from '../lib/siteUrl'
 import { trackEvent } from '../lib/analytics'
+import { clearReferralFromStorage, peekReferralUserId } from '../lib/referral'
 import type { UserRole } from '../types/database'
 
 function formatRegisterError(e: AuthError, t: (k: string) => string): string {
@@ -107,11 +108,13 @@ export function RegisterPage() {
     setGoogleLoading(true)
     setError(null)
     const baseUrl = getAppBaseUrl()
+    const ref = peekReferralUserId()
     const { error: e } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo: `${baseUrl}/`,
         queryParams: { prompt: 'select_account' },
+        ...(ref ? { data: { referred_by: ref } } : {}),
       },
     })
     if (e) {
@@ -127,12 +130,17 @@ export function RegisterPage() {
     setError(null)
     setInfo(null)
     const baseUrl = getAppBaseUrl()
+    const ref = peekReferralUserId()
     const { data, error: e } = await supabase.auth.signUp({
       email: values.email,
       password: values.password,
       options: {
         emailRedirectTo: baseUrl ? `${baseUrl}/` : undefined,
-        data: { display_name: values.display_name, role: values.role },
+        data: {
+          display_name: values.display_name,
+          role: values.role,
+          ...(ref ? { referred_by: ref } : {}),
+        },
       },
     })
     if (e) {
@@ -140,8 +148,14 @@ export function RegisterPage() {
       setError(formatRegisterError(e, t))
       return
     }
-    if (data.session) { navigate('/home', { replace: true }); return }
+    if (ref) trackEvent('signup_with_referral_meta')
+    if (data.session) {
+      clearReferralFromStorage()
+      navigate('/home', { replace: true })
+      return
+    }
     if (data.user) {
+      clearReferralFromStorage()
       trackEvent('register_success', { method: 'email', role: values.role })
       setInfo(`${t('register.successTitle')} ${t('register.successDesc')} ${values.email}`)
       return

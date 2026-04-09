@@ -1,5 +1,16 @@
 export type UserRole = 'pupil' | 'student' | 'parent'
 export type ListingKind = 'good' | 'service'
+export type ContentReportTarget = 'job' | 'achievement' | 'message' | 'listing' | 'profile'
+export type JobApplicationStatus =
+  | 'submitted'
+  | 'viewed'
+  | 'replied'
+  | 'test_task'
+  | 'interview'
+  | 'accepted'
+  | 'rejected'
+  | 'withdrawn'
+export type JobWorkMode = 'any' | 'remote' | 'onsite' | 'hybrid'
 
 export interface Database {
   public: {
@@ -25,6 +36,17 @@ export interface Database {
           profile_views: number
           accent_color: string | null
           is_admin: boolean
+          referred_by: string | null
+          onboarding_bonus_claimed: boolean
+          onboarding_completed_at: string | null
+          onboarding_dismissed_at: string | null
+          org_verified: boolean
+          is_banned: boolean
+          portfolio_links: unknown
+          onboarding_snoozed_until: string | null
+          is_moderator: boolean
+          activity_streak_count: number
+          activity_streak_last_utc: string | null
         }
         Insert: Partial<Database['public']['Tables']['profiles']['Row']> & {
           id: string
@@ -44,6 +66,8 @@ export interface Database {
           updated_at: string
           theme: string
           reduce_motion: boolean
+          digest_email_enabled: boolean
+          push_notify_opt_in: boolean
         }
         Insert: {
           user_id: string
@@ -54,6 +78,8 @@ export interface Database {
           show_in_people_search?: boolean
           theme?: string
           reduce_motion?: boolean
+          digest_email_enabled?: boolean
+          push_notify_opt_in?: boolean
         }
         Update: Partial<Omit<Database['public']['Tables']['user_settings']['Row'], 'user_id'>>
       }
@@ -120,6 +146,7 @@ export interface Database {
           description: string | null
           price_text: string | null
           image_url: string | null
+          collection_slug: string | null
           created_at: string
           updated_at: string
         }
@@ -130,6 +157,7 @@ export interface Database {
           description?: string | null
           price_text?: string | null
           image_url?: string | null
+          collection_slug?: string | null
         }
         Update: Partial<
           Omit<Database['public']['Tables']['listings']['Row'], 'id' | 'owner_id' | 'created_at'>
@@ -142,6 +170,11 @@ export interface Database {
           title: string
           description: string | null
           format_text: string | null
+          is_featured: boolean
+          featured_until: string | null
+          work_mode: JobWorkMode
+          company_name: string | null
+          hide_company_until_applied: boolean
           created_at: string
           updated_at: string
         }
@@ -150,10 +183,100 @@ export interface Database {
           title: string
           description?: string | null
           format_text?: string | null
+          is_featured?: boolean
+          featured_until?: string | null
+          work_mode?: JobWorkMode
+          company_name?: string | null
+          hide_company_until_applied?: boolean
         }
         Update: Partial<
           Omit<Database['public']['Tables']['jobs']['Row'], 'id' | 'owner_id' | 'created_at'>
         >
+      }
+      job_applications: {
+        Row: {
+          id: string
+          job_id: string
+          applicant_id: string
+          status: JobApplicationStatus
+          cv_url: string | null
+          portfolio_url: string | null
+          interview_slot: string | null
+          owner_note: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          job_id: string
+          applicant_id: string
+          status?: JobApplicationStatus
+          cv_url?: string | null
+          portfolio_url?: string | null
+          interview_slot?: string | null
+          owner_note?: string | null
+        }
+        Update: Partial<
+          Omit<
+            Database['public']['Tables']['job_applications']['Row'],
+            'id' | 'job_id' | 'applicant_id' | 'created_at'
+          >
+        >
+      }
+      profile_recommendations: {
+        Row: {
+          id: string
+          author_id: string
+          subject_id: string
+          body: string
+          is_public: boolean
+          created_at: string
+        }
+        Insert: {
+          author_id: string
+          subject_id: string
+          body: string
+          is_public?: boolean
+        }
+        Update: Partial<Omit<Database['public']['Tables']['profile_recommendations']['Row'], 'id' | 'created_at'>>
+      }
+      content_reports: {
+        Row: {
+          id: string
+          reporter_id: string
+          target_type: ContentReportTarget
+          target_id: string
+          reason: string | null
+          status: 'open' | 'resolved' | 'dismissed'
+          created_at: string
+          resolved_at: string | null
+          resolved_by: string | null
+        }
+        Insert: {
+          reporter_id: string
+          target_type: ContentReportTarget
+          target_id: string
+          reason?: string | null
+          status?: 'open' | 'resolved' | 'dismissed'
+        }
+        Update: Partial<
+          Pick<
+            Database['public']['Tables']['content_reports']['Row'],
+            'status' | 'resolved_at' | 'resolved_by'
+          >
+        >
+      }
+      audit_log: {
+        Row: {
+          id: string
+          actor_id: string | null
+          action: string
+          entity_type: string
+          entity_id: string | null
+          metadata: Record<string, unknown> | null
+          created_at: string
+        }
+        Insert: never
+        Update: never
       }
       interests: {
         Row: {
@@ -193,6 +316,7 @@ export interface Database {
         Row: {
           conversation_id: string
           user_id: string
+          last_read_at: string | null
         }
       }
       messages: {
@@ -200,14 +324,62 @@ export interface Database {
           id: string
           conversation_id: string
           sender_id: string
-          body: string
+          body: string | null
+          attachment_url: string | null
+          attachment_name: string | null
           created_at: string
         }
         Insert: {
           conversation_id: string
           sender_id: string
-          body: string
+          body?: string | null
+          attachment_url?: string | null
+          attachment_name?: string | null
         }
+      }
+      communities: {
+        Row: {
+          id: string
+          slug: string
+          title: string
+          region_label: string
+          created_at: string
+        }
+        Insert: {
+          slug: string
+          title: string
+          region_label?: string
+        }
+        Update: Partial<Pick<Database['public']['Tables']['communities']['Row'], 'title' | 'region_label'>>
+      }
+      community_members: {
+        Row: {
+          community_id: string
+          user_id: string
+          joined_at: string
+        }
+        Insert: {
+          community_id: string
+          user_id: string
+        }
+        Update: never
+      }
+      mentorship_requests: {
+        Row: {
+          id: string
+          mentee_id: string
+          mentor_id: string
+          note: string | null
+          status: 'pending' | 'accepted' | 'declined' | 'cancelled'
+          created_at: string
+        }
+        Insert: {
+          mentee_id: string
+          mentor_id: string
+          note?: string | null
+          status?: 'pending' | 'accepted' | 'declined' | 'cancelled'
+        }
+        Update: Partial<Pick<Database['public']['Tables']['mentorship_requests']['Row'], 'status' | 'note'>>
       }
       events: {
         Row: {
@@ -241,6 +413,14 @@ export interface Database {
       get_or_create_dm: {
         Args: { other_id: string }
         Returns: string
+      }
+      claim_onboarding_bonus: {
+        Args: Record<string, never>
+        Returns: void
+      }
+      touch_activity_streak: {
+        Args: Record<string, never>
+        Returns: void
       }
     }
   }

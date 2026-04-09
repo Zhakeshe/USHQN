@@ -1,9 +1,14 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { MiniProfileSidebar } from '../components/MiniProfileSidebar'
+import { OnboardingPanel } from '../components/OnboardingPanel'
+import { WeeklyDigestCard } from '../components/WeeklyDigestCard'
+import { MissionsTeaserCard } from '../components/MissionsTeaserCard'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
+import { clearReferralFromStorage } from '../lib/referral'
 
 const CATEGORY_EMOJI: Record<string, string> = {
   robotics: '🤖', programming: '💻', sports: '⚽', debates: '🎤',
@@ -13,12 +18,23 @@ const CATEGORY_EMOJI: Record<string, string> = {
 export function HomePage() {
   const { userId } = useAuth()
   const { t } = useTranslation()
+  const qc = useQueryClient()
+
+  useEffect(() => {
+    if (!userId) return
+    void supabase.auth.getUser().then(({ data }) => {
+      const c = data.user?.created_at
+      if (!c) return
+      if (Date.now() - new Date(c).getTime() < 5 * 60_000) clearReferralFromStorage()
+    })
+  }, [userId])
 
   const QUICK_ACTIONS = [
     { to: '/achievements', emoji: '🏆', label: t('home.quickActions.addAchievement'), color: 'from-[#0052CC] to-[#2684FF]' },
     { to: '/jobs', emoji: '💼', label: t('home.quickActions.findJob'), color: 'from-[#00875A] to-[#36B37E]' },
     { to: '/people', emoji: '👥', label: t('home.quickActions.findPeople'), color: 'from-[#6554C0] to-[#8777D9]' },
     { to: '/calendar', emoji: '📅', label: t('home.quickActions.events'), color: 'from-[#FF8B00] to-[#FFAB00]' },
+    { to: '/communities', emoji: '📍', label: t('home.quickActions.communities'), color: 'from-[#00B8D9] to-[#79E2F2]' },
   ]
 
   const SECTION_CARDS = [
@@ -27,6 +43,7 @@ export function HomePage() {
     { to: '/jobs', title: t('home.cards.jobs.title'), desc: t('home.cards.jobs.desc'), emoji: '💼' },
     { to: '/people', title: t('home.cards.people.title'), desc: t('home.cards.people.desc'), emoji: '👥' },
     { to: '/calendar', title: t('home.cards.calendar.title'), desc: t('home.cards.calendar.desc'), emoji: '📅' },
+    { to: '/communities', title: t('home.cards.communities.title'), desc: t('home.cards.communities.desc'), emoji: '📍' },
     { to: '/chat', title: t('home.cards.chat.title'), desc: t('home.cards.chat.desc'), emoji: '💬' },
     { to: '/rating', title: t('home.cards.rating.title'), desc: t('home.cards.rating.desc'), emoji: '🏆' },
     { to: '/settings', title: t('home.cards.settings.title'), desc: t('home.cards.settings.desc'), emoji: '⚙️' },
@@ -56,6 +73,27 @@ export function HomePage() {
       return { achCount: achCount ?? 0, followersCount: followersCount ?? 0 }
     },
   })
+
+  const streakQuery = useQuery({
+    queryKey: ['profile-streak', userId],
+    enabled: Boolean(userId),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('activity_streak_count, activity_streak_last_utc')
+        .eq('id', userId!)
+        .single()
+      if (error) throw error
+      return data
+    },
+  })
+
+  useEffect(() => {
+    if (!userId) return
+    void supabase.rpc('touch_activity_streak').then(({ error }) => {
+      if (!error) void qc.invalidateQueries({ queryKey: ['profile-streak', userId] })
+    })
+  }, [userId, qc])
 
   const upcomingEvents = useQuery({
     queryKey: ['upcoming-events', userId],
@@ -89,13 +127,25 @@ export function HomePage() {
                 <span className="rounded-full bg-[#E3FCEF] px-3 py-1 text-xs font-bold text-[#006644]">
                   👥 {statsQuery.data.followersCount} {t('home.followers')}
                 </span>
+                {streakQuery.data && (streakQuery.data.activity_streak_count ?? 0) > 0 ? (
+                  <span
+                    className="rounded-full bg-[#FFF0B3] px-3 py-1 text-xs font-bold text-[#974F00]"
+                    title={t('home.streakTitle')}
+                  >
+                    🔥 {streakQuery.data.activity_streak_count} {t('home.streakDays')}
+                  </span>
+                ) : null}
               </div>
             ) : null}
           </div>
         </section>
 
+        <OnboardingPanel />
+        <WeeklyDigestCard />
+        <MissionsTeaserCard />
+
         {/* Quick actions */}
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           {QUICK_ACTIONS.map((a) => (
             <Link key={a.to} to={a.to}
               className={`flex flex-col items-center gap-2 rounded-2xl bg-gradient-to-br ${a.color} p-4 text-center text-white shadow-md transition hover:scale-[1.03] hover:shadow-lg active:scale-[0.98]`}>

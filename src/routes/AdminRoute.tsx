@@ -9,12 +9,12 @@ export function AdminRoute({ children }: { children: ReactNode }) {
   const { userId } = useAuth()
 
   const q = useQuery({
-    queryKey: ['profile-admin-flag', userId],
+    queryKey: ['profile-staff-flags', userId],
     enabled: Boolean(userId),
     queryFn: async () => {
-      const { data, error } = await supabase.from('profiles').select('is_admin').eq('id', userId!).single()
+      const { data, error } = await supabase.from('profiles').select('is_admin,is_moderator').eq('id', userId!).single()
       if (error) throw error
-      return Boolean(data?.is_admin)
+      return { isAdmin: Boolean(data?.is_admin), isModerator: Boolean(data?.is_moderator) }
     },
   })
 
@@ -27,7 +27,7 @@ export function AdminRoute({ children }: { children: ReactNode }) {
       query={q}
       skeleton={<div className="ushqn-card h-40 animate-pulse" />}
     >
-      {q.data ? children : <Navigate to="/home" replace />}
+      {q.data && (q.data.isAdmin || q.data.isModerator) ? children : <Navigate to="/home" replace />}
     </QueryState>
   )
 }

@@ -15,7 +15,7 @@ import { useConfirm } from '../lib/confirm'
 import type { ListingKind } from '../types/database'
 import { QueryState } from '../components/QueryState'
 
-type Form = { title: string; description?: string; price_text?: string; kind: ListingKind }
+type Form = { title: string; description?: string; price_text?: string; kind: ListingKind; collection_slug?: string }
 
 export function ShowcasePage() {
   const { t } = useTranslation()
@@ -27,6 +27,8 @@ export function ShowcasePage() {
   const { confirm } = useConfirm()
 
   const qUrl = searchParams.get('q') ?? ''
+  const collectionUrl = searchParams.get('collection') ?? ''
+  const [collectionInput, setCollectionInput] = useState(collectionUrl)
   const [filter, setFilter] = useState<'all' | ListingKind>(() => {
     const f = searchParams.get('kind')
     if (f === 'good' || f === 'service') return f
@@ -40,19 +42,27 @@ export function ShowcasePage() {
   }, [qUrl])
 
   useEffect(() => {
+    setCollectionInput(collectionUrl)
+  }, [collectionUrl])
+
+  useEffect(() => {
     const curQ = searchParams.get('q') ?? ''
     const curKind = searchParams.get('kind')
+    const curCol = searchParams.get('collection') ?? ''
     const wantKind = filter === 'all' ? null : filter
     const kindMatch =
       wantKind == null ? curKind == null || curKind === '' : curKind === wantKind
-    if (curQ === debouncedSearch && kindMatch) return
+    const colTrim = collectionInput.trim()
+    if (curQ === debouncedSearch && kindMatch && curCol === colTrim) return
     const next = new URLSearchParams(searchParams)
     if (debouncedSearch) next.set('q', debouncedSearch)
     else next.delete('q')
     if (filter !== 'all') next.set('kind', filter)
     else next.delete('kind')
+    if (colTrim) next.set('collection', colTrim)
+    else next.delete('collection')
     setSearchParams(next, { replace: true })
-  }, [debouncedSearch, filter, searchParams, setSearchParams])
+  }, [debouncedSearch, filter, collectionInput, searchParams, setSearchParams])
 
   const [image, setImage] = useState<File | null>(null)
   const [showForm, setShowForm] = useState(false)
@@ -64,18 +74,22 @@ export function ShowcasePage() {
         description: z.string().optional(),
         price_text: z.string().optional(),
         kind: z.enum(['good', 'service']),
+        collection_slug: z.string().max(80).optional(),
       }),
     [t],
   )
 
+  const collectionFilter = collectionUrl.trim()
+
   const listQuery = useQuery({
-    queryKey: ['listings', filter, debouncedSearch],
+    queryKey: ['listings', filter, debouncedSearch, collectionFilter],
     queryFn: async () => {
       let q = supabase
         .from('listings')
-        .select('id,owner_id,kind,title,description,price_text,image_url,created_at')
+        .select('id,owner_id,kind,title,description,price_text,image_url,created_at,collection_slug')
         .order('created_at', { ascending: false })
       if (filter !== 'all') q = q.eq('kind', filter)
+      if (collectionFilter) q = q.eq('collection_slug', collectionFilter)
       if (debouncedSearch) q = q.or(`title.ilike.%${debouncedSearch}%,description.ilike.%${debouncedSearch}%`)
       const { data, error } = await q
       if (error) throw error
@@ -85,7 +99,7 @@ export function ShowcasePage() {
 
   const form = useForm<Form>({
     resolver: zodResolver(schema),
-    defaultValues: { kind: 'good', title: '', description: '', price_text: '' },
+    defaultValues: { kind: 'good', title: '', description: '', price_text: '', collection_slug: '' },
   })
 
   useEffect(() => {
@@ -104,11 +118,12 @@ export function ShowcasePage() {
         description: values.description || null,
         price_text: values.price_text || null,
         image_url: imageUrl,
+        collection_slug: values.collection_slug?.trim() || null,
       })
       if (error) throw error
     },
     onSuccess: () => {
-      form.reset({ kind: 'good', title: '', description: '', price_text: '' })
+      form.reset({ kind: 'good', title: '', description: '', price_text: '', collection_slug: '' })
       setImage(null)
       setShowForm(false)
       void qc.invalidateQueries({ queryKey: ['listings'] })
@@ -162,6 +177,19 @@ export function ShowcasePage() {
             name="showcase-search"
             enterKeyHint="search"
           />
+          <div className="min-w-0 flex-1 sm:max-w-xs">
+            <label className="mb-1 block text-[10px] font-bold uppercase tracking-wide text-[#6B778C]" htmlFor="showcase-collection">
+              {t('showcase.collectionLabel')}
+            </label>
+            <input
+              id="showcase-collection"
+              value={collectionInput}
+              onChange={(e) => setCollectionInput(e.target.value)}
+              placeholder={t('showcase.collectionPh')}
+              className="ushqn-input w-full text-sm"
+              autoComplete="off"
+            />
+          </div>
           <div className="flex gap-2">
             {(['all', 'good', 'service'] as const).map((v) => (
               <button
@@ -226,6 +254,10 @@ export function ShowcasePage() {
             <div className="sm:col-span-2">
               <label className="ushqn-label">{t('showcase.descLabel')}</label>
               <textarea rows={3} className="ushqn-input resize-none" {...form.register('description')} />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="ushqn-label">{t('showcase.collectionLabel')}</label>
+              <input className="ushqn-input" placeholder={t('showcase.collectionPh')} {...form.register('collection_slug')} />
             </div>
             <div className="sm:col-span-2">
               <label className="ushqn-label">{t('showcase.imageLabel')}</label>
@@ -293,6 +325,11 @@ export function ShowcasePage() {
                     >
                       {r.kind === 'good' ? t('showcase.kindGood') : t('showcase.kindService')}
                     </span>
+                    {(r as { collection_slug?: string | null }).collection_slug ? (
+                      <span className="rounded-full bg-[#F4F5F7] px-2 py-0.5 text-[10px] font-bold text-[#6B778C]">
+                        #{(r as { collection_slug?: string | null }).collection_slug}
+                      </span>
+                    ) : null}
                     {r.price_text ? <span className="text-sm font-extrabold text-[#0052CC]">{r.price_text}</span> : null}
                   </div>
                   <h3 className="mt-2 text-base font-bold leading-snug text-[#172B4D]">{r.title}</h3>

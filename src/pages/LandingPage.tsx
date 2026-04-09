@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { useEffect, useMemo, useState } from 'react'
+import { captureReferralFromHref } from '../lib/referral'
 import { Helmet } from 'react-helmet-async'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -129,6 +130,23 @@ function IcShop() {
   )
 }
 
+function landingVideoEmbed(raw: string): { src: string } | null {
+  const u = raw.trim()
+  if (!u) return null
+  try {
+    const url = new URL(u)
+    if (url.hostname.includes('youtube.com') || url.hostname.includes('youtu.be')) {
+      let id: string | null = null
+      if (url.hostname.includes('youtu.be')) id = url.pathname.replace(/^\//, '') || null
+      else id = url.searchParams.get('v')
+      if (id) return { src: `https://www.youtube.com/embed/${id}` }
+    }
+    return { src: u }
+  } catch {
+    return null
+  }
+}
+
 function HeroPreview() {
   const { t } = useTranslation()
   return (
@@ -193,7 +211,14 @@ export function LandingPage() {
   const primary = session ? '/home' : '/register'
   const secondary = session ? '/home' : '/login'
 
+  useEffect(() => {
+    captureReferralFromHref(window.location.href)
+  }, [])
+
   const canonical = typeof window !== 'undefined' ? `${window.location.origin}/` : '/'
+
+  const videoUrl = (import.meta.env.VITE_LANDING_VIDEO_URL as string | undefined)?.trim()
+  const videoEmbed = videoUrl ? landingVideoEmbed(videoUrl) : null
 
   const jsonLd = useMemo(
     () =>
@@ -297,6 +322,25 @@ export function LandingPage() {
             <HeroPreview />
           </div>
         </section>
+
+        {videoEmbed ? (
+          <section className="mx-auto max-w-6xl px-4 pb-12 sm:px-5 sm:pb-16">
+            <p className="text-xs font-black uppercase tracking-[0.12em] text-[#0052CC]">{t('landing.videoKicker')}</p>
+            <h2 className="mt-2 text-xl font-extrabold tracking-tight text-[#172B4D] sm:text-2xl">{t('landing.videoTitle')}</h2>
+            <p className="mt-1 text-sm text-[#6B778C]">{t('landing.videoSub')}</p>
+            <div className="mt-5 overflow-hidden rounded-2xl border border-[#dce3eb] bg-black shadow-[0_28px_80px_rgba(23,43,77,0.12)] ring-1 ring-black/[0.04]">
+              <div className="aspect-video w-full">
+                <iframe
+                  src={videoEmbed.src}
+                  className="h-full w-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                  title={t('landing.videoTitle')}
+                />
+              </div>
+            </div>
+          </section>
+        ) : null}
 
         <section id="features" className="border-t border-[#e4e9ef] bg-white/70 py-16 shadow-[inset_0_1px_0_rgba(255,255,255,0.85)] backdrop-blur-[3px] sm:py-20">
           <div className="mx-auto max-w-6xl px-4 sm:px-5">

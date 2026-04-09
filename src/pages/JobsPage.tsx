@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { format } from 'date-fns'
 import { useAuth } from '../hooks/useAuth'
@@ -13,13 +13,41 @@ import { useToast } from '../lib/toast'
 import { useConfirm } from '../lib/confirm'
 import { getDateFnsLocale } from '../lib/dateLocale'
 import { QueryState } from '../components/QueryState'
+import { ContentReportDialog } from '../components/ContentReportDialog'
 import { trackEvent } from '../lib/analytics'
+import type { Database, JobApplicationStatus, JobWorkMode } from '../types/database'
 
 const JOBS_FILTERS_KEY = 'ushqn_jobs_filters_v1'
 
-type Form = { title: string; description?: string; format_text?: string }
+type JobRow = Database['public']['Tables']['jobs']['Row']
+type AppRow = {
+  id: string
+  job_id: string
+  applicant_id: string
+  status: JobApplicationStatus
+  name: string
+  interview_slot: string | null
+}
+
+function toDatetimeLocalValue(iso: string | null): string {
+  if (!iso) return ''
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return ''
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
+
+type Form = {
+  title: string
+  description?: string
+  format_text?: string
+  work_mode: JobWorkMode
+  company_name?: string
+  hide_company_until_applied: boolean
+}
 type EmploymentFilter = 'all' | 'internship' | 'fulltime' | 'parttime' | 'project'
 type JobSort = 'new' | 'relevance'
+type WorkModeFilter = 'all' | JobWorkMode
 
 export function JobsPage() {
   const { t, i18n } = useTranslation()
@@ -32,8 +60,10 @@ export function JobsPage() {
   const [employment, setEmployment] = useState<EmploymentFilter>('all')
   const [sphere, setSphere] = useState<string>('all')
   const [sort, setSort] = useState<JobSort>('new')
+  const [workMode, setWorkMode] = useState<WorkModeFilter>('all')
   const [filtersHydrated, setFiltersHydrated] = useState(false)
   const [showForm, setShowForm] = useState(false)
+  const [reportJobId, setReportJobId] = useState<string | null>(null)
 
   const qUrl = searchParams.get('q') ?? ''
   const [searchText, setSearchText] = useState(qUrl)
@@ -60,6 +90,7 @@ export function JobsPage() {
           employment?: EmploymentFilter
           sphere?: string
           sort?: JobSort
+          workMode?: WorkModeFilter
         }
         if (p.employment && ['all', 'internship', 'fulltime', 'parttime', 'project'].includes(p.employment)) {
           setEmployment(p.employment)
@@ -68,6 +99,9 @@ export function JobsPage() {
           setSphere(p.sphere)
         }
         if (p.sort === 'new' || p.sort === 'relevance') setSort(p.sort)
+        if (p.workMode && ['all', 'any', 'remote', 'onsite', 'hybrid'].includes(p.workMode)) {
+          setWorkMode(p.workMode)
+        }
       }
     } catch {
       /* ignore */
@@ -78,11 +112,11 @@ export function JobsPage() {
   useEffect(() => {
     if (!filtersHydrated) return
     try {
-      localStorage.setItem(JOBS_FILTERS_KEY, JSON.stringify({ employment, sphere, sort }))
+      localStorage.setItem(JOBS_FILTERS_KEY, JSON.stringify({ employment, sphere, sort, workMode }))
     } catch {
       /* ignore */
     }
-  }, [employment, sphere, sort, filtersHydrated])
+  }, [employment, sphere, sort, workMode, filtersHydrated])
 
   const schema = useMemo(
     () =>
@@ -90,6 +124,9 @@ export function JobsPage() {
         title: z.string().min(1, t('validation.titleRequired')),
         description: z.string().optional(),
         format_text: z.string().optional(),
+        work_mode: z.enum(['any', 'remote', 'onsite', 'hybrid']),
+        company_name: z.string().optional(),
+        hide_company_until_applied: z.boolean(),
       }),
     [t],
   )
@@ -132,7 +169,52 @@ export function JobsPage() {
     queryFn: async () => {
       const { data, error } = await supabase.from('jobs').select('*').order('created_at', { ascending: false })
       if (error) throw error
-      return data ?? []
+      return (data ?? []) as JobRow[]
+    },
+  })
+
+  const myAppsQuery = useQuery({
+    queryKey: ['my-job-applications', userId],
+    enabled: Boolean(userId),
+    queryFn: async () => {
+      const { data, error } = await supabase.from('job_applications').select('job_id, status').eq('applicant_id', userId!)
+      if (error) throw error
+      return new Map((data ?? []).map((r) => [r.job_id, r.status as JobApplicationStatus]))
+    },
+  })
+
+  const myJobIds = useMemo(() => {
+    if (!userId) return [] as string[]
+    return (listQuery.data ?? []).filter((j) => j.owner_id === userId).map((j) => j.id)
+  }, [listQuery.data, userId])
+
+  const appsByJobQuery = useQuery({
+    queryKey: ['job-apps-by-owner', userId, myJobIds.join('|')],
+    enabled: Boolean(userId) && myJobIds.length > 0,
+    queryFn: async (): Promise<Map<string, AppRow[]>> => {
+      const { data, error } = await supabase
+        .from('job_applications')
+        .select('id, job_id, applicant_id, status, interview_slot')
+        .in('job_id', myJobIds)
+      if (error) throw error
+      const applicants = [...new Set((data ?? []).map((r) => r.applicant_id))]
+      if (applicants.length === 0) return new Map()
+      const { data: profs } = await supabase.from('profiles').select('id, display_name').in('id', applicants)
+      const names = new Map((profs ?? []).map((p) => [p.id, p.display_name]))
+      const map = new Map<string, AppRow[]>()
+      for (const row of data ?? []) {
+        const arr = map.get(row.job_id) ?? []
+        arr.push({
+          id: row.id,
+          job_id: row.job_id,
+          applicant_id: row.applicant_id,
+          status: row.status as JobApplicationStatus,
+          name: names.get(row.applicant_id) ?? '—',
+          interview_slot: (row as { interview_slot?: string | null }).interview_slot ?? null,
+        })
+        map.set(row.job_id, arr)
+      }
+      return map
     },
   })
 
@@ -155,8 +237,17 @@ export function JobsPage() {
     return 0
   }
 
+  function isJobFeatured(j: { is_featured?: boolean; featured_until?: string | null }) {
+    if (!j.is_featured || !j.featured_until) return false
+    return new Date(j.featured_until) > new Date()
+  }
+
   const filteredJobs = useMemo(() => {
     let list = (listQuery.data ?? []).filter((j) => {
+      if (workMode !== 'all') {
+        const mode = (j.work_mode ?? 'any') as JobWorkMode
+        if (mode !== 'any' && mode !== workMode) return false
+      }
       const fmt = `${j.title} ${j.format_text ?? ''} ${j.description ?? ''}`.toLowerCase()
       if (employment === 'internship' && !/(стаж|intern)/i.test(fmt)) return false
       if (employment === 'fulltime' && !/(полн|full|офис)/i.test(fmt)) return false
@@ -174,6 +265,8 @@ export function JobsPage() {
       )
     }
     list = [...list].sort((a, b) => {
+      const f = Number(isJobFeatured(b)) - Number(isJobFeatured(a))
+      if (f !== 0) return f
       if (sort === 'relevance' && debouncedQ) {
         const d = relevanceScore(b, debouncedQ) - relevanceScore(a, debouncedQ)
         if (d !== 0) return d
@@ -181,25 +274,69 @@ export function JobsPage() {
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     })
     return list
-  }, [listQuery.data, employment, sphere, debouncedQ, sort])
+  }, [listQuery.data, employment, sphere, debouncedQ, sort, workMode])
 
-  const form = useForm<Form>({ resolver: zodResolver(schema), defaultValues: {} })
+  const form = useForm<Form>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      work_mode: 'any',
+      company_name: '',
+      hide_company_until_applied: false,
+    },
+  })
 
   useEffect(() => {
     void form.clearErrors()
     void form.trigger()
   }, [schema, form])
 
+  const patchApplication = useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: JobApplicationStatus }) => {
+      const { error } = await supabase.from('job_applications').update({ status }).eq('id', id)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['job-apps-by-owner'] })
+      void qc.invalidateQueries({ queryKey: ['my-job-applications'] })
+      toast(t('jobs.statusUpdated'), 'info')
+    },
+    onError: () => toast(t('common.error'), 'error'),
+  })
+
+  const patchInterviewSlot = useMutation({
+    mutationFn: async ({ id, interview_slot }: { id: string; interview_slot: string | null }) => {
+      const { error } = await supabase.from('job_applications').update({ interview_slot }).eq('id', id)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['job-apps-by-owner'] })
+      toast(t('jobs.interviewSlotSaved'), 'info')
+    },
+    onError: () => toast(t('common.error'), 'error'),
+  })
+
   const create = useMutation({
     mutationFn: async (values: Form) => {
       const { error } = await supabase.from('jobs').insert({
-        owner_id: userId!, title: values.title,
-        description: values.description || null, format_text: values.format_text || null,
+        owner_id: userId!,
+        title: values.title,
+        description: values.description || null,
+        format_text: values.format_text || null,
+        work_mode: values.work_mode,
+        company_name: values.company_name?.trim() || null,
+        hide_company_until_applied: values.hide_company_until_applied,
       })
       if (error) throw error
     },
     onSuccess: () => {
-      form.reset()
+      form.reset({
+        title: '',
+        description: '',
+        format_text: '',
+        work_mode: 'any',
+        company_name: '',
+        hide_company_until_applied: false,
+      })
       setShowForm(false)
       void qc.invalidateQueries({ queryKey: ['jobs'] })
       trackEvent('job_created')
@@ -234,8 +371,28 @@ export function JobsPage() {
     void qc.invalidateQueries({ queryKey: ['bookmarks-jobs', userId] })
   }
 
-  async function applyToJob(ownerId: string) {
+  async function applyToJob(jobId: string, ownerId: string) {
     if (!userId) return
+    const existing = await supabase
+      .from('job_applications')
+      .select('id')
+      .eq('job_id', jobId)
+      .eq('applicant_id', userId)
+      .maybeSingle()
+    if (!existing.data) {
+      const { error: insErr } = await supabase.from('job_applications').insert({
+        job_id: jobId,
+        applicant_id: userId,
+        status: 'submitted',
+      })
+      if (insErr) {
+        trackEvent('job_apply_failed')
+        toast(insErr.message, 'error')
+        return
+      }
+      void qc.invalidateQueries({ queryKey: ['my-job-applications'] })
+      void qc.invalidateQueries({ queryKey: ['job-apps-by-owner'] })
+    }
     const { data, error } = await supabase.rpc('get_or_create_dm', { other_id: ownerId })
     if (error) {
       trackEvent('job_apply_failed')
@@ -244,6 +401,17 @@ export function JobsPage() {
     }
     trackEvent('job_applied')
     void navigate(`/chat/${data}`)
+  }
+
+  function companyDisplay(j: JobRow, hasApplied: boolean): string | null {
+    const name = j.company_name?.trim()
+    if (!name) return null
+    const hidden = Boolean(j.hide_company_until_applied)
+    if (!hidden) return name
+    if (!userId) return t('jobs.companyHidden')
+    if (j.owner_id === userId) return name
+    if (hasApplied) return name
+    return t('jobs.companyHidden')
   }
 
   function getTag(j: { format_text: string | null; title: string; description: string | null }) {
@@ -259,6 +427,12 @@ export function JobsPage() {
 
   return (
     <div className="space-y-5">
+      <ContentReportDialog
+        open={Boolean(reportJobId)}
+        onClose={() => setReportJobId(null)}
+        targetType="job"
+        targetId={reportJobId ?? ''}
+      />
       {/* Header */}
       <div className="ushqn-card overflow-hidden p-0">
         <div className="bg-gradient-to-r from-[#0052CC] to-[#2684FF] px-6 py-7 text-white">
@@ -293,6 +467,23 @@ export function JobsPage() {
                 <button key={c.value} type="button" onClick={() => setSphere(c.value)}
                   className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${sphere === c.value ? 'border-[#0052CC] bg-[#0052CC] text-white' : 'border-[#DFE1E6] text-[#172B4D] hover:border-[#0052CC]'}`}>
                   {t('jobs.' + c.labelKey)}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <p className="mb-2 text-xs font-bold uppercase tracking-wide text-[#6B778C]">{t('jobs.filterWorkMode')}</p>
+            <div className="flex flex-wrap gap-2">
+              {(['all', 'remote', 'onsite', 'hybrid'] as WorkModeFilter[]).map((wm) => (
+                <button
+                  key={wm}
+                  type="button"
+                  onClick={() => setWorkMode(wm)}
+                  className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                    workMode === wm ? 'border-[#0052CC] bg-[#0052CC] text-white' : 'border-[#DFE1E6] text-[#172B4D] hover:border-[#0052CC]'
+                  }`}
+                >
+                  {t(`jobs.workMode.${wm}`)}
                 </button>
               ))}
             </div>
@@ -361,6 +552,25 @@ export function JobsPage() {
               <label className="ushqn-label">{t('jobs.jobDescLabel')}</label>
               <textarea rows={4} className="ushqn-input resize-none" {...form.register('description')} />
             </div>
+            <div>
+              <label className="ushqn-label" htmlFor="job-work-mode">
+                {t('jobs.workModeField')}
+              </label>
+              <select id="job-work-mode" className="ushqn-input w-full max-w-md" {...form.register('work_mode')}>
+                <option value="any">{t('jobs.workMode.any')}</option>
+                <option value="remote">{t('jobs.workMode.remote')}</option>
+                <option value="onsite">{t('jobs.workMode.onsite')}</option>
+                <option value="hybrid">{t('jobs.workMode.hybrid')}</option>
+              </select>
+            </div>
+            <div>
+              <label className="ushqn-label">{t('jobs.companyName')}</label>
+              <input className="ushqn-input" placeholder={t('jobs.companyNamePh')} {...form.register('company_name')} />
+            </div>
+            <label className="flex items-center gap-2.5 rounded-lg border border-[#DFE1E6] bg-[#fafbfc] px-3 py-2.5 cursor-pointer">
+              <input type="checkbox" className="h-4 w-4 accent-[#0052CC]" {...form.register('hide_company_until_applied')} />
+              <span className="text-sm font-medium text-[#172B4D]">{t('jobs.hideCompanyUntilApplied')}</span>
+            </label>
             <div className="flex gap-3">
               <button type="submit" disabled={create.isPending} className="ushqn-btn-primary px-6">
                 {create.isPending ? t('jobs.publishPending') : t('jobs.publishBtn')}
@@ -397,6 +607,7 @@ export function JobsPage() {
                   setSearchText('')
                   setEmployment('all')
                   setSphere('all')
+                  setWorkMode('all')
                   setSort('new')
                   const next = new URLSearchParams(searchParams)
                   next.delete('q')
@@ -413,6 +624,11 @@ export function JobsPage() {
             const tag = getTag(j)
             const isBookmarked = bookmarksQuery.data?.has(j.id)
             const isOwner = j.owner_id === userId
+            const myStatus = myAppsQuery.data?.get(j.id)
+            const hasApplied = Boolean(myStatus)
+            const comp = companyDisplay(j, hasApplied)
+            const appsList = appsByJobQuery.data?.get(j.id) ?? []
+            const wm = (j.work_mode ?? 'any') as JobWorkMode
             return (
               <article key={j.id} className="ushqn-card flex flex-col transition-shadow hover:shadow-md">
                 <div className="flex items-start gap-4 p-5">
@@ -421,17 +637,43 @@ export function JobsPage() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <h3 className="text-base font-bold text-[#172B4D]">{j.title}</h3>
+                    {comp ? <p className="mt-0.5 text-xs font-medium text-[#505F79]">{comp}</p> : null}
                     <p className="text-xs text-[#6B778C]">
                       {format(new Date(j.created_at), 'PP', { locale: dateLocale })}
                     </p>
                     <div className="mt-2 flex flex-wrap gap-1.5">
+                      {isJobFeatured(j) ? (
+                        <span
+                          title={t('jobs.featuredExplained')}
+                          className="cursor-help rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-900"
+                        >
+                          {t('jobs.featuredBadge')}
+                        </span>
+                      ) : null}
                       <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${tag.bg} ${tag.text}`}>{tag.label}</span>
-                      {j.format_text ? <span className="rounded-full bg-[#F4F5F7] px-2.5 py-0.5 text-xs font-semibold text-[#6B778C]">{j.format_text}</span> : null}
+                      {j.format_text ? (
+                        <span className="rounded-full bg-[#F4F5F7] px-2.5 py-0.5 text-xs font-semibold text-[#6B778C]">
+                          {j.format_text}
+                        </span>
+                      ) : null}
+                      {wm !== 'any' ? (
+                        <span className="rounded-full border border-[#DFE1E6] bg-white px-2.5 py-0.5 text-xs font-semibold text-[#172B4D]">
+                          {t(`jobs.workMode.${wm}`)}
+                        </span>
+                      ) : null}
                     </div>
+                    {!isOwner && myStatus ? (
+                      <p className="mt-2 text-xs font-semibold text-[#0052CC]">
+                        {t('jobs.myApplicationStatus')}: {t(`jobs.appStatus.${myStatus}`)}
+                      </p>
+                    ) : null}
                   </div>
-                  <button type="button" onClick={() => void toggleBookmark(j.id)}
+                  <button
+                    type="button"
+                    onClick={() => void toggleBookmark(j.id)}
                     className={`shrink-0 rounded-full p-1.5 transition ${isBookmarked ? 'text-[#0052CC]' : 'text-[#97A0AF] hover:text-[#0052CC]'}`}
-                    title={isBookmarked ? t('jobs.bookmarkRemoveTitle') : t('jobs.bookmarkAddTitle')}>
+                    title={isBookmarked ? t('jobs.bookmarkRemoveTitle') : t('jobs.bookmarkAddTitle')}
+                  >
                     <svg viewBox="0 0 20 20" fill={isBookmarked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.5" className="h-5 w-5">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z"/>
                     </svg>
@@ -442,18 +684,88 @@ export function JobsPage() {
                     <p className="line-clamp-3 text-sm text-[#6B778C]">{j.description}</p>
                   </div>
                 ) : null}
-                <div className="flex items-center justify-between border-t border-[#f4f5f7] px-5 py-3 mt-auto">
+                {isOwner && appsList.length > 0 ? (
+                  <div className="space-y-2 border-t border-[#f4f5f7] px-5 py-3">
+                    <p className="text-xs font-bold uppercase tracking-wide text-[#6B778C]">{t('jobs.applicantsTitle')}</p>
+                    {appsList.map((appRow) => (
+                      <div key={appRow.id} className="flex flex-col gap-1.5 text-xs sm:flex-row sm:flex-wrap sm:items-center sm:gap-2">
+                        <Link to={`/u/${appRow.applicant_id}`} className="font-semibold text-[#0052CC] hover:underline">
+                          {appRow.name}
+                        </Link>
+                        <select
+                          className="ushqn-input max-w-[12rem] py-1 text-xs"
+                          value={appRow.status}
+                          disabled={patchApplication.isPending}
+                          onChange={(e) =>
+                            patchApplication.mutate({
+                              id: appRow.id,
+                              status: e.target.value as JobApplicationStatus,
+                            })
+                          }
+                        >
+                          {(
+                            [
+                              'submitted',
+                              'viewed',
+                              'replied',
+                              'test_task',
+                              'interview',
+                              'accepted',
+                              'rejected',
+                              'withdrawn',
+                            ] as JobApplicationStatus[]
+                          ).map((s) => (
+                            <option key={s} value={s}>
+                              {t(`jobs.appStatus.${s}`)}
+                            </option>
+                          ))}
+                        </select>
+                        <label className="flex min-w-0 flex-col gap-0.5 sm:inline-flex sm:flex-row sm:items-center sm:gap-1">
+                          <span className="whitespace-nowrap text-[10px] font-bold uppercase tracking-wide text-[#6B778C]">
+                            {t('jobs.interviewSlot')}
+                          </span>
+                          <input
+                            type="datetime-local"
+                            className="ushqn-input max-w-[11.5rem] py-1 text-xs"
+                            value={toDatetimeLocalValue(appRow.interview_slot)}
+                            disabled={patchInterviewSlot.isPending}
+                            onChange={(e) => {
+                              const v = e.target.value
+                              patchInterviewSlot.mutate({
+                                id: appRow.id,
+                                interview_slot: v ? new Date(v).toISOString() : null,
+                              })
+                            }}
+                          />
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+                <div className="mt-auto flex flex-wrap items-center justify-between gap-2 border-t border-[#f4f5f7] px-5 py-3">
                   {isOwner ? (
                     <button type="button" onClick={() => void remove(j.id, j.title)}
                       className="rounded-lg border border-red-100 px-3 py-1.5 text-xs font-semibold text-red-500 hover:bg-red-50 transition">
                       {t('common.delete')}
                     </button>
                   ) : (
-                    <button type="button" onClick={() => void applyToJob(j.owner_id)}
-                      className="ushqn-btn-primary px-4 py-1.5 text-xs">
-                      💬 {t('jobs.apply')}
+                    <button
+                      type="button"
+                      onClick={() => void applyToJob(j.id, j.owner_id)}
+                      className="ushqn-btn-primary px-4 py-1.5 text-xs"
+                    >
+                      💬 {hasApplied ? t('jobs.openChat') : t('jobs.apply')}
                     </button>
                   )}
+                  {!isOwner && userId ? (
+                    <button
+                      type="button"
+                      className="rounded-lg border border-[#eef1f4] px-3 py-1.5 text-xs font-semibold text-[#6B778C] hover:bg-[#f4f5f7]"
+                      onClick={() => setReportJobId(j.id)}
+                    >
+                      {t('trust.report.open')}
+                    </button>
+                  ) : null}
                 </div>
               </article>
             )

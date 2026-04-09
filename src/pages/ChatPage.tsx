@@ -5,12 +5,24 @@ import { useTranslation } from 'react-i18next'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
 import { sanitizeUserText } from '../lib/sanitize'
+import { uploadPublicFile } from '../lib/upload'
+import { ContentReportDialog } from '../components/ContentReportDialog'
+import { useToast } from '../lib/toast'
 
 type ConvRow = {
   id: string
   created_at: string
   peer_name: string
   peer_id: string
+}
+
+type MsgRow = {
+  id: string
+  body: string | null
+  sender_id: string
+  created_at: string
+  attachment_url: string | null
+  attachment_name: string | null
 }
 
 function getInitials(name: string) {
@@ -52,7 +64,10 @@ export function ChatPage() {
   const { userId } = useAuth()
   const qc = useQueryClient()
   const [body, setBody] = useState('')
+  const [pendingFile, setPendingFile] = useState<File | null>(null)
+  const [reportMessageId, setReportMessageId] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const conversationsQuery = useQuery({
     queryKey: ['conversations', userId, i18n.language],
@@ -98,23 +113,57 @@ export function ChatPage() {
     },
   })
 
+  const activeConv = useMemo(() => {
+    return (conversationsQuery.data ?? []).find((c) => c.id === conversationId)
+  }, [conversationsQuery.data, conversationId])
+
   const messagesQuery = useQuery({
     queryKey: ['messages', conversationId],
     enabled: Boolean(userId && conversationId),
     queryFn: async () => {
       const { data, error } = await supabase
         .from('messages')
-        .select('id,body,sender_id,created_at')
+        .select('id,body,sender_id,created_at,attachment_url,attachment_name')
         .eq('conversation_id', conversationId!)
         .order('created_at', { ascending: true })
       if (error) throw error
-      return data ?? []
+      return (data ?? []) as MsgRow[]
+    },
+  })
+
+  const peerReadQuery = useQuery({
+    queryKey: ['conv-peer-read', conversationId, activeConv?.peer_id],
+    enabled: Boolean(conversationId && userId && activeConv?.peer_id),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('conversation_participants')
+        .select('last_read_at')
+        .eq('conversation_id', conversationId!)
+        .eq('user_id', activeConv!.peer_id)
+        .maybeSingle()
+      if (error) throw error
+      return data?.last_read_at ?? null
     },
   })
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messagesQuery.data])
+
+  useEffect(() => {
+    if (!conversationId || !userId || !(messagesQuery.data?.length)) return
+    const tmr = window.setTimeout(() => {
+      void supabase
+        .from('conversation_participants')
+        .update({ last_read_at: new Date().toISOString() })
+        .eq('conversation_id', conversationId)
+        .eq('user_id', userId)
+        .then(() => {
+          void qc.invalidateQueries({ queryKey: ['conv-peer-read', conversationId] })
+        })
+    }, 450)
+    return () => window.clearTimeout(tmr)
+  }, [conversationId, userId, messagesQuery.data, qc])
 
   useEffect(() => {
     if (!conversationId || !userId) return
@@ -138,29 +187,73 @@ export function ChatPage() {
     }
   }, [conversationId, userId, qc])
 
+  useEffect(() => {
+    if (!conversationId) return
+    const channel = supabase
+      .channel(`partread:${conversationId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'conversation_participants',
+          filter: `conversation_id=eq.${conversationId}`,
+        },
+        () => {
+          void qc.invalidateQueries({ queryKey: ['conv-peer-read', conversationId] })
+        },
+      )
+      .subscribe()
+    return () => {
+      void supabase.removeChannel(channel)
+    }
+  }, [conversationId, qc])
+
+  const { toast } = useToast()
+
   const send = useMutation({
     mutationFn: async () => {
       const text = body.trim()
-      if (!text || !conversationId || !userId) return
+      const file = pendingFile
+      if ((!text && !file) || !conversationId || !userId) return
+      let attachment_url: string | null = null
+      let attachment_name: string | null = null
+      if (file) {
+        attachment_name = file.name
+        attachment_url = await uploadPublicFile(userId, `chat/${conversationId}/${Date.now()}-${file.name}`, file)
+        if (!attachment_url) throw new Error('upload failed')
+      }
+      const bodyOut = text || (attachment_name ? `📎 ${attachment_name}` : '')
       const { error } = await supabase.from('messages').insert({
         conversation_id: conversationId,
         sender_id: userId,
-        body: text,
+        body: bodyOut,
+        attachment_url,
+        attachment_name,
       })
       if (error) throw error
     },
     onSuccess: () => {
       setBody('')
+      setPendingFile(null)
+      if (fileInputRef.current) fileInputRef.current.value = ''
       void qc.invalidateQueries({ queryKey: ['messages', conversationId] })
+    },
+    onError: () => {
+      toast(t('chat.sendFailed'), 'error')
     },
   })
 
-  const activeConv = useMemo(() => {
-    return (conversationsQuery.data ?? []).find((c) => c.id === conversationId)
-  }, [conversationsQuery.data, conversationId])
+  const peerReadAt = peerReadQuery.data ? new Date(peerReadQuery.data).getTime() : null
 
   return (
     <div className="grid gap-4 lg:grid-cols-3" style={{ height: 'calc(100vh - 6rem)' }}>
+      <ContentReportDialog
+        open={Boolean(reportMessageId)}
+        onClose={() => setReportMessageId(null)}
+        targetType="message"
+        targetId={reportMessageId ?? ''}
+      />
       {/* Sidebar */}
       <aside className="ushqn-card flex flex-col overflow-hidden lg:col-span-1">
         <div className="border-b border-[#eef1f4] px-4 py-3.5">
@@ -182,9 +275,7 @@ export function ChatPage() {
                   <Link
                     to={`/chat/${c.id}`}
                     className={`flex items-center gap-3 px-4 py-3 transition-colors ${
-                      isActive
-                        ? 'bg-[#DEEBFF]'
-                        : 'hover:bg-[#f4f5f7]'
+                      isActive ? 'bg-[#DEEBFF]' : 'hover:bg-[#f4f5f7]'
                     }`}
                   >
                     <div
@@ -198,9 +289,7 @@ export function ChatPage() {
                       </p>
                       <p className="truncate text-xs text-[#6B778C]">{t('chat.openThreadHint')}</p>
                     </div>
-                    {isActive ? (
-                      <div className="ml-auto h-2 w-2 shrink-0 rounded-full bg-[#0052CC]" />
-                    ) : null}
+                    {isActive ? <div className="ml-auto h-2 w-2 shrink-0 rounded-full bg-[#0052CC]" /> : null}
                   </Link>
                 </li>
               )
@@ -221,7 +310,6 @@ export function ChatPage() {
           </div>
         ) : (
           <>
-            {/* Header */}
             <header className="flex items-center gap-3 border-b border-[#eef1f4] px-5 py-3.5">
               {activeConv ? (
                 <>
@@ -240,8 +328,8 @@ export function ChatPage() {
               )}
             </header>
 
-            {/* Messages */}
-            <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3"
+            <div
+              className="flex-1 overflow-y-auto px-5 py-4 space-y-3"
               style={{ background: 'linear-gradient(180deg, #f8f9fc 0%, #fff 100%)' }}
             >
               {(messagesQuery.data ?? []).length === 0 ? (
@@ -252,11 +340,13 @@ export function ChatPage() {
               ) : null}
               {(messagesQuery.data ?? []).map((m) => {
                 const isMe = m.sender_id === userId
+                const showRead =
+                  isMe &&
+                  peerReadAt != null &&
+                  !Number.isNaN(peerReadAt) &&
+                  peerReadAt >= new Date(m.created_at).getTime()
                 return (
-                  <div
-                    key={m.id}
-                    className={`flex items-end gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}
-                  >
+                  <div key={m.id} className={`flex items-end gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
                     {!isMe && activeConv ? (
                       <div
                         className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br ${colorFor(activeConv.peer_id)} text-xs font-bold text-white`}
@@ -272,9 +362,31 @@ export function ChatPage() {
                             : 'rounded-bl-sm bg-white text-[#172B4D] border border-[#eef1f4]'
                         }`}
                       >
-                        {sanitizeUserText(m.body)}
+                        {m.attachment_url ? (
+                          <a
+                            href={m.attachment_url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className={`mb-1 block font-semibold underline ${isMe ? 'text-white' : 'text-[#0052CC]'}`}
+                          >
+                            📎 {sanitizeUserText(m.attachment_name ?? t('chat.attachment'))}
+                          </a>
+                        ) : null}
+                        {m.body ? <span className="whitespace-pre-wrap break-words">{sanitizeUserText(m.body)}</span> : null}
                       </div>
-                      <span className="text-[10px] text-[#97a0af]">{formatTime(m.created_at, i18n.language)}</span>
+                      <span className="flex flex-wrap items-center gap-2 text-[10px] text-[#97a0af]">
+                        {formatTime(m.created_at, i18n.language)}
+                        {showRead ? <span className="font-semibold text-[#36B37E]">{t('chat.readReceipt')}</span> : null}
+                        {!isMe && userId ? (
+                          <button
+                            type="button"
+                            className="font-semibold text-red-500 hover:underline"
+                            onClick={() => setReportMessageId(m.id)}
+                          >
+                            {t('trust.report.open')}
+                          </button>
+                        ) : null}
+                      </span>
                     </div>
                   </div>
                 )
@@ -282,9 +394,30 @@ export function ChatPage() {
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Input */}
             <footer className="border-t border-[#eef1f4] bg-white px-4 py-3">
+              {pendingFile ? (
+                <p className="mb-2 text-xs text-[#6B778C]">
+                  {t('chat.pendingFile')}: <span className="font-semibold text-[#172B4D]">{pendingFile.name}</span>
+                  <button type="button" className="ml-2 font-bold text-red-600" onClick={() => setPendingFile(null)}>
+                    {t('common.cancel')}
+                  </button>
+                </p>
+              ) : null}
               <div className="flex items-center gap-2">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  className="sr-only"
+                  onChange={(e) => setPendingFile(e.target.files?.[0] ?? null)}
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#DFE1E6] text-lg text-[#6B778C] hover:bg-[#f4f5f7]"
+                  title={t('chat.attachFile')}
+                >
+                  📎
+                </button>
                 <input
                   value={body}
                   onChange={(e) => setBody(e.target.value)}
@@ -302,7 +435,7 @@ export function ChatPage() {
                 <button
                   type="button"
                   onClick={() => send.mutate()}
-                  disabled={send.isPending || !body.trim()}
+                  disabled={send.isPending || (!body.trim() && !pendingFile)}
                   className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#0052CC] text-white shadow-sm transition hover:bg-[#0747A6] active:scale-95 disabled:opacity-50"
                 >
                   <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4 translate-x-0.5">
