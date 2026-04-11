@@ -25,6 +25,13 @@
     "viewAll": "All →",
     "or": "or"
   },
+  "errors": {
+    "rateLimit": "Too many actions in a short time. Wait a minute and try again.",
+    "schemaOutdated": "The database is missing an update. Run the latest SQL migrations in Supabase (or ask the project owner).",
+    "network": "Network error. Check your connection and try again.",
+    "rpcMissing": "A server function is missing. Apply the latest Supabase migrations.",
+    "notAuthenticated": "Session expired. Sign in again."
+  },
   "lang": {
     "ru": "Русский",
     "kk": "Қазақша",
@@ -758,6 +765,7 @@
     "leave": "Leave",
     "openChat": "Open group chat",
     "chatOpenFailed": "Could not open group chat.",
+    "notMember": "You must join this group first.",
     "joined": "You joined the group.",
     "left": "You left the group.",
     "membersCount": "{{count}} members"

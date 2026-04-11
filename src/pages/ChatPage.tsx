@@ -10,6 +10,7 @@ import { sanitizeUserText } from '../lib/sanitize'
 import { uploadPublicFile } from '../lib/upload'
 import { ContentReportDialog } from '../components/ContentReportDialog'
 import { useToast } from '../lib/toast'
+import { formatSupabaseError } from '../lib/supabaseErrors'
 
 type MsgRow = {
   id: string
@@ -601,8 +602,8 @@ export function ChatPage() {
       void qc.invalidateQueries({ queryKey: ['messages', conversationId] })
       void qc.invalidateQueries({ queryKey: ['chat-sidebar', userId] })
     },
-    onError: () => {
-      toast(t('chat.sendFailed'), 'error')
+    onError: (err) => {
+      toast(formatSupabaseError(err, t), 'error')
     },
   })
 

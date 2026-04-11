@@ -6,6 +6,7 @@ import { QueryState } from '../components/QueryState'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
 import { useToast } from '../lib/toast'
+import { formatSupabaseError } from '../lib/supabaseErrors'
 
 export function CommunitiesPage() {
   const { t } = useTranslation()
@@ -68,7 +69,7 @@ export function CommunitiesPage() {
       void qc.invalidateQueries({ queryKey: ['my-community-members', userId] })
       toast(t('communities.joined'), 'info')
     },
-    onError: () => toast(t('common.error'), 'error'),
+    onError: (err) => toast(formatSupabaseError(err, t), 'error'),
   })
 
   const leave = useMutation({
@@ -84,7 +85,7 @@ export function CommunitiesPage() {
       void qc.invalidateQueries({ queryKey: ['my-community-members', userId] })
       toast(t('communities.left'), 'info')
     },
-    onError: () => toast(t('common.error'), 'error'),
+    onError: (err) => toast(formatSupabaseError(err, t), 'error'),
   })
 
   const openCommunityChat = useMutation({
@@ -96,7 +97,7 @@ export function CommunitiesPage() {
     onSuccess: (conversationId) => {
       void navigate(`/chat/${conversationId}`)
     },
-    onError: () => toast(t('communities.chatOpenFailed'), 'error'),
+    onError: (err) => toast(formatSupabaseError(err, t), 'error'),
   })
 
   const busyCommunityId = useMemo(() => join.variables ?? leave.variables ?? openCommunityChat.variables ?? null, [

@@ -12,6 +12,7 @@ import { ACCENT_PRESETS, isValidAccentHex } from '../lib/profileTheme'
 import { parsePortfolioLinks, serializePortfolioLinks, type PortfolioLink } from '../lib/portfolio'
 import { supabase } from '../lib/supabase'
 import { useToast } from '../lib/toast'
+import { formatSupabaseError } from '../lib/supabaseErrors'
 import { uploadPublicFile } from '../lib/upload'
 import type { UserRole } from '../types/database'
 
@@ -152,7 +153,7 @@ export function ProfilePage() {
       void qc.invalidateQueries({ queryKey: ['profile', userId] })
       toast(t('profile.saveSuccess'), 'info')
     },
-    onError: () => toast(t('profile.edit.saveFailed'), 'error'),
+    onError: (err) => toast(formatSupabaseError(err, t), 'error'),
   })
 
   const updateProfile = useMutation({
@@ -174,6 +175,9 @@ export function ProfilePage() {
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['profile', userId] })
       setEditing(false)
+    },
+    onError: (err) => {
+      toast(formatSupabaseError(err, t), 'error')
     },
   })
 
@@ -501,8 +505,10 @@ export function ProfilePage() {
                 />
               </div>
 
-              {updateProfile.isError ? (
-                <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{t('profile.edit.saveFailed')}</p>
+              {updateProfile.isError && updateProfile.error ? (
+                <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
+                  {formatSupabaseError(updateProfile.error, t)}
+                </p>
               ) : null}
 
               <div className="flex justify-end gap-2 border-t border-[#eef1f4] pt-4">
