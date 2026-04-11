@@ -824,6 +824,41 @@ export function ChatPage() {
                               : 'rounded-tl-md border border-[var(--color-ushqn-border)] bg-white text-[var(--color-ushqn-text)] dark:bg-[#1e293b]'
                           }`}
                         >
+                          {m.reply_to_id ? (
+                            (() => {
+                              const parent = messageById.get(m.reply_to_id)
+                              if (!parent) {
+                                return (
+                                  <div
+                                    className={`mb-2 rounded-lg border-l-2 px-2 py-1.5 text-left text-[11px] ${
+                                      isMe ? 'border-white/50 bg-black/15 text-white/90' : 'border-[var(--color-ushqn-border)] bg-[var(--color-ushqn-surface-muted)]'
+                                    }`}
+                                  >
+                                    {t('chat.originalUnavailable')}
+                                  </div>
+                                )
+                              }
+                              const pName = nameById.get(parent.sender_id) ?? t('chat.unknownPeer')
+                              const line = parent.attachment_url
+                                ? t('chat.replyPreviewAttachment', {
+                                    name: parent.attachment_name ?? t('chat.attachment'),
+                                  })
+                                : (() => {
+                                    const raw = parent.body?.replace(/\s+/g, ' ').trim() ?? ''
+                                    return raw.length > 100 ? `${raw.slice(0, 97)}…` : raw || t('chat.lastMessagePreview')
+                                  })()
+                              return (
+                                <div
+                                  className={`mb-2 rounded-lg border-l-2 px-2 py-1.5 text-left text-[11px] leading-snug ${
+                                    isMe ? 'border-white/60 bg-black/15' : 'border-[#0052CC] bg-[var(--color-ushqn-surface-muted)]'
+                                  }`}
+                                >
+                                  <span className="font-bold">{pName}</span>
+                                  <span className="mt-0.5 block line-clamp-2 opacity-90">{line}</span>
+                                </div>
+                              )
+                            })()
+                          ) : null}
                           {m.attachment_url ? (
                             <a
                               href={m.attachment_url}
@@ -839,6 +874,13 @@ export function ChatPage() {
                         <span className="flex flex-wrap items-center gap-2 px-1 text-[10px] text-[var(--color-ushqn-muted)]">
                           {formatClock(m.created_at, i18n.language)}
                           {showRead ? <span className="font-semibold text-emerald-600 dark:text-emerald-400">{t('chat.readReceipt')}</span> : null}
+                          <button
+                            type="button"
+                            className="font-semibold text-[#0052CC] hover:underline"
+                            onClick={() => setReplyDraft(m)}
+                          >
+                            {t('chat.reply')}
+                          </button>
                           {!isMe && userId ? (
                             <button
                               type="button"
@@ -865,6 +907,24 @@ export function ChatPage() {
                     {t('common.cancel')}
                   </button>
                 </p>
+              ) : null}
+              {replyDraft ? (
+                <div className="mx-auto mb-2 flex max-w-3xl items-stretch gap-2 rounded-xl border border-[var(--color-ushqn-border)] bg-[var(--color-ushqn-surface-muted)] p-2">
+                  <div className="min-w-0 flex-1 border-l-2 border-[#0052CC] pl-2">
+                    <p className="text-[11px] font-bold text-[var(--color-ushqn-muted)]">
+                      {t('chat.replyingTo', { name: nameById.get(replyDraft.sender_id) ?? t('chat.unknownPeer') })}
+                    </p>
+                    <p className="line-clamp-2 text-xs text-[var(--color-ushqn-text)]">{replyComposerPreview(replyDraft, t)}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setReplyDraft(null)}
+                    className="shrink-0 rounded-lg px-2 text-lg leading-none text-[var(--color-ushqn-muted)] transition hover:bg-[var(--color-ushqn-surface)] hover:text-[var(--color-ushqn-text)]"
+                    aria-label={t('chat.cancelReply')}
+                  >
+                    ×
+                  </button>
+                </div>
               ) : null}
               <div className="mx-auto flex max-w-3xl items-end gap-2">
                 <input
