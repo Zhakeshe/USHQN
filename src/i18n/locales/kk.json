@@ -161,15 +161,42 @@
     "streakTitle": "Платформада қатарғы күндер (UTC)",
     "streakDays": "күн сериясы",
     "cards": {
-      "achievements": { "title": "Жетістіктер", "desc": "Цифрлық портфолио және USHQN-баллдар" },
-      "showcase": { "title": "Витрина", "desc": "Қатысушылардың тауарлары мен қызметтері" },
-      "jobs": { "title": "Жұмыс биржасы", "desc": "Вакансиялар және тәжірибе" },
-      "people": { "title": "Адамдар", "desc": "Қызығушылықтар, байланыстар, тәлімгерлер" },
-      "calendar": { "title": "Іс-шаралар", "desc": "Хакатондар, олимпиадалар" },
-      "communities": { "title": "Топтар", "desc": "Қалалық және онлайн қоғамдықтар" },
-      "chat": { "title": "Чат", "desc": "Нақты уақыттағы диалогтар" },
-      "rating": { "title": "Рейтинг", "desc": "Жаһандық көшбасшылар кестесі" },
-      "settings": { "title": "Параметрлер", "desc": "Әлеуметтік желілер, қауіпсіздік" }
+      "achievements": {
+        "title": "Жетістіктер",
+        "desc": "Цифрлық портфолио және USHQN-баллдар"
+      },
+      "showcase": {
+        "title": "Витрина",
+        "desc": "Қатысушылардың тауарлары мен қызметтері"
+      },
+      "jobs": {
+        "title": "Жұмыс биржасы",
+        "desc": "Вакансиялар және тәжірибе"
+      },
+      "people": {
+        "title": "Адамдар",
+        "desc": "Қызығушылықтар, байланыстар, тәлімгерлер"
+      },
+      "calendar": {
+        "title": "Іс-шаралар",
+        "desc": "Хакатондар, олимпиадалар"
+      },
+      "communities": {
+        "title": "Топтар",
+        "desc": "Қалалық және онлайн қоғамдықтар"
+      },
+      "chat": {
+        "title": "Чат",
+        "desc": "Нақты уақыттағы диалогтар"
+      },
+      "rating": {
+        "title": "Рейтинг",
+        "desc": "Жаһандық көшбасшылар кестесі"
+      },
+      "settings": {
+        "title": "Параметрлер",
+        "desc": "Әлеуметтік желілер, қауіпсіздік"
+      }
     }
   },
   "profile": {
@@ -466,7 +493,39 @@
     "readReceipt": "Оқылды",
     "attachment": "Файл",
     "attachFile": "Тіркеу",
-    "pendingFile": "Тіркеме"
+    "pendingFile": "Тіркеме",
+    "backToList": "Чаттар",
+    "newGroup": "Жаңа топ",
+    "createGroupTitle": "Топ құру",
+    "groupName": "Топ аты",
+    "groupNamePlaceholder": "мысалы, Олимпиадаға дайындық",
+    "groupSearchPeople": "Аты бойынша іздеу…",
+    "groupSearchMin": "Іздеу үшін кемінде 2 әріп енгізіңіз.",
+    "groupPickHint": "Кем дегенде біреуді таңдаңыз — сыныптастар, команда, ұстаз.",
+    "groupCreate": "Құру",
+    "groupCreating": "Құрылуда…",
+    "groupNeedTitle": "Топ атыңызды жазыңыз.",
+    "groupNeedMember": "Кемінде бір қатысушы таңдаңыз.",
+    "groupFailed": "Топ қосылмады. Қайталаңыз.",
+    "membersCount": "{{count}} адам",
+    "directChat": "Жеке хат",
+    "groupChat": "Топ",
+    "lastMessagePreview": "Әлі хабарлама жоқ",
+    "youPrefix": "Сіз: ",
+    "justNow": "қазір ғана",
+    "minutesAgo_one": "{{count}} минут бұрын",
+    "minutesAgo_other": "{{count}} минут бұрын",
+    "hoursAgo_one": "{{count}} сағат бұрын",
+    "hoursAgo_other": "{{count}} сағат бұрын",
+    "yesterdayAt": "Кеше, {{time}}",
+    "typing": "Жазып жатыр…",
+    "typingOne": "{{name}} жазып жатыр…",
+    "typingMany": "{{count}} адам жазып жатыр…",
+    "reply": "Жауап беру",
+    "replyingTo": "{{name}} хабарламасына жауап",
+    "cancelReply": "Жауапты болдырмау",
+    "originalUnavailable": "Бастапқы хабарлама қолжетімсіз",
+    "replyPreviewAttachment": "📎 {{name}}"
   },
   "calendar": {
     "title": "📅 Іс-шаралар",
@@ -691,8 +750,11 @@
     "subtitle": "Жақын қауымдастық немесе ортақ онлайн шеңбер.",
     "join": "Қосылу",
     "leave": "Шығу",
+    "openChat": "Топ чатын ашу",
+    "chatOpenFailed": "Топ чатын ашу мүмкін болмады.",
     "joined": "Топқа қосылдыңыз.",
-    "left": "Топтан шықтыңыз."
+    "left": "Топтан шықтыңыз.",
+    "membersCount": "{{count}} қатысушы"
   },
   "publicProfile": {
     "notFound": "Профиль табылмады",
@@ -871,7 +933,12 @@
     "previewWelcomeTag": "USHQN",
     "previewWelcomeTitle": "Қош келдіңіз",
     "previewWelcomeSub": "Жетістіктер, жұмыс орындары және адамдар — бір терезеде.",
-    "featTiles": { "ach": "Жетістіктер", "job": "Жұмыс", "people": "Адамдар", "cal": "Іс-шаралар" },
+    "featTiles": {
+      "ach": "Жетістіктер",
+      "job": "Жұмыс",
+      "people": "Адамдар",
+      "cal": "Іс-шаралар"
+    },
     "featuresSectionKicker": "Мүмкіндіктер",
     "featuresTitle": "Оқушы, студент және тәлімгер үшін",
     "featuresSub": "Өнім модульдері — қысқа да нүктелі.",

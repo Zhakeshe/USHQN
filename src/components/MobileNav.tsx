@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
+import { useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 
@@ -78,6 +79,7 @@ function ProfileIcon({ active }: { active: boolean }) {
 export function MobileNav() {
   const { userId } = useAuth()
   const { t } = useTranslation()
+  const qc = useQueryClient()
 
   const { data: unreadCount } = useQuery({
     queryKey: ['notif-count', userId],
@@ -92,6 +94,23 @@ export function MobileNav() {
       return count ?? 0
     },
   })
+
+  useEffect(() => {
+    if (!userId) return
+    const channel = supabase
+      .channel(`notif-live-mobile:${userId}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'notifications', filter: `user_id=eq.${userId}` },
+        () => {
+          void qc.invalidateQueries({ queryKey: ['notif-count', userId] })
+        },
+      )
+      .subscribe()
+    return () => {
+      void supabase.removeChannel(channel)
+    }
+  }, [userId, qc])
 
   const navItems = [
     { to: '/home', label: t('nav.home'), icon: HomeIcon },

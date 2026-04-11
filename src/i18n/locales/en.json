@@ -161,15 +161,42 @@
     "streakTitle": "Consecutive days active on the platform (UTC)",
     "streakDays": "day streak",
     "cards": {
-      "achievements": { "title": "Achievements", "desc": "Digital portfolio and USHQN points" },
-      "showcase": { "title": "Showcase", "desc": "Products and services from members" },
-      "jobs": { "title": "Job board", "desc": "Jobs and internships with filters" },
-      "people": { "title": "People", "desc": "Interests, connections, mentors" },
-      "calendar": { "title": "Events", "desc": "Hackathons, olympiads, meetups" },
-      "communities": { "title": "Groups", "desc": "City and online communities" },
-      "chat": { "title": "Chat", "desc": "Real-time messaging" },
-      "rating": { "title": "Rating", "desc": "Global leaderboard" },
-      "settings": { "title": "Settings", "desc": "Social links, security, privacy" }
+      "achievements": {
+        "title": "Achievements",
+        "desc": "Digital portfolio and USHQN points"
+      },
+      "showcase": {
+        "title": "Showcase",
+        "desc": "Products and services from members"
+      },
+      "jobs": {
+        "title": "Job board",
+        "desc": "Jobs and internships with filters"
+      },
+      "people": {
+        "title": "People",
+        "desc": "Interests, connections, mentors"
+      },
+      "calendar": {
+        "title": "Events",
+        "desc": "Hackathons, olympiads, meetups"
+      },
+      "communities": {
+        "title": "Groups",
+        "desc": "City and online communities"
+      },
+      "chat": {
+        "title": "Chat",
+        "desc": "Real-time messaging"
+      },
+      "rating": {
+        "title": "Rating",
+        "desc": "Global leaderboard"
+      },
+      "settings": {
+        "title": "Settings",
+        "desc": "Social links, security, privacy"
+      }
     }
   },
   "profile": {
@@ -466,7 +493,39 @@
     "readReceipt": "Read",
     "attachment": "File",
     "attachFile": "Attach file",
-    "pendingFile": "Attachment"
+    "pendingFile": "Attachment",
+    "backToList": "Chats",
+    "newGroup": "New group",
+    "createGroupTitle": "Create a group",
+    "groupName": "Group name",
+    "groupNamePlaceholder": "e.g. Olympiad prep",
+    "groupSearchPeople": "Search people by name…",
+    "groupSearchMin": "Type at least 2 letters to search.",
+    "groupPickHint": "Select at least one person. You can add teammates, classmates, or mentors.",
+    "groupCreate": "Create",
+    "groupCreating": "Creating…",
+    "groupNeedTitle": "Enter a group name.",
+    "groupNeedMember": "Choose at least one member.",
+    "groupFailed": "Could not create the group. Try again.",
+    "membersCount": "{{count}} people",
+    "directChat": "Direct message",
+    "groupChat": "Group",
+    "lastMessagePreview": "No messages yet",
+    "youPrefix": "You: ",
+    "justNow": "just now",
+    "minutesAgo_one": "{{count}} minute ago",
+    "minutesAgo_other": "{{count}} minutes ago",
+    "hoursAgo_one": "{{count}} hour ago",
+    "hoursAgo_other": "{{count}} hours ago",
+    "yesterdayAt": "Yesterday, {{time}}",
+    "typing": "Typing…",
+    "typingOne": "{{name}} is typing…",
+    "typingMany": "{{count}} people are typing…",
+    "reply": "Reply",
+    "replyingTo": "Replying to {{name}}",
+    "cancelReply": "Cancel reply",
+    "originalUnavailable": "Original message unavailable",
+    "replyPreviewAttachment": "📎 {{name}}"
   },
   "calendar": {
     "title": "📅 Events",
@@ -697,8 +756,11 @@
     "subtitle": "Find people near you or join the online circle.",
     "join": "Join",
     "leave": "Leave",
+    "openChat": "Open group chat",
+    "chatOpenFailed": "Could not open group chat.",
     "joined": "You joined the group.",
-    "left": "You left the group."
+    "left": "You left the group.",
+    "membersCount": "{{count}} members"
   },
   "publicProfile": {
     "notFound": "Profile not found",
@@ -877,7 +939,12 @@
     "previewWelcomeTag": "USHQN",
     "previewWelcomeTitle": "Welcome",
     "previewWelcomeSub": "Achievements, jobs, and people — in one place.",
-    "featTiles": { "ach": "Achievements", "job": "Jobs", "people": "People", "cal": "Events" },
+    "featTiles": {
+      "ach": "Achievements",
+      "job": "Jobs",
+      "people": "People",
+      "cal": "Events"
+    },
     "featuresSectionKicker": "Features",
     "featuresTitle": "Built for students, learners, and mentors",
     "featuresSub": "Product modules — short and practical.",

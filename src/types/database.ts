@@ -310,6 +310,8 @@ export interface Database {
         Row: {
           id: string
           created_at: string
+          is_group: boolean
+          title: string | null
         }
       }
       conversation_participants: {
@@ -327,6 +329,7 @@ export interface Database {
           body: string | null
           attachment_url: string | null
           attachment_name: string | null
+          reply_to_id: string | null
           created_at: string
         }
         Insert: {
@@ -335,6 +338,7 @@ export interface Database {
           body?: string | null
           attachment_url?: string | null
           attachment_name?: string | null
+          reply_to_id?: string | null
         }
       }
       communities: {
@@ -412,6 +416,28 @@ export interface Database {
     Functions: {
       get_or_create_dm: {
         Args: { other_id: string }
+        Returns: string
+      }
+      create_group_conversation: {
+        Args: { p_title: string; p_member_ids: string[] }
+        Returns: string
+      }
+      my_chat_sidebar: {
+        Args: Record<string, never>
+        Returns: {
+          conversation_id: string
+          is_group: boolean
+          title: string | null
+          last_body: string | null
+          last_at: string | null
+          last_sender_id: string | null
+          unread_count: number
+          has_unread: boolean
+          other_user_ids: string[]
+        }[]
+      }
+      get_or_create_community_chat: {
+        Args: { p_community_id: string }
         Returns: string
       }
       claim_onboarding_bonus: {

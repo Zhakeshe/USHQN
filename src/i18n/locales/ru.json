@@ -161,15 +161,42 @@
     "streakTitle": "Дней подряд на платформе (UTC)",
     "streakDays": "дн. серия",
     "cards": {
-      "achievements": { "title": "Достижения", "desc": "Цифровое портфолио и USHQN-баллы" },
-      "showcase": { "title": "Витрина", "desc": "Товары и услуги участников" },
-      "jobs": { "title": "Биржа", "desc": "Вакансии и стажировки с фильтрами" },
-      "people": { "title": "Люди", "desc": "Интересы, связи, наставники" },
-      "calendar": { "title": "События", "desc": "Мероприятия, хакатоны, олимпиады" },
-      "communities": { "title": "Группы", "desc": "Городские и онлайн-сообщества" },
-      "chat": { "title": "Чат", "desc": "Диалоги в реальном времени" },
-      "rating": { "title": "Рейтинг", "desc": "Глобальная таблица лидеров" },
-      "settings": { "title": "Настройки", "desc": "Соцсети, безопасность, приватность" }
+      "achievements": {
+        "title": "Достижения",
+        "desc": "Цифровое портфолио и USHQN-баллы"
+      },
+      "showcase": {
+        "title": "Витрина",
+        "desc": "Товары и услуги участников"
+      },
+      "jobs": {
+        "title": "Биржа",
+        "desc": "Вакансии и стажировки с фильтрами"
+      },
+      "people": {
+        "title": "Люди",
+        "desc": "Интересы, связи, наставники"
+      },
+      "calendar": {
+        "title": "События",
+        "desc": "Мероприятия, хакатоны, олимпиады"
+      },
+      "communities": {
+        "title": "Группы",
+        "desc": "Городские и онлайн-сообщества"
+      },
+      "chat": {
+        "title": "Чат",
+        "desc": "Диалоги в реальном времени"
+      },
+      "rating": {
+        "title": "Рейтинг",
+        "desc": "Глобальная таблица лидеров"
+      },
+      "settings": {
+        "title": "Настройки",
+        "desc": "Соцсети, безопасность, приватность"
+      }
     }
   },
   "profile": {
@@ -466,7 +493,41 @@
     "readReceipt": "Прочитано",
     "attachment": "Файл",
     "attachFile": "Вложение",
-    "pendingFile": "Вложение"
+    "pendingFile": "Вложение",
+    "backToList": "Чаты",
+    "newGroup": "Новая группа",
+    "createGroupTitle": "Создать группу",
+    "groupName": "Название",
+    "groupNamePlaceholder": "например, Подготовка к олимпиаде",
+    "groupSearchPeople": "Поиск по имени…",
+    "groupSearchMin": "Введите минимум 2 буквы для поиска.",
+    "groupPickHint": "Выберите хотя бы одного человека — одноклассники, команда, наставник.",
+    "groupCreate": "Создать",
+    "groupCreating": "Создаём…",
+    "groupNeedTitle": "Введите название группы.",
+    "groupNeedMember": "Выберите хотя бы одного участника.",
+    "groupFailed": "Не удалось создать группу. Попробуйте снова.",
+    "membersCount": "{{count}} человек",
+    "directChat": "Личный чат",
+    "groupChat": "Группа",
+    "lastMessagePreview": "Пока без сообщений",
+    "youPrefix": "Вы: ",
+    "justNow": "только что",
+    "minutesAgo_one": "{{count}} минуту назад",
+    "minutesAgo_few": "{{count}} минуты назад",
+    "minutesAgo_many": "{{count}} минут назад",
+    "hoursAgo_one": "{{count}} час назад",
+    "hoursAgo_few": "{{count}} часа назад",
+    "hoursAgo_many": "{{count}} часов назад",
+    "yesterdayAt": "Вчера, {{time}}",
+    "typing": "Печатает…",
+    "typingOne": "{{name}} печатает…",
+    "typingMany": "Печатают: {{count}} чел.",
+    "reply": "Ответить",
+    "replyingTo": "Ответ на сообщение от {{name}}",
+    "cancelReply": "Отменить ответ",
+    "originalUnavailable": "Исходное сообщение недоступно",
+    "replyPreviewAttachment": "📎 {{name}}"
   },
   "calendar": {
     "title": "📅 События",
@@ -697,8 +758,11 @@
     "subtitle": "Сообщества рядом с вами или общий онлайн-круг.",
     "join": "Вступить",
     "leave": "Выйти",
+    "openChat": "Открыть чат группы",
+    "chatOpenFailed": "Не удалось открыть чат группы.",
     "joined": "Вы вступили в группу.",
-    "left": "Вы вышли из группы."
+    "left": "Вы вышли из группы.",
+    "membersCount": "{{count}} участников"
   },
   "publicProfile": {
     "notFound": "Профиль не найден",
@@ -877,7 +941,12 @@
     "previewWelcomeTag": "USHQN",
     "previewWelcomeTitle": "Добро пожаловать",
     "previewWelcomeSub": "Достижения, вакансии и люди — в одном окне.",
-    "featTiles": { "ach": "Достижения", "job": "Вакансии", "people": "Люди", "cal": "События" },
+    "featTiles": {
+      "ach": "Достижения",
+      "job": "Вакансии",
+      "people": "Люди",
+      "cal": "События"
+    },
     "featuresSectionKicker": "Возможности",
     "featuresTitle": "Всё для ученика, студента и наставника",
     "featuresSub": "Модули продукта — кратко и по делу.",

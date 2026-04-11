@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { useState, useRef, useEffect, useMemo } from 'react'
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
@@ -127,6 +127,7 @@ type MoreItem = { to: string; label: string }
 
 export function Navbar() {
   const { userId } = useAuth()
+  const qc = useQueryClient()
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const { t } = useTranslation()
@@ -158,6 +159,23 @@ export function Navbar() {
       return count ?? 0
     },
   })
+
+  useEffect(() => {
+    if (!userId) return
+    const channel = supabase
+      .channel(`notif-live:${userId}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'notifications', filter: `user_id=eq.${userId}` },
+        () => {
+          void qc.invalidateQueries({ queryKey: ['notif-count', userId] })
+        },
+      )
+      .subscribe()
+    return () => {
+      void supabase.removeChannel(channel)
+    }
+  }, [userId, qc])
 
   const moreItems: MoreItem[] = useMemo(() => {
     const base: MoreItem[] = [
