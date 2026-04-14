@@ -106,9 +106,11 @@ export function HomePage() {
 
   return (
     <div className="grid gap-5 lg:grid-cols-[280px_1fr] lg:gap-6">
-      {/* LinkedIn-style left profile sidebar */}
+      {/* LinkedIn-style left profile sidebar — sticky on scroll */}
       <aside className="hidden lg:block">
-        <MiniProfileSidebar />
+        <div className="sticky top-6">
+          <MiniProfileSidebar />
+        </div>
       </aside>
 
       <div className="space-y-4">
