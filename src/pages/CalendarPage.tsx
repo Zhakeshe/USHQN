@@ -174,7 +174,7 @@ export function CalendarPage() {
 
   return (
     <div className="space-y-5">
-      <AppPageMeta title={`${t('nav.calendar')} · USHQN`} />
+      <AppPageMeta title={t('nav.calendar')} />
       {/* Header */}
       <div className="ushqn-card overflow-hidden p-0">
         <div className="bg-gradient-to-r from-[#00875A] to-[#36B37E] px-6 py-7 text-white">

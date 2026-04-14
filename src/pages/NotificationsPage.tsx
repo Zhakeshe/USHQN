@@ -89,7 +89,7 @@ export function NotificationsPage() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-4">
-      <AppPageMeta title={`${t('nav.notifications')} · USHQN`} />
+      <AppPageMeta title={t('nav.notifications')} />
       <div className="ushqn-card p-5">
         <div className="flex items-center justify-between gap-3">
           <div>

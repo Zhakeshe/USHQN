@@ -8,23 +8,28 @@ import { useAuth } from '../hooks/useAuth'
 
 /* ─── CSS keyframes injected once ─── */
 const LANDING_CSS = `
-@keyframes ushqn-glow{0%,100%{opacity:.35;transform:scale(1)}50%{opacity:.7;transform:scale(1.12)}}
-@keyframes ushqn-float{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-18px) rotate(4deg)}}
-@keyframes ushqn-float2{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-12px) rotate(-3deg)}}
-@keyframes ushqn-fade-up{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+@keyframes ushqn-glow{0%,100%{opacity:.35;transform:scale(1)}50%{opacity:.72;transform:scale(1.14)}}
+@keyframes ushqn-float{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-22px) rotate(5deg)}}
+@keyframes ushqn-float2{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-14px) rotate(-4deg)}}
+@keyframes ushqn-fade-up{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
 @keyframes ushqn-chat-in{from{opacity:0;transform:scale(.82) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}
 @keyframes ushqn-type-dot{0%,80%,100%{transform:scale(.6);opacity:.3}40%{transform:scale(1);opacity:1}}
 @keyframes ushqn-badge-glow{0%,100%{box-shadow:0 0 0 0 rgba(0,82,204,.35)}70%{box-shadow:0 0 0 8px rgba(0,82,204,0)}}
 @keyframes ushqn-shimmer{0%{background-position:-200% center}100%{background-position:200% center}}
-.landing-reveal{opacity:0;transform:translateY(28px);transition:opacity .7s cubic-bezier(.22,1,.36,1),transform .7s cubic-bezier(.22,1,.36,1)}
+@keyframes ushqn-beam-sweep{0%{opacity:0;transform:translateX(-100%) skewX(-12deg)}15%{opacity:.55}55%{opacity:.25}100%{opacity:0;transform:translateX(180%) skewX(-12deg)}}
+@keyframes ushqn-aurora-drift{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(3%,-4%) scale(1.06)}}
+.landing-reveal{opacity:0;transform:translateY(32px);transition:opacity .8s cubic-bezier(.22,1,.36,1),transform .8s cubic-bezier(.22,1,.36,1)}
 .landing-reveal.in{opacity:1;transform:translateY(0)}
-.landing-reveal-l{opacity:0;transform:translateX(-24px);transition:opacity .7s cubic-bezier(.22,1,.36,1),transform .7s cubic-bezier(.22,1,.36,1)}
+.landing-reveal-l{opacity:0;transform:translateX(-32px);transition:opacity .8s cubic-bezier(.22,1,.36,1),transform .8s cubic-bezier(.22,1,.36,1)}
 .landing-reveal-l.in{opacity:1;transform:translateX(0)}
-.landing-reveal-r{opacity:0;transform:translateX(24px);transition:opacity .7s cubic-bezier(.22,1,.36,1),transform .7s cubic-bezier(.22,1,.36,1)}
+.landing-reveal-r{opacity:0;transform:translateX(32px);transition:opacity .8s cubic-bezier(.22,1,.36,1),transform .8s cubic-bezier(.22,1,.36,1)}
 .landing-reveal-r.in{opacity:1;transform:translateX(0)}
-.ushqn-glow-btn{transition:box-shadow .2s ease,transform .18s ease}
-.ushqn-glow-btn:hover{transform:translateY(-1px) scale(1.015);box-shadow:0 12px 40px rgba(0,82,204,.6),0 1px 0 rgba(255,255,255,.2) inset!important}
+.ushqn-glow-btn{transition:box-shadow .22s ease,transform .2s cubic-bezier(.34,1.56,.64,1)}
+.ushqn-glow-btn:hover{transform:translateY(-2px) scale(1.02);box-shadow:0 18px 56px rgba(0,82,204,.58),0 1px 0 rgba(255,255,255,.22) inset!important}
 .ushqn-glow-btn:active{transform:scale(.97)}
+.landing-hero-sweep{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.landing-hero-sweep::before{content:'';position:absolute;top:-25%;left:-30%;width:55%;height:150%;background:linear-gradient(105deg,transparent,rgba(147,197,253,.12),rgba(167,139,250,.08),transparent);animation:ushqn-beam-sweep 8.5s ease-in-out infinite}
+.landing-aurora-mesh{animation:ushqn-aurora-drift 22s ease-in-out infinite}
 `
 
 /* ─── Arrow icon ─── */
@@ -128,7 +133,9 @@ function ChatMockup({ t }: { t: TFunction }) {
         </div>
         <div className="mx-auto flex items-center gap-2">
           <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
-          <span className="text-xs font-semibold text-white/60">USHQN Chat</span>
+          <span className="text-xs font-semibold text-white/60">
+            {t('landing.chatWindowTitle', { wordmark: t('brand.wordmark') })}
+          </span>
         </div>
       </div>
       {/* Messages */}
@@ -178,12 +185,12 @@ function ChatMockup({ t }: { t: TFunction }) {
 
 /* ─── Feature cards ─── */
 const FEATURES = [
-  { emoji: '🏆', titleKey: 'landing.feature1t', descKey: 'landing.feature1d', accent: '#FFAB00', from: 'from-[#FF8B00]/15', to: 'to-[#FFAB00]/5' },
-  { emoji: '💼', titleKey: 'landing.feature3t', descKey: 'landing.feature3d', accent: '#0052CC', from: 'from-[#0052CC]/15', to: 'to-[#2684FF]/5' },
-  { emoji: '👥', titleKey: 'landing.feature4t', descKey: 'landing.feature4d', accent: '#6554C0', from: 'from-[#6554C0]/15', to: 'to-[#8777D9]/5' },
-  { emoji: '💬', titleKey: 'landing.feature5t', descKey: 'landing.feature5d', accent: '#00B8D9', from: 'from-[#00B8D9]/15', to: 'to-[#79E2F2]/5' },
-  { emoji: '📅', titleKey: 'landing.feature6t', descKey: 'landing.feature6d', accent: '#36B37E', from: 'from-[#00875A]/15', to: 'to-[#36B37E]/5' },
-  { emoji: '⭐', titleKey: 'landing.feature2t', descKey: 'landing.feature2d', accent: '#FF5630', from: 'from-[#FF5630]/15', to: 'to-[#FF8B00]/5' },
+  { emoji: '🏆', titleKey: 'landing.feature1t', descKey: 'landing.feature1d', accent: '#FFAB00' },
+  { emoji: '💼', titleKey: 'landing.feature3t', descKey: 'landing.feature3d', accent: '#0052CC' },
+  { emoji: '👥', titleKey: 'landing.feature4t', descKey: 'landing.feature4d', accent: '#6554C0' },
+  { emoji: '💬', titleKey: 'landing.feature5t', descKey: 'landing.feature5d', accent: '#00B8D9' },
+  { emoji: '📅', titleKey: 'landing.feature6t', descKey: 'landing.feature6d', accent: '#36B37E' },
+  { emoji: '⭐', titleKey: 'landing.feature2t', descKey: 'landing.feature2d', accent: '#FF5630' },
 ]
 
 /* ─── Mock people ─── */
@@ -221,6 +228,16 @@ function useScrolled(thr = 10) {
   return s
 }
 
+function useScrollParallax() {
+  const [y, setY] = useState(0)
+  useEffect(() => {
+    const h = () => setY(window.scrollY)
+    window.addEventListener('scroll', h, { passive: true })
+    return () => window.removeEventListener('scroll', h)
+  }, [])
+  return y
+}
+
 /* ════════════════════════════════════════════
    MAIN PAGE
 ═══════════════════════════════════════════ */
@@ -228,6 +245,7 @@ export function LandingPage() {
   const { t, i18n } = useTranslation()
   const { session } = useAuth()
   const scrolled = useScrolled()
+  const scrollY = useScrollParallax()
   const statsRef = useRef<HTMLDivElement>(null)
   const [statsVisible, setStatsVisible] = useState(false)
   const primary = session ? '/home' : '/register'
@@ -260,7 +278,7 @@ export function LandingPage() {
     <div className="overflow-x-hidden">
       <Helmet>
         <html lang={i18n.language} />
-        <title>{t('landing.seoTitle')}</title>
+        <title>{t('landing.seoTitle', { wordmark: t('brand.wordmark') })}</title>
         <meta name="description" content={t('landing.seoDescription')} />
         <link rel="canonical" href={canonical} />
       </Helmet>
@@ -275,11 +293,8 @@ export function LandingPage() {
         }}
       >
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-5">
-          <Link to="/" className="flex items-center gap-2.5">
-            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-[#0052CC] to-[#2684FF] text-sm font-black text-white shadow-lg shadow-[#0052CC]/30">
-              U
-            </span>
-            <span className="text-base font-extrabold tracking-tight text-white">USHQN</span>
+          <Link to="/" className="flex items-center gap-2">
+            <span className="landing-wordmark-shimmer text-lg font-black tracking-tight sm:text-xl">{t('brand.wordmark')}</span>
           </Link>
           <nav className="hidden items-center gap-6 md:flex">
             {[['#features', t('landing.navFeatures')], ['#chat', t('landing.chatSectionKicker')], ['#people', t('landing.peopleSectionKicker')]].map(([href, label]) => (
@@ -311,15 +326,58 @@ export function LandingPage() {
           minHeight: '100dvh',
         }}
       >
-        {/* Orbs */}
+        {/* Orbs + parallax */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
-          <div style={{ position: 'absolute', width: '55vw', height: '55vw', maxWidth: 800, maxHeight: 800, background: 'radial-gradient(circle,rgba(0,82,204,.4) 0%,transparent 65%)', top: '-12%', right: '-8%', animation: 'ushqn-glow 8s ease-in-out infinite' }} />
-          <div style={{ position: 'absolute', width: '45vw', height: '45vw', maxWidth: 600, maxHeight: 600, background: 'radial-gradient(circle,rgba(101,84,192,.28) 0%,transparent 65%)', bottom: '-8%', left: '-8%', animation: 'ushqn-glow 11s ease-in-out infinite 4s' }} />
-          <div style={{ position: 'absolute', width: '28vw', height: '28vw', maxWidth: 380, maxHeight: 380, background: 'radial-gradient(circle,rgba(0,184,217,.18) 0%,transparent 70%)', top: '35%', left: '25%', animation: 'ushqn-float 14s ease-in-out infinite 2s' }} />
+          <div
+            className="landing-aurora-mesh"
+            style={{
+              position: 'absolute',
+              width: '55vw',
+              height: '55vw',
+              maxWidth: 800,
+              maxHeight: 800,
+              background: 'radial-gradient(circle,rgba(0,82,204,.44) 0%,transparent 65%)',
+              top: '-12%',
+              right: '-8%',
+              animation: 'ushqn-glow 8s ease-in-out infinite',
+              transform: `translate3d(0, ${scrollY * 0.045}px, 0)`,
+            }}
+          />
+          <div
+            className="landing-aurora-mesh"
+            style={{
+              position: 'absolute',
+              width: '45vw',
+              height: '45vw',
+              maxWidth: 600,
+              maxHeight: 600,
+              background: 'radial-gradient(circle,rgba(101,84,192,.32) 0%,transparent 65%)',
+              bottom: '-8%',
+              left: '-8%',
+              animation: 'ushqn-glow 11s ease-in-out infinite 4s',
+              transform: `translate3d(0, ${scrollY * -0.035}px, 0)`,
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              width: '28vw',
+              height: '28vw',
+              maxWidth: 380,
+              maxHeight: 380,
+              background: 'radial-gradient(circle,rgba(0,184,217,.22) 0%,transparent 70%)',
+              top: '35%',
+              left: '25%',
+              animation: 'ushqn-float 14s ease-in-out infinite 2s',
+              transform: `translate3d(0, ${scrollY * 0.06}px, 0)`,
+            }}
+          />
         </div>
 
         {/* Grid lines */}
-        <div className="pointer-events-none absolute inset-0" aria-hidden style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px)', backgroundSize: '72px 72px' }} />
+        <div className="pointer-events-none absolute inset-0" aria-hidden style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,.028) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.028) 1px,transparent 1px)', backgroundSize: '72px 72px' }} />
+
+        <div className="landing-hero-sweep" aria-hidden />
 
         <div className="relative z-10 mx-auto max-w-6xl px-4 py-20 sm:py-28 lg:py-36 sm:px-5">
           <div className="mx-auto max-w-3xl text-center">
@@ -333,22 +391,13 @@ export function LandingPage() {
             </div>
 
             {/* Headline */}
-            <h1
-              className="text-4xl font-black leading-[1.07] tracking-tight sm:text-5xl lg:text-[3.6rem]"
-              style={{ animation: 'ushqn-fade-up .8s ease-out .1s both' }}
-            >
-              <span
-                style={{
-                  background: 'linear-gradient(135deg,#fff 20%,#93c5fd 65%,#c4b5fd 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                }}
-              >
-                {t('landing.heroTitle1')}
+            <h1 className="tracking-tight" style={{ animation: 'ushqn-fade-up .85s ease-out .08s both' }}>
+              <span className="landing-wordmark-shimmer block text-5xl font-black leading-none sm:text-6xl lg:text-7xl">
+                {t('brand.wordmark')}
               </span>
-              <br />
-              <span className="text-white/85">{t('landing.heroTitle2')}</span>
+              <span className="mt-4 block text-2xl font-bold leading-tight text-white/90 sm:text-3xl lg:text-4xl">
+                {t('landing.heroHeadline')}
+              </span>
             </h1>
 
             {/* Subline */}
@@ -410,28 +459,35 @@ export function LandingPage() {
       {/* ══════════════════════════════════════════
           FEATURES
       ══════════════════════════════════════════ */}
-      <section id="features" className="bg-[#f8fafc] py-16 sm:py-24">
-        <div className="mx-auto max-w-6xl px-4 sm:px-5">
+      <section id="features" className="relative overflow-hidden bg-[#030712] py-20 sm:py-28">
+        <div
+          className="pointer-events-none absolute inset-0"
+          aria-hidden
+          style={{
+            background: 'radial-gradient(ellipse 100% 70% at 50% -25%, rgba(0,82,204,.28), transparent 50%)',
+          }}
+        />
+        <div className="relative mx-auto max-w-6xl px-4 sm:px-5">
           <div className="landing-reveal mx-auto max-w-xl text-center">
-            <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0052CC]">{t('landing.featuresSectionKicker')}</p>
-            <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-[#172B4D] sm:text-3xl lg:text-4xl">{t('landing.featuresTitle')}</h2>
-            <p className="mt-3 text-sm leading-relaxed text-[#6B778C] sm:text-base">{t('landing.featuresSub')}</p>
+            <p className="text-xs font-black uppercase tracking-[0.14em] text-[#60a5fa]">{t('landing.featuresSectionKicker')}</p>
+            <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-white sm:text-3xl lg:text-4xl">{t('landing.featuresTitle')}</h2>
+            <p className="mt-3 text-sm leading-relaxed text-slate-400 sm:text-base">{t('landing.featuresSub')}</p>
           </div>
           <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {FEATURES.map((f, i) => (
               <div
                 key={i}
-                className={`landing-reveal group flex flex-col rounded-2xl bg-gradient-to-br ${f.from} ${f.to} border border-[#e4e9ef] p-6 transition-all duration-200 hover:-translate-y-1 hover:border-transparent hover:shadow-[0_16px_48px_rgba(0,0,0,0.07)]`}
-                style={{ transitionDelay: `${i * 60}ms` }}
+                className="landing-reveal group flex flex-col rounded-2xl border border-white/10 bg-white/[0.04] p-6 shadow-[inset_0_1px_0_0_rgba(255,255,255,.06)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-[#0052CC]/40 hover:shadow-[0_24px_80px_rgba(0,82,204,.2)]"
+                style={{ borderLeftWidth: 3, borderLeftColor: f.accent, transitionDelay: `${i * 60}ms` }}
               >
                 <div
-                  className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl text-2xl shadow-sm transition-transform duration-200 group-hover:scale-110"
-                  style={{ background: `${f.accent}18`, border: `1px solid ${f.accent}22` }}
+                  className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl text-2xl shadow-sm transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3"
+                  style={{ background: `${f.accent}22`, border: `1px solid ${f.accent}33` }}
                 >
                   {f.emoji}
                 </div>
-                <h3 className="text-base font-bold text-[#172B4D]">{t(f.titleKey)}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-[#6B778C]">{t(f.descKey)}</p>
+                <h3 className="text-base font-bold text-white">{t(f.titleKey)}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-slate-400">{t(f.descKey)}</p>
               </div>
             ))}
           </div>
@@ -441,22 +497,22 @@ export function LandingPage() {
       {/* ══════════════════════════════════════════
           HOW IT WORKS
       ══════════════════════════════════════════ */}
-      <section className="border-t border-[#e4e9ef] bg-white py-16 sm:py-24">
+      <section className="border-t border-white/5 bg-[#0a0f18] py-20 sm:py-28">
         <div className="mx-auto max-w-6xl px-4 sm:px-5">
           <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
             <div className="landing-reveal-l">
-              <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0052CC]">{t('landing.howKicker')}</p>
-              <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-[#172B4D] sm:text-3xl">{t('landing.howTitle')}</h2>
+              <p className="text-xs font-black uppercase tracking-[0.14em] text-[#60a5fa]">{t('landing.howKicker')}</p>
+              <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-white sm:text-3xl">{t('landing.howTitle')}</h2>
             </div>
             <div className="space-y-6 landing-reveal-r">
               {([1, 2, 3] as const).map((n) => (
                 <div key={n} className="flex gap-4">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#0052CC] to-[#2684FF] text-sm font-black text-white shadow-md shadow-[#0052CC]/25">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#0052CC] to-[#2684FF] text-sm font-black text-white shadow-lg shadow-[#0052CC]/35 ring-2 ring-white/10">
                     {n}
                   </div>
                   <div>
-                    <h3 className="text-base font-bold text-[#172B4D]">{t(`landing.step${n}t`)}</h3>
-                    <p className="mt-0.5 text-sm leading-relaxed text-[#6B778C]">{t(`landing.step${n}d`)}</p>
+                    <h3 className="text-base font-bold text-white">{t(`landing.step${n}t`)}</h3>
+                    <p className="mt-0.5 text-sm leading-relaxed text-slate-400">{t(`landing.step${n}d`)}</p>
                   </div>
                 </div>
               ))}
@@ -505,29 +561,29 @@ export function LandingPage() {
       {/* ══════════════════════════════════════════
           PEOPLE
       ══════════════════════════════════════════ */}
-      <section id="people" className="bg-[#f8fafc] py-16 sm:py-24">
+      <section id="people" className="bg-[#030712] py-20 sm:py-28">
         <div className="mx-auto max-w-6xl px-4 sm:px-5">
           <div className="landing-reveal mb-10 text-center">
-            <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0052CC]">{t('landing.peopleSectionKicker')}</p>
-            <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-[#172B4D] sm:text-3xl">{t('landing.peopleSectionTitle')}</h2>
-            <p className="mt-2 text-sm text-[#6B778C] sm:text-base">{t('landing.peopleSectionSub')}</p>
+            <p className="text-xs font-black uppercase tracking-[0.14em] text-[#60a5fa]">{t('landing.peopleSectionKicker')}</p>
+            <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-white sm:text-3xl">{t('landing.peopleSectionTitle')}</h2>
+            <p className="mt-2 text-sm text-slate-400 sm:text-base">{t('landing.peopleSectionSub')}</p>
           </div>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
             {MOCK_PEOPLE.map((p, i) => (
               <div
                 key={i}
-                className="landing-reveal flex flex-col items-center gap-2 rounded-2xl border border-[#e4e9ef] bg-white p-4 text-center shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                className="landing-reveal flex flex-col items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-center shadow-[inset_0_1px_0_0_rgba(255,255,255,.05)] backdrop-blur-sm transition hover:-translate-y-0.5 hover:border-white/20 hover:shadow-[0_20px_50px_rgba(0,82,204,.12)]"
                 style={{ transitionDelay: `${i * 70}ms` }}
               >
                 <div
-                  className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${p.grad} text-sm font-bold text-white shadow-sm`}
+                  className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${p.grad} text-sm font-bold text-white shadow-lg ring-1 ring-white/15`}
                 >
                   {p.initials}
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-[#172B4D]">{p.name}</p>
-                  <p className="text-[10px] text-[#6B778C]">{p.role}</p>
-                  <p className="mt-0.5 text-[9px] text-[#97A0AF]">📍 {p.city}</p>
+                  <p className="text-xs font-bold text-white">{p.name}</p>
+                  <p className="text-[10px] text-slate-400">{p.role}</p>
+                  <p className="mt-0.5 text-[9px] text-slate-500">📍 {p.city}</p>
                 </div>
               </div>
             ))}
@@ -547,28 +603,28 @@ export function LandingPage() {
       {/* ══════════════════════════════════════════
           VOICES
       ══════════════════════════════════════════ */}
-      <section className="border-t border-[#e4e9ef] bg-white py-16 sm:py-24">
+      <section className="border-t border-white/5 bg-[#0a0f18] py-20 sm:py-28">
         <div className="mx-auto max-w-6xl px-4 sm:px-5">
           <div className="landing-reveal mb-10">
-            <p className="text-xs font-black uppercase tracking-[0.14em] text-[#0052CC]">{t('landing.voicesKicker')}</p>
-            <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-[#172B4D] sm:text-3xl">{t('landing.voicesTitle')}</h2>
+            <p className="text-xs font-black uppercase tracking-[0.14em] text-[#60a5fa]">{t('landing.voicesKicker')}</p>
+            <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-white sm:text-3xl">{t('landing.voicesTitle')}</h2>
           </div>
           <div className="grid gap-4 md:grid-cols-3">
             {([1, 2, 3] as const).map((n) => (
               <blockquote
                 key={n}
-                className="landing-reveal rounded-2xl border border-[#e4e9ef] bg-[#FAFBFC] p-6 transition hover:border-[#B3D4FF] hover:shadow-[0_8px_32px_rgba(0,82,204,.06)]"
+                className="landing-reveal rounded-2xl border border-white/10 bg-white/[0.04] p-6 shadow-[inset_0_1px_0_0_rgba(255,255,255,.06)] backdrop-blur-md transition hover:border-[#0052CC]/35 hover:shadow-[0_20px_60px_rgba(0,82,204,.12)]"
                 style={{ transitionDelay: `${(n - 1) * 80}ms` }}
               >
-                <div className="mb-3 text-2xl text-[#0052CC]/40">❝</div>
-                <p className="text-sm leading-relaxed text-[#172B4D]">{t(`landing.quote${n}b`)}</p>
-                <footer className="mt-4 flex items-center gap-3 border-t border-[#eef1f4] pt-4">
+                <div className="mb-3 text-2xl text-[#60a5fa]/50">❝</div>
+                <p className="text-sm leading-relaxed text-slate-200">{t(`landing.quote${n}b`)}</p>
+                <footer className="mt-4 flex items-center gap-3 border-t border-white/10 pt-4">
                   <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[#0052CC] to-[#2684FF] text-xs font-bold text-white">
                     {t(`landing.quote${n}n`).split(' ').map((w: string) => w[0]).join('').slice(0, 2)}
                   </div>
                   <div>
-                    <cite className="not-italic text-sm font-bold text-[#172B4D]">{t(`landing.quote${n}n`)}</cite>
-                    <p className="text-xs text-[#6B778C]">{t(`landing.quote${n}r`)}</p>
+                    <cite className="not-italic text-sm font-bold text-white">{t(`landing.quote${n}n`)}</cite>
+                    <p className="text-xs text-slate-400">{t(`landing.quote${n}r`)}</p>
                   </div>
                 </footer>
               </blockquote>
@@ -612,19 +668,16 @@ export function LandingPage() {
         style={{ background: 'linear-gradient(150deg,#020818 0%,#0b1630 100%)', borderTop: '1px solid rgba(255,255,255,.06)' }}
       >
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-6 px-4 sm:flex-row sm:px-5">
-          <div className="flex items-center gap-2.5">
-            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-[#0052CC] to-[#2684FF] text-sm font-black text-white">U</span>
-            <div>
-              <div className="text-sm font-extrabold text-white">USHQN</div>
-              <div className="text-[10px] text-white/30">Discover. Grow. Achieve.</div>
-            </div>
+          <div className="text-center sm:text-left">
+            <div className="landing-wordmark-shimmer text-lg font-black sm:text-xl">{t('brand.wordmark')}</div>
+            <div className="mt-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/35">{t('brand.navTagline')}</div>
           </div>
           <div className="flex flex-wrap justify-center gap-6 text-sm font-semibold text-white/35">
             <a href="#features" className="transition hover:text-white/70">{t('landing.navFeatures')}</a>
             <Link to="/login" className="transition hover:text-white/70">{t('landing.login')}</Link>
             <Link to="/register" className="transition hover:text-white/70">{t('landing.register')}</Link>
           </div>
-          <p className="text-xs text-white/25">{t('landing.footerCopy', { year: new Date().getFullYear() })}</p>
+          <p className="text-xs text-white/25">{t('landing.footerCopy', { year: new Date().getFullYear(), legalName: t('brand.legalName') })}</p>
         </div>
       </footer>
     </div>

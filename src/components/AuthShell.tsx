@@ -41,7 +41,7 @@ export function AuthShell({ children, maxWidthClass = 'max-w-[460px]' }: { child
           </span>
           {t('auth.backToLanding')}
         </Link>
-        <span className="hidden text-[10px] font-black uppercase tracking-[0.25em] text-white/35 sm:inline">USHQN</span>
+        <span className="landing-wordmark-shimmer hidden text-sm font-black tracking-tight sm:inline">{t('brand.wordmark')}</span>
       </header>
 
       <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-4 pb-10 pt-0 sm:px-6">

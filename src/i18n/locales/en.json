@@ -25,6 +25,12 @@
     "viewAll": "All →",
     "or": "or"
   },
+  "brand": {
+    "wordmark": "Ushqyn",
+    "titleSuffix": " · Ushqyn",
+    "navTagline": "Grow",
+    "legalName": "USHQN"
+  },
   "errors": {
     "rateLimit": "Too many actions in a short time. Wait a minute and try again.",
     "schemaOutdated": "The database is missing an update. Run the latest SQL migrations in Supabase (or ask the project owner).",
@@ -964,9 +970,9 @@
     "toApp": "Open app",
     "startFree": "Start free",
     "badge": "Growth platform · 2026",
-    "heroTitle1": "Portfolio, ranking, and career",
-    "heroTitle2": "without chat chaos",
-    "heroSub": "USHQN brings achievements, jobs, events, and messaging together — in the same visual language as the product you use after sign-in.",
+    "heroHeadline": "Portfolio · rank · career",
+    "heroSub": "Achievements, jobs, events, and messaging — one app, one look — no noise.",
+    "chatWindowTitle": "{{wordmark}} · Chat",
     "ctaPrimary": "Create account",
     "ctaSecondary": "See features",
     "ctaNote": "Free sign-up · your data is protected",
@@ -1054,8 +1060,8 @@
     "quote3n": "Marina K.",
     "quote3r": "Mentor, IT",
     "quote3b": "I can see the whole person: interests, achievements, chat — no jumping between tools.",
-    "footerCopy": "© {{year}} USHQN",
-    "seoTitle": "USHQN — portfolio, ranking, and career",
+    "footerCopy": "© {{year}} {{legalName}}",
+    "seoTitle": "{{wordmark}} — portfolio, ranking, and career",
     "seoDescription": "Achievements, jobs, events, and messaging in one place — for students, learners, and mentors."
   },
   "ui": {

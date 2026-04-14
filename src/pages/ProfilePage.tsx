@@ -244,7 +244,7 @@ export function ProfilePage() {
 
   return (
     <div className="space-y-4">
-      <AppPageMeta title={`${t('nav.profile')} · USHQN`} />
+      <AppPageMeta title={t('nav.profile')} />
       <ProfileCard
         profile={{
           display_name: p.display_name,

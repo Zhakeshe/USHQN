@@ -227,7 +227,7 @@ export function PublicProfilePage() {
         <div>
           <Helmet>
             <title>
-              {profileQuery.data.display_name} — USHQN
+              {profileQuery.data.display_name} — {t('brand.wordmark')}
             </title>
             <meta name="description" content={profileQuery.data.headline ?? profileQuery.data.display_name} />
             <link rel="canonical" href={profileUrl} />

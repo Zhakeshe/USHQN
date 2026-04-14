@@ -554,3 +554,38 @@ html.dark .ushqn-rating-hero-mesh {
     transform: none;
   }
 }
+
+/* Brand wordmark — gradient shimmer (landing, auth, nav) */
+@keyframes ushqn-wordmark-shimmer {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.landing-wordmark-shimmer {
+  background-image: linear-gradient(
+    105deg,
+    #fff 0%,
+    #93c5fd 18%,
+    #a78bfa 38%,
+    #38bdf8 58%,
+    #fff 78%,
+    #e0e7ff 100%
+  );
+  background-size: 220% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: ushqn-wordmark-shimmer 5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-wordmark-shimmer {
+    animation: none;
+    background-position: 50% 50%;
+  }
+}

@@ -246,7 +246,7 @@ export function SettingsPage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-4">
-      <AppPageMeta title={`${t('nav.settings')} · USHQN`} />
+      <AppPageMeta title={t('nav.settings')} />
       <div className="ushqn-card p-5">
         <h1 className="text-2xl font-extrabold text-[#172B4D]">{t('settings.title')}</h1>
         <p className="mt-0.5 text-sm text-[#6B778C]">{t('settings.subtitle')}</p>

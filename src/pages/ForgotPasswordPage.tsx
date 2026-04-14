@@ -44,7 +44,7 @@ export function ForgotPasswordPage() {
 
   return (
     <AuthShell maxWidthClass="max-w-[420px]">
-      <AppPageMeta title={`${t('forgotPassword.title')} · USHQN`} />
+      <AppPageMeta title={t('forgotPassword.title')} />
       <AuthBrand />
 
       {sent ? (

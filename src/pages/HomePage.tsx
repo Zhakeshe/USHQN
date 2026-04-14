@@ -119,7 +119,7 @@ export function HomePage() {
 
   return (
     <div className="grid gap-5 lg:grid-cols-[280px_1fr] lg:gap-6">
-      <AppPageMeta title={`${t('nav.home')} · USHQN`} />
+      <AppPageMeta title={t('nav.home')} />
       {/* LinkedIn-style left profile sidebar — sticky on scroll */}
       <aside className="hidden lg:block">
         <div className="sticky top-6">

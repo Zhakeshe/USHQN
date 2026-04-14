@@ -52,7 +52,7 @@ function TopBar() {
   return (
     <header className="sticky top-0 z-40 flex h-12 items-center justify-between gap-2 border-b border-[var(--color-ushqn-border)]/80 bg-[var(--color-ushqn-surface)]/85 px-4 backdrop-blur-xl lg:hidden">
       {/* Active page text via hidden navlinks — just show app name */}
-      <span className="text-sm font-extrabold tracking-tight text-[var(--color-ushqn-text)]">USHQN</span>
+      <span className="landing-wordmark-shimmer text-sm font-black tracking-tight">{t('brand.wordmark')}</span>
       <div className="flex items-center gap-1">
         {/* Lang cycle */}
         <button

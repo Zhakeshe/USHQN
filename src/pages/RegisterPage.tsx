@@ -168,7 +168,7 @@ export function RegisterPage() {
 
   return (
     <AuthShell maxWidthClass="max-w-[520px]">
-      <AppPageMeta title={`${t('register.title')} · USHQN`} />
+      <AppPageMeta title={t('register.title')} />
       <AuthBrand slogan={t('login.slogan')} />
 
       <h2 className="mb-5 text-center text-lg font-bold text-slate-800 dark:text-slate-100">{t('register.title')}</h2>

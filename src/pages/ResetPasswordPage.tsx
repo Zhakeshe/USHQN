@@ -52,7 +52,7 @@ export function ResetPasswordPage() {
   if (!ready) {
     return (
       <AuthShell maxWidthClass="max-w-sm">
-        <AppPageMeta title={`${t('resetPassword.title')} · USHQN`} />
+        <AppPageMeta title={t('resetPassword.title')} />
         <AuthBrand />
         <p className="text-center text-sm text-slate-500 dark:text-slate-400">{t('common.loading')}</p>
       </AuthShell>
@@ -61,7 +61,7 @@ export function ResetPasswordPage() {
 
   return (
     <AuthShell maxWidthClass="max-w-[420px]">
-      <AppPageMeta title={`${t('resetPassword.title')} · USHQN`} />
+      <AppPageMeta title={t('resetPassword.title')} />
       <AuthBrand />
 
       {success ? (

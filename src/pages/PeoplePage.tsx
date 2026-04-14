@@ -136,7 +136,7 @@ export function PeoplePage() {
 
   return (
     <div className="space-y-5">
-      <AppPageMeta title={`${t('nav.people')} · USHQN`} />
+      <AppPageMeta title={t('nav.people')} />
       {/* Header */}
       <div className="ushqn-card p-6">
         <h1 className="text-2xl font-extrabold tracking-tight text-[var(--color-ushqn-text)]">

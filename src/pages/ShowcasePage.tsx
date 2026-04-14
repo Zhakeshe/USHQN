@@ -157,7 +157,7 @@ export function ShowcasePage() {
 
   return (
     <div className="space-y-5">
-      <AppPageMeta title={`${t('nav.services')} · USHQN`} />
+      <AppPageMeta title={t('nav.services')} />
       <div className="ushqn-card overflow-hidden p-0">
         <div className="bg-gradient-to-r from-[#6554C0] to-[#8777D9] px-6 py-7 text-white">
           <h1 className="text-2xl font-extrabold">{t('showcase.pageTitle')}</h1>

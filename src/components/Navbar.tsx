@@ -216,19 +216,17 @@ export function Navbar() {
       <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4 sm:h-[3.75rem] sm:px-5">
         <Link
           to="/home"
-          className="ushqn-tap-clear group flex shrink-0 items-center gap-2.5 rounded-xl py-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0052CC] focus-visible:ring-offset-2"
+          className="ushqn-tap-clear group flex shrink-0 items-center gap-2 rounded-xl py-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0052CC] focus-visible:ring-offset-2"
         >
-          <span
-            className={`flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#0052CC] via-[#1d4ed8] to-[#60a5fa] text-sm font-black tracking-tight text-white shadow-lg shadow-[#0052CC]/30 ring-2 ring-white/40 ${NAV_SPRING} motion-safe:group-hover:scale-[1.06] motion-safe:group-hover:shadow-xl motion-safe:group-hover:shadow-[#0052CC]/35 motion-safe:group-active:scale-[0.92]`}
-          >
-            U
-          </span>
           <span className="hidden flex-col leading-none sm:flex">
-            <span className="text-base font-extrabold tracking-tight text-[var(--color-ushqn-text)]">USHQN</span>
+            <span className={`landing-wordmark-shimmer text-lg font-black tracking-tight sm:text-xl ${NAV_SPRING} motion-safe:group-hover:opacity-95`}>
+              {t('brand.wordmark')}
+            </span>
             <span className="mt-0.5 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--color-ushqn-muted)]">
-              Grow
+              {t('brand.navTagline')}
             </span>
           </span>
+          <span className="landing-wordmark-shimmer text-base font-black tracking-tight sm:hidden">{t('brand.wordmark')}</span>
         </Link>
 
         <nav

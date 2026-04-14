@@ -519,7 +519,7 @@ export function JobsPage() {
 
   return (
     <div className="space-y-5">
-      <AppPageMeta title={`${t('nav.jobs')} · USHQN`} />
+      <AppPageMeta title={t('nav.jobs')} />
       <ContentReportDialog
         open={Boolean(reportJobId)}
         onClose={() => setReportJobId(null)}

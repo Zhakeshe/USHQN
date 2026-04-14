@@ -109,7 +109,7 @@ export function CommunitiesPage() {
 
   return (
     <div className="space-y-5">
-      <AppPageMeta title={`${t('nav.communities')} · USHQN`} />
+      <AppPageMeta title={t('nav.communities')} />
       <div className="ushqn-card overflow-hidden p-0">
         <div className="bg-gradient-to-r from-[#00875A] to-[#36B37E] px-6 py-7 text-white">
           <h1 className="text-2xl font-extrabold">{t('communities.title')}</h1>

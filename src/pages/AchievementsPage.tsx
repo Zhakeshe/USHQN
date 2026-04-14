@@ -141,7 +141,7 @@ export function AchievementsPage() {
 
   return (
     <div className="space-y-5">
-      <AppPageMeta title={`${t('nav.achievements')} · USHQN`} />
+      <AppPageMeta title={t('nav.achievements')} />
       {/* Header stats */}
       <div className="ushqn-card overflow-hidden p-0">
         <div className="bg-gradient-to-r from-[#0052CC] to-[#2684FF] px-6 py-5 text-white">

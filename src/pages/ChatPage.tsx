@@ -767,7 +767,7 @@ export function ChatPage() {
     <div
       className="flex min-h-[calc(100dvh-5.5rem)] flex-col gap-0 lg:grid lg:min-h-[calc(100dvh-7rem)] lg:grid-cols-[minmax(280px,340px)_1fr] lg:gap-3"
     >
-      <AppPageMeta title={`${t('nav.chat')} · USHQN`} />
+      <AppPageMeta title={t('nav.chat')} />
       <ContentReportDialog
         open={Boolean(reportMessageId)}
         onClose={() => setReportMessageId(null)}

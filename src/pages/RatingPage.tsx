@@ -171,7 +171,7 @@ export function RatingPage() {
 
   return (
     <div className="space-y-6">
-      <AppPageMeta title={`${t('nav.rating')} · USHQN`} />
+      <AppPageMeta title={t('nav.rating')} />
       <div className="ushqn-card overflow-hidden p-0 shadow-xl">
         <div className="ushqn-rating-hero-mesh relative px-6 py-10 text-white">
           <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 animate-pulse rounded-full bg-white/10 blur-3xl" />
