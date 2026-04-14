@@ -9,7 +9,7 @@
   --color-ushqn-primary: #0052cc;
   --color-ushqn-text: #0f172a;
   --color-ushqn-muted: #64748b;
-  --font-sans: 'Inter', system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-sans: system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
 }
 
 html {

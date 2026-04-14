@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
+import { AppPageMeta } from '../components/AppPageMeta'
 import { QueryState } from '../components/QueryState'
 import { trackEvent } from '../lib/analytics'
 import { useAuth } from '../hooks/useAuth'
@@ -200,6 +201,7 @@ export function AdminPage() {
 
   return (
     <div className="space-y-6">
+      <AppPageMeta title={`${t('nav.admin')} · USHQN`} />
       <div>
         <h1 className="text-2xl font-bold text-[var(--color-ushqn-text)]">{t('admin.title')}</h1>
         <p className="mt-1 text-sm text-[var(--color-ushqn-muted)]">{t('admin.subtitle')}</p>

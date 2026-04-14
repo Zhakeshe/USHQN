@@ -10,6 +10,7 @@ import { useToast } from '../lib/toast'
 import { useConfirm } from '../lib/confirm'
 import { format } from 'date-fns'
 import { getDateFnsLocale } from '../lib/dateLocale'
+import { AppPageMeta } from '../components/AppPageMeta'
 
 const CATEGORY_EMOJI: Record<string, string> = {
   robotics: '🤖', programming: '💻', sports: '⚽', debates: '🎤',
@@ -140,6 +141,7 @@ export function AchievementsPage() {
 
   return (
     <div className="space-y-5">
+      <AppPageMeta title={`${t('nav.achievements')} · USHQN`} />
       {/* Header stats */}
       <div className="ushqn-card overflow-hidden p-0">
         <div className="bg-gradient-to-r from-[#0052CC] to-[#2684FF] px-6 py-5 text-white">

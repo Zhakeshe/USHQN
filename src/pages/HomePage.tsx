@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { AppPageMeta } from '../components/AppPageMeta'
 import { MiniProfileSidebar } from '../components/MiniProfileSidebar'
 import { OnboardingPanel } from '../components/OnboardingPanel'
 import { WeeklyDigestCard } from '../components/WeeklyDigestCard'
@@ -118,6 +119,7 @@ export function HomePage() {
 
   return (
     <div className="grid gap-5 lg:grid-cols-[280px_1fr] lg:gap-6">
+      <AppPageMeta title={`${t('nav.home')} · USHQN`} />
       {/* LinkedIn-style left profile sidebar — sticky on scroll */}
       <aside className="hidden lg:block">
         <div className="sticky top-6">
@@ -128,36 +130,36 @@ export function HomePage() {
       <div className="space-y-4">
       {/* Quick stats row */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <div
-          className="ushqn-card flex items-center gap-3 p-3.5 transition hover:shadow-md cursor-pointer"
-          onClick={() => window.location.href = '/achievements'}
+        <Link
+          to="/achievements"
+          className="ushqn-card flex items-center gap-3 p-3.5 transition hover:shadow-md"
         >
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#0052CC]/10 to-[#2684FF]/5 text-xl">🏆</span>
           <div>
             <p className="text-lg font-extrabold text-[var(--color-ushqn-text)]">{statsQuery.data?.achCount ?? '—'}</p>
             <p className="text-[11px] text-[var(--color-ushqn-muted)]">{t('home.achievements')}</p>
           </div>
-        </div>
-        <div
-          className="ushqn-card flex items-center gap-3 p-3.5 transition hover:shadow-md cursor-pointer"
-          onClick={() => window.location.href = '/people'}
+        </Link>
+        <Link
+          to="/people"
+          className="ushqn-card flex items-center gap-3 p-3.5 transition hover:shadow-md"
         >
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#36B37E]/10 to-[#00875A]/5 text-xl">👥</span>
           <div>
             <p className="text-lg font-extrabold text-[var(--color-ushqn-text)]">{statsQuery.data?.followersCount ?? '—'}</p>
             <p className="text-[11px] text-[var(--color-ushqn-muted)]">{t('home.followers')}</p>
           </div>
-        </div>
-        <div
-          className="ushqn-card flex items-center gap-3 p-3.5 transition hover:shadow-md cursor-pointer"
-          onClick={() => window.location.href = '/chat'}
+        </Link>
+        <Link
+          to="/chat"
+          className="ushqn-card flex items-center gap-3 p-3.5 transition hover:shadow-md"
         >
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#6554C0]/10 to-[#8777D9]/5 text-xl">💬</span>
           <div>
             <p className="text-sm font-bold text-[var(--color-ushqn-text)]">{t('home.cards.chat.title')}</p>
             <p className="text-[11px] text-[var(--color-ushqn-muted)]">{t('home.cards.chat.desc')}</p>
           </div>
-        </div>
+        </Link>
         {streakQuery.data && (streakQuery.data.activity_streak_count ?? 0) > 0 ? (
           <div className="ushqn-card flex items-center gap-3 p-3.5">
             <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#FF8B00]/15 to-[#FFAB00]/5 text-xl">🔥</span>
@@ -167,16 +169,16 @@ export function HomePage() {
             </div>
           </div>
         ) : (
-          <div
-            className="ushqn-card flex items-center gap-3 p-3.5 transition hover:shadow-md cursor-pointer"
-            onClick={() => window.location.href = '/jobs'}
+          <Link
+            to="/jobs"
+            className="ushqn-card flex items-center gap-3 p-3.5 transition hover:shadow-md"
           >
             <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#FF5630]/10 to-[#FF8B00]/5 text-xl">💼</span>
             <div>
               <p className="text-sm font-bold text-[var(--color-ushqn-text)]">{t('home.cards.jobs.title')}</p>
               <p className="text-[11px] text-[var(--color-ushqn-muted)]">{t('home.cards.jobs.desc')}</p>
             </div>
-          </div>
+          </Link>
         )}
       </div>
 

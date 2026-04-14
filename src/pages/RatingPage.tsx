@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import type { TFunction } from 'i18next'
+import { AppPageMeta } from '../components/AppPageMeta'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../hooks/useAuth'
@@ -170,6 +171,7 @@ export function RatingPage() {
 
   return (
     <div className="space-y-6">
+      <AppPageMeta title={`${t('nav.rating')} · USHQN`} />
       <div className="ushqn-card overflow-hidden p-0 shadow-xl">
         <div className="ushqn-rating-hero-mesh relative px-6 py-10 text-white">
           <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 animate-pulse rounded-full bg-white/10 blur-3xl" />

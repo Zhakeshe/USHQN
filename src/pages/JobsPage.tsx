@@ -13,6 +13,7 @@ import { supabase } from '../lib/supabase'
 import { useToast } from '../lib/toast'
 import { useConfirm } from '../lib/confirm'
 import { getDateFnsLocale } from '../lib/dateLocale'
+import { AppPageMeta } from '../components/AppPageMeta'
 import { QueryState } from '../components/QueryState'
 import { ContentReportDialog } from '../components/ContentReportDialog'
 import { trackEvent } from '../lib/analytics'
@@ -518,6 +519,7 @@ export function JobsPage() {
 
   return (
     <div className="space-y-5">
+      <AppPageMeta title={`${t('nav.jobs')} · USHQN`} />
       <ContentReportDialog
         open={Boolean(reportJobId)}
         onClose={() => setReportJobId(null)}

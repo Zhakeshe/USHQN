@@ -11,6 +11,7 @@ import { useToast } from '../lib/toast'
 import { useConfirm } from '../lib/confirm'
 import { getAppBaseUrl } from '../lib/siteUrl'
 import { trackEvent } from '../lib/analytics'
+import { AppPageMeta } from '../components/AppPageMeta'
 
 const LANG_OPTIONS = [
   { code: 'ru', key: 'settings.language.ru' },
@@ -245,6 +246,7 @@ export function SettingsPage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-4">
+      <AppPageMeta title={`${t('nav.settings')} · USHQN`} />
       <div className="ushqn-card p-5">
         <h1 className="text-2xl font-extrabold text-[#172B4D]">{t('settings.title')}</h1>
         <p className="mt-0.5 text-sm text-[#6B778C]">{t('settings.subtitle')}</p>

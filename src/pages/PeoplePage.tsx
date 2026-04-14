@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { useAuth } from '../hooks/useAuth'
 import { useDebouncedValue } from '../hooks/useDebouncedValue'
 import { supabase } from '../lib/supabase'
+import { AppPageMeta } from '../components/AppPageMeta'
 import { QueryState } from '../components/QueryState'
 
 const AVATAR_COLORS = [
@@ -120,7 +121,7 @@ export function PeoplePage() {
 
   async function openChat(targetId: string) {
     const { data, error } = await supabase.rpc('get_or_create_dm', { other_id: targetId })
-    if (error) { console.error(error); return }
+    if (error) return
     void navigate(`/chat/${data}`)
   }
 
@@ -135,12 +136,13 @@ export function PeoplePage() {
 
   return (
     <div className="space-y-5">
+      <AppPageMeta title={`${t('nav.people')} · USHQN`} />
       {/* Header */}
       <div className="ushqn-card p-6">
-        <h1 className="text-2xl font-extrabold text-[#172B4D] tracking-tight">
+        <h1 className="text-2xl font-extrabold tracking-tight text-[var(--color-ushqn-text)]">
           {t('people.title')}
         </h1>
-        <p className="mt-1 text-sm text-[#6B778C]">
+        <p className="mt-1 text-sm text-[var(--color-ushqn-muted)]">
           {t('people.subtitle')}
         </p>
         <div className="mt-4 max-w-md">

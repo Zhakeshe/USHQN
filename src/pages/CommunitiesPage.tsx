@@ -2,6 +2,7 @@ import { useEffect, useMemo } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
+import { AppPageMeta } from '../components/AppPageMeta'
 import { QueryState } from '../components/QueryState'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
@@ -108,6 +109,7 @@ export function CommunitiesPage() {
 
   return (
     <div className="space-y-5">
+      <AppPageMeta title={`${t('nav.communities')} · USHQN`} />
       <div className="ushqn-card overflow-hidden p-0">
         <div className="bg-gradient-to-r from-[#00875A] to-[#36B37E] px-6 py-7 text-white">
           <h1 className="text-2xl font-extrabold">{t('communities.title')}</h1>

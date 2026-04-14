@@ -5,6 +5,7 @@ import { formatDistanceToNow } from 'date-fns'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
 import { getDateFnsLocale } from '../lib/dateLocale'
+import { AppPageMeta } from '../components/AppPageMeta'
 import { QueryState } from '../components/QueryState'
 
 type Notif = {
@@ -88,6 +89,7 @@ export function NotificationsPage() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-4">
+      <AppPageMeta title={`${t('nav.notifications')} · USHQN`} />
       <div className="ushqn-card p-5">
         <div className="flex items-center justify-between gap-3">
           <div>

@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslation } from 'react-i18next'
+import { AppPageMeta } from '../components/AppPageMeta'
 import { CategoryScores } from '../components/CategoryScores'
 import { ProfileCard } from '../components/ProfileCard'
 import { SkillsCard } from '../components/SkillsCard'
@@ -243,6 +244,7 @@ export function ProfilePage() {
 
   return (
     <div className="space-y-4">
+      <AppPageMeta title={`${t('nav.profile')} · USHQN`} />
       <ProfileCard
         profile={{
           display_name: p.display_name,

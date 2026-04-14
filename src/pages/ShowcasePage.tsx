@@ -13,6 +13,7 @@ import { uploadPublicFile } from '../lib/upload'
 import { useToast } from '../lib/toast'
 import { useConfirm } from '../lib/confirm'
 import type { ListingKind } from '../types/database'
+import { AppPageMeta } from '../components/AppPageMeta'
 import { QueryState } from '../components/QueryState'
 
 type Form = { title: string; description?: string; price_text?: string; kind: ListingKind; collection_slug?: string }
@@ -156,6 +157,7 @@ export function ShowcasePage() {
 
   return (
     <div className="space-y-5">
+      <AppPageMeta title={`${t('nav.services')} · USHQN`} />
       <div className="ushqn-card overflow-hidden p-0">
         <div className="bg-gradient-to-r from-[#6554C0] to-[#8777D9] px-6 py-7 text-white">
           <h1 className="text-2xl font-extrabold">{t('showcase.pageTitle')}</h1>
