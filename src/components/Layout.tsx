@@ -7,6 +7,7 @@ import { Sidebar } from './Sidebar'
 import { OfflineBanner } from './OfflineBanner'
 import { PrivacyBanner } from './PrivacyBanner'
 import { ThemeSync } from './ThemeSync'
+import { ChatMessageNotifications } from './ChatMessageNotifications'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 
@@ -92,6 +93,7 @@ export function AppLayout() {
   return (
     <div className="flex min-h-dvh bg-[var(--color-ushqn-bg)] transition-colors duration-200">
       <ThemeSync />
+      <ChatMessageNotifications />
       {/* Desktop sidebar */}
       <Sidebar />
 

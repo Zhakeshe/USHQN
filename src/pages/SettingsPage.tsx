@@ -507,7 +507,17 @@ export function SettingsPage() {
                           ? Boolean(s?.push_notify_opt_in)
                           : (s?.[item.key] ?? true)
                     }
-                    onChange={(e) => updateSettings.mutate({ [item.key]: e.target.checked })}
+                    onChange={async (e) => {
+                      const checked = e.target.checked
+                      if (item.key === 'push_notify_opt_in' && checked && typeof Notification !== 'undefined') {
+                        const perm = await Notification.requestPermission()
+                        if (perm !== 'granted') {
+                          toast(t('settings.notificationsSection.pushDenied'), 'info')
+                          return
+                        }
+                      }
+                      updateSettings.mutate({ [item.key]: checked })
+                    }}
                   />
                 </label>
               ))}

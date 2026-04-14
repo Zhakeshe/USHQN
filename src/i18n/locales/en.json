@@ -298,7 +298,9 @@
     "emptyHint": "Add achievements first and climb the leaderboard!",
     "emptyTitle": "Leaderboard is empty",
     "total": "total",
-    "loading": "Loading ranking…"
+    "loading": "Loading ranking…",
+    "leaderboardKicker": "Points come from achievements — stay active and watch your rank rise.",
+    "fullBoard": "Full leaderboard"
   },
   "achievements": {
     "title": "🏅 Achievements",
@@ -509,6 +511,11 @@
     "onlineStatus": "Online",
     "chatHeader": "Chat",
     "unknownPeer": "Conversation",
+    "peerFallback": "User",
+    "browserNotifyTitle": "USHQN — new message",
+    "communitiesSection": "Communities & channels",
+    "communitiesSectionSub": "Open groups — join and chat with everyone.",
+    "allCommunities": "All communities →",
     "sendFailed": "Message not sent. Your connection may be unstable or you hit a safety limit — try again shortly.",
     "readReceipt": "Read",
     "attachment": "File",
@@ -746,8 +753,9 @@
       "achievementsDesc": "When an achievement is added or confirmed",
       "digestEmail": "Weekly digest email",
       "digestEmailDesc": "Summary of activity (when email delivery is enabled server-side)",
-      "pushOptIn": "Web push (coming soon)",
-      "pushOptInDesc": "Save your preference for browser notifications — delivery is not wired yet",
+      "pushOptIn": "Browser notifications for new messages",
+      "pushOptInDesc": "Shows a system notification when you get a chat message (enable Messages above). Grant permission when prompted.",
+      "pushDenied": "Notification permission was not granted. You can allow it in the browser site settings.",
       "saved": "Settings saved"
     },
     "privacy": {

@@ -11,6 +11,7 @@ import { uploadPublicFile } from '../lib/upload'
 import { ContentReportDialog } from '../components/ContentReportDialog'
 import { useToast } from '../lib/toast'
 import { formatSupabaseError } from '../lib/supabaseErrors'
+import { chatPeerLabel, initialsFromChatLabel, type ChatPeerProfile } from '../lib/chatPeerLabel'
 
 type MsgRow = {
   id: string
@@ -49,6 +50,8 @@ type ConvListItem = {
   hasUnread: boolean
   otherUserIds: string[]
   avatarKey: string
+  /** DM peer avatar; groups use generated tile */
+  avatarUrl: string | null
 }
 
 function getInitials(name: string) {
@@ -142,6 +145,7 @@ function ChatConvItem({
   const isActive = c.id === conversationId
   const grad = colorFor(c.avatarKey)
   const timeStr = c.lastAt ? formatRelativeListTime(c.lastAt, i18n.language, t, nowTs) : ''
+  const showPhoto = !c.isGroup && c.avatarUrl
   return (
     <div className="border-b border-[var(--color-ushqn-border)]/30 last:border-0">
       <Link
@@ -153,9 +157,15 @@ function ChatConvItem({
         }`}
       >
         <div
-          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${grad} text-xs font-bold text-white shadow-inner`}
+          className={`relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br ${grad} text-xs font-bold text-white shadow-inner`}
         >
-          {c.isGroup ? '⎔' : getInitials(c.displayName)}
+          {showPhoto ? (
+            <img src={c.avatarUrl!} alt="" className="h-full w-full object-cover" loading="lazy" />
+          ) : c.isGroup ? (
+            '⎔'
+          ) : (
+            initialsFromChatLabel(c.displayName)
+          )}
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-baseline justify-between gap-1">
@@ -426,30 +436,48 @@ export function ChatPage() {
     return [...s]
   }, [sidebarQuery.data])
 
-  const namesQuery = useQuery({
-    queryKey: ['chat-names', [...profileIds].sort().join('|')],
+  const peerProfilesQuery = useQuery({
+    queryKey: ['chat-peer-profiles', [...profileIds].sort().join('|')],
     enabled: profileIds.length > 0,
     queryFn: async () => {
-      const { data, error } = await supabase.from('profiles').select('id,display_name').in('id', profileIds)
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id,display_name,username,avatar_url')
+        .in('id', profileIds)
       if (error) throw error
-      return new Map((data ?? []).map((p) => [p.id, p.display_name ?? '']))
+      return new Map((data ?? []).map((p) => [p.id, p as ChatPeerProfile]))
+    },
+  })
+
+  const communitiesPeekQuery = useQuery({
+    queryKey: ['communities-peek-chat'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('communities').select('id,title,region_label').order('title').limit(8)
+      if (error) throw error
+      return data ?? []
     },
   })
 
   const convList = useMemo((): ConvListItem[] => {
     const rows = sidebarQuery.data ?? []
-    const nm = namesQuery.data ?? new Map<string, string>()
+    const pmap = peerProfilesQuery.data ?? new Map<string, ChatPeerProfile>()
     return rows.map((r) => {
       const isGroup = Boolean(r.is_group)
       let displayName: string
+      let avatarUrl: string | null = null
       if (isGroup) {
         displayName = r.title?.trim() || t('chat.groupChat')
       } else if ((r.other_user_ids?.length ?? 0) === 1) {
-        const pid = r.other_user_ids[0]
-        displayName = (pid && nm.get(pid)) || t('chat.unknownPeer')
+        const pid = r.other_user_ids[0]!
+        const prof = pmap.get(pid)
+        displayName = chatPeerLabel(prof ? { ...prof, id: pid } : { id: pid, display_name: null, username: null }, t)
+        avatarUrl = prof?.avatar_url?.trim() || null
       } else {
-        const parts = (r.other_user_ids ?? []).map((id) => nm.get(id)).filter(Boolean) as string[]
-        displayName = parts.slice(0, 3).join(', ') || t('chat.unknownPeer')
+        const parts = (r.other_user_ids ?? []).map((id) => {
+          const pr = pmap.get(id)
+          return pr ? chatPeerLabel({ ...pr, id }, t) : null
+        }).filter(Boolean) as string[]
+        displayName = parts.slice(0, 3).join(', ') || t('chat.peerFallback')
       }
       const subtitle = previewLine(r.last_body, r.last_sender_id, userId ?? undefined, t)
       const avatarKey = isGroup ? r.conversation_id : r.other_user_ids?.[0] ?? r.conversation_id
@@ -464,9 +492,10 @@ export function ChatPage() {
         hasUnread: Boolean(r.has_unread),
         otherUserIds: r.other_user_ids ?? [],
         avatarKey,
+        avatarUrl,
       }
     })
-  }, [sidebarQuery.data, namesQuery.data, t, userId])
+  }, [sidebarQuery.data, peerProfilesQuery.data, t, userId])
 
   const activeConv = useMemo(() => convList.find((c) => c.id === conversationId) ?? null, [convList, conversationId])
 
@@ -477,11 +506,19 @@ export function ChatPage() {
       const { data: parts, error } = await supabase.rpc('get_conversation_members', { p_conv_id: conversationId! })
       if (error) throw error
       const ids = [...new Set((parts ?? []).map((p: { user_id: string }) => p.user_id))]
-      if (ids.length === 0) return { ids: [], byId: new Map<string, string>() }
-      const { data: profs, error: e2 } = await supabase.from('profiles').select('id,display_name').in('id', ids)
+      if (ids.length === 0) return { ids: [], byId: new Map<string, string>(), avatarById: new Map<string, string | null>() }
+      const { data: profs, error: e2 } = await supabase
+        .from('profiles')
+        .select('id,display_name,username,avatar_url')
+        .in('id', ids)
       if (e2) throw e2
-      const byId = new Map((profs ?? []).map((p) => [p.id, p.display_name ?? t('chat.unknownPeer')]))
-      return { ids, byId }
+      const byId = new Map<string, string>()
+      const avatarById = new Map<string, string | null>()
+      for (const p of profs ?? []) {
+        byId.set(p.id, chatPeerLabel({ id: p.id, display_name: p.display_name, username: p.username }, t))
+        avatarById.set(p.id, p.avatar_url?.trim() || null)
+      }
+      return { ids, byId, avatarById }
     },
   })
 
@@ -692,6 +729,7 @@ export function ChatPage() {
 
   const peerReadAt = peerReadQuery.data ? new Date(peerReadQuery.data).getTime() : null
   const nameById = membersQuery.data?.byId ?? new Map<string, string>()
+  const avatarById = membersQuery.data?.avatarById ?? new Map<string, string | null>()
   const memberCount = membersQuery.data?.ids.length ?? 0
 
   const messagesWithDividers = useMemo((): ChatTimelineItem[] => {
@@ -718,7 +756,7 @@ export function ChatPage() {
 
   const typingLabel = useMemo(() => {
     if (!typingUsers.length) return ''
-    const names = typingUsers.map((id) => nameById.get(id) || t('chat.unknownPeer')).filter(Boolean)
+    const names = typingUsers.map((id) => nameById.get(id) || t('chat.peerFallback')).filter(Boolean)
     if (!names.length) return t('chat.typing')
     if (names.length === 1) return t('chat.typingOne', { name: names[0] })
     return t('chat.typingMany', { count: names.length })
@@ -841,6 +879,47 @@ export function ChatPage() {
                     ))}
                   </>
                 ) : null}
+
+                {/* Communities & channels — browse open groups */}
+                <div className="mt-1 border-t border-[var(--color-ushqn-border)]/50 pt-2">
+                  <p className="px-3 pb-0.5 text-[10px] font-black uppercase tracking-[0.12em] text-[var(--color-ushqn-muted)]">
+                    {t('chat.communitiesSection')}
+                  </p>
+                  <p className="px-3 pb-2 text-[11px] leading-snug text-[var(--color-ushqn-muted)]">{t('chat.communitiesSectionSub')}</p>
+                  {(communitiesPeekQuery.data ?? []).length === 0 && communitiesPeekQuery.isLoading ? (
+                    <p className="px-3 pb-3 text-xs text-[var(--color-ushqn-muted)]">…</p>
+                  ) : (
+                    <ul className="pb-1">
+                      {(communitiesPeekQuery.data ?? []).map((c) => (
+                        <li key={c.id} className="border-b border-[var(--color-ushqn-border)]/20 last:border-0">
+                          <Link
+                            to="/communities"
+                            className="flex items-center gap-2.5 px-3 py-2 transition hover:bg-[var(--color-ushqn-surface)]"
+                          >
+                            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-base shadow-inner">
+                              #
+                            </span>
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-sm font-bold text-[var(--color-ushqn-text)]">{c.title}</p>
+                              {c.region_label ? (
+                                <p className="truncate text-[10px] text-[var(--color-ushqn-muted)]">{c.region_label}</p>
+                              ) : null}
+                            </div>
+                            <span className="shrink-0 text-[var(--color-ushqn-muted)]" aria-hidden>
+                              →
+                            </span>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  <Link
+                    to="/communities"
+                    className="mx-3 mb-3 mt-1 block rounded-xl border border-dashed border-[var(--color-ushqn-border)] py-2.5 text-center text-xs font-bold text-[#0052CC] transition hover:border-[#0052CC]/40 hover:bg-[var(--color-ushqn-surface)]"
+                  >
+                    {t('chat.allCommunities')}
+                  </Link>
+                </div>
               </>
             )}
           </div>
@@ -871,9 +950,15 @@ export function ChatPage() {
               {activeConv ? (
                 <>
                   <div
-                    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${colorFor(activeConv.avatarKey)} text-sm font-bold text-white`}
+                    className={`relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br ${colorFor(activeConv.avatarKey)} text-sm font-bold text-white`}
                   >
-                    {activeConv.isGroup ? '⎔' : getInitials(activeConv.displayName)}
+                    {!activeConv.isGroup && activeConv.avatarUrl ? (
+                      <img src={activeConv.avatarUrl} alt="" className="h-full w-full object-cover" loading="lazy" />
+                    ) : activeConv.isGroup ? (
+                      '⎔'
+                    ) : (
+                      initialsFromChatLabel(activeConv.displayName)
+                    )}
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-extrabold text-[var(--color-ushqn-text)]">{activeConv.displayName}</p>
@@ -921,14 +1006,25 @@ export function ChatPage() {
                     !Number.isNaN(peerReadAt) &&
                     peerReadAt >= new Date(m.created_at).getTime()
                   const showName = activeConv?.isGroup && !isMe
-                  const senderName = nameById.get(m.sender_id) ?? t('chat.unknownPeer')
+                  const senderName = nameById.get(m.sender_id) ?? t('chat.peerFallback')
+                  const incomingDmAvatar =
+                    !isMe && activeConv && !activeConv.isGroup && dmPeerId ? activeConv.avatarUrl : null
+                  const groupPh = activeConv?.isGroup ? avatarById.get(m.sender_id) : null
                   return (
                     <div key={item.key} className={`flex gap-2 py-0.5 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
                       {!isMe ? (
-                        <div
-                          className={`mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${colorFor(m.sender_id)} text-[10px] font-bold text-white`}
-                        >
-                          {getInitials(senderName)}
+                        <div className="mt-1 h-8 w-8 shrink-0 overflow-hidden rounded-xl">
+                          {incomingDmAvatar ? (
+                            <img src={incomingDmAvatar} alt="" className="h-full w-full object-cover" loading="lazy" />
+                          ) : groupPh ? (
+                            <img src={groupPh} alt="" className="h-full w-full object-cover" loading="lazy" />
+                          ) : (
+                            <div
+                              className={`flex h-full w-full items-center justify-center bg-gradient-to-br ${colorFor(m.sender_id)} text-[10px] font-bold text-white`}
+                            >
+                              {initialsFromChatLabel(senderName)}
+                            </div>
+                          )}
                         </div>
                       ) : (
                         <div className="w-8 shrink-0" aria-hidden />
