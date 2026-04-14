@@ -5,6 +5,9 @@ import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
+import { AppPageMeta } from '../components/AppPageMeta'
+import { AuthBrand } from '../components/AuthBrand'
+import { AuthShell } from '../components/AuthShell'
 
 type Form = { password: string; confirm: string }
 
@@ -48,35 +51,30 @@ export function ResetPasswordPage() {
 
   if (!ready) {
     return (
-      <div className="flex min-h-dvh items-center justify-center px-4"
-        style={{ background: 'linear-gradient(135deg, #f0f4ff 0%, #f3f2ef 100%)' }}
-      >
-        <div className="ushqn-card p-8 text-center w-full max-w-sm">
-          <p className="text-sm text-[#6B778C]">{t('common.loading')}</p>
-        </div>
-      </div>
+      <AuthShell maxWidthClass="max-w-sm">
+        <AppPageMeta title={`${t('resetPassword.title')} · USHQN`} />
+        <AuthBrand />
+        <p className="text-center text-sm text-slate-500 dark:text-slate-400">{t('common.loading')}</p>
+      </AuthShell>
     )
   }
 
   return (
-    <div className="flex min-h-dvh items-center justify-center px-4"
-      style={{ background: 'linear-gradient(135deg, #f0f4ff 0%, #f3f2ef 100%)' }}
-    >
-      <div className="ushqn-card w-full max-w-[420px] p-8 sm:p-10">
-        <div className="mb-6 text-center">
-          <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#0052CC] text-xl font-black text-white shadow-lg shadow-blue-200">U</div>
-          <h1 className="text-xl font-extrabold text-[#0052CC]">USHQN</h1>
-        </div>
+    <AuthShell maxWidthClass="max-w-[420px]">
+      <AppPageMeta title={`${t('resetPassword.title')} · USHQN`} />
+      <AuthBrand />
 
-        {success ? (
-          <div className="text-center">
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#E3FCEF] text-3xl">✅</div>
-            <h2 className="text-lg font-bold text-[#172B4D]">{t('resetPassword.success')}</h2>
+      {success ? (
+        <div className="text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-emerald-100 to-teal-100 text-3xl dark:from-emerald-900/50 dark:to-teal-900/40">
+            ✅
           </div>
-        ) : (
-          <>
-            <h2 className="mb-2 text-center text-lg font-bold text-[#172B4D]">{t('resetPassword.title')}</h2>
-            <p className="mb-5 text-center text-sm text-[#6B778C]">{t('resetPassword.subtitle')}</p>
+          <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">{t('resetPassword.success')}</h2>
+        </div>
+      ) : (
+        <>
+          <h2 className="mb-2 text-center text-lg font-bold text-slate-800 dark:text-slate-100">{t('resetPassword.title')}</h2>
+          <p className="mb-5 text-center text-sm text-slate-500 dark:text-slate-400">{t('resetPassword.subtitle')}</p>
             <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
               <div>
                 <label className="ushqn-label">{t('resetPassword.newPassword')}</label>
@@ -103,14 +101,17 @@ export function ResetPasswordPage() {
                 <input type="password" className="ushqn-input" placeholder="…" {...register('confirm')} />
                 {errors.confirm ? <p className="mt-1 text-xs text-red-600">{errors.confirm.message}</p> : null}
               </div>
-              {error ? <p className="rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p> : null}
-              <button type="submit" disabled={isSubmitting} className="ushqn-btn-primary w-full py-3">
+              {error ? (
+                <p className="rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/40 dark:text-red-200">
+                  {error}
+                </p>
+              ) : null}
+              <button type="submit" disabled={isSubmitting} className="ushqn-btn-primary w-full py-3 shadow-lg shadow-[#0052CC]/25">
                 {isSubmitting ? t('resetPassword.submitting') : t('resetPassword.submit')}
               </button>
             </form>
           </>
         )}
-      </div>
-    </div>
+    </AuthShell>
   )
 }

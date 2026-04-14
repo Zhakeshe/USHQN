@@ -10,6 +10,9 @@ import { getAppBaseUrl } from '../lib/siteUrl'
 import { trackEvent } from '../lib/analytics'
 import { clearReferralFromStorage, peekReferralUserId } from '../lib/referral'
 import type { UserRole } from '../types/database'
+import { AppPageMeta } from '../components/AppPageMeta'
+import { AuthBrand } from '../components/AuthBrand'
+import { AuthShell } from '../components/AuthShell'
 
 function formatRegisterError(e: AuthError, t: (k: string) => string): string {
   const m = e.message.toLowerCase()
@@ -57,7 +60,7 @@ function PasswordStrength({ password, t }: { password: string; t: (k: string) =>
       </div>
       <div className="flex flex-wrap gap-x-3 gap-y-0.5">
         {checks.map((c) => (
-          <span key={c.label} className={`text-xs ${c.ok ? 'text-green-600' : 'text-[#97A0AF]'}`}>
+          <span key={c.label} className={`text-xs ${c.ok ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'}`}>
             {c.ok ? '✓' : '○'} {c.label}
           </span>
         ))}
@@ -164,63 +167,59 @@ export function RegisterPage() {
   }
 
   return (
-    <div
-      className="flex min-h-dvh flex-col items-center justify-center px-4 py-10"
-      style={{ background: 'linear-gradient(135deg, #f0f4ff 0%, #f3f2ef 60%, #e8f5e9 100%)' }}
-    >
-      <div className="ushqn-card w-full max-w-[460px] p-8 sm:p-10">
-        {/* Branding */}
-        <div className="mb-6 text-center">
-          <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#0052CC] text-xl font-black text-white shadow-lg shadow-blue-200">
-            U
+    <AuthShell maxWidthClass="max-w-[520px]">
+      <AppPageMeta title={`${t('register.title')} · USHQN`} />
+      <AuthBrand slogan={t('login.slogan')} />
+
+      <h2 className="mb-5 text-center text-lg font-bold text-slate-800 dark:text-slate-100">{t('register.title')}</h2>
+
+      {/* Google */}
+      <button
+        type="button"
+        disabled={googleLoading}
+        onClick={() => void signInWithGoogle()}
+        className="mb-5 flex w-full items-center justify-center gap-3 rounded-xl border border-slate-200/90 bg-white px-4 py-3 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 hover:shadow-md active:scale-[0.99] disabled:opacity-60 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
+      >
+        <GoogleIcon />
+        {googleLoading ? t('login.googleLoading') : t('register.google')}
+      </button>
+
+      <div className="mb-5 flex items-center gap-3">
+        <div className="h-px flex-1 bg-slate-200 dark:bg-slate-600" />
+        <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">{t('register.orEmail')}</span>
+        <div className="h-px flex-1 bg-slate-200 dark:bg-slate-600" />
+      </div>
+
+      <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+        {/* Role selector */}
+        <div>
+          <label className="ushqn-label mb-2 block">{t('register.role')}</label>
+          <p className="mb-3 text-xs leading-relaxed text-slate-500 dark:text-slate-400">{t('register.roleDesc')}</p>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            {roleOptions.map((o) => (
+              <button
+                key={o.value}
+                type="button"
+                onClick={() => {
+                  setSelectedRole(o.value)
+                  setValue('role', o.value)
+                }}
+                className={`group flex flex-col items-center gap-1.5 rounded-2xl border-2 p-4 text-center transition-all duration-200 ${
+                  selectedRole === o.value
+                    ? 'border-[#0052CC] bg-gradient-to-b from-[#E9F2FF] to-white shadow-lg shadow-[#0052CC]/15 ring-2 ring-[#0052CC]/20 dark:from-slate-800 dark:to-slate-900 dark:ring-[#79b8ff]/30'
+                    : 'border-slate-200 bg-white hover:border-[#0052CC]/45 hover:shadow-md dark:border-slate-600 dark:bg-slate-900/80 dark:hover:border-[#79b8ff]/40'
+                }`}
+              >
+                <span className="text-3xl transition-transform duration-200 group-hover:scale-110">{o.icon}</span>
+                <span className={`text-xs font-extrabold ${selectedRole === o.value ? 'text-[#0052CC] dark:text-[#79b8ff]' : 'text-slate-800 dark:text-slate-100'}`}>
+                  {o.label}
+                </span>
+                <span className="text-[10px] font-medium leading-snug text-slate-500 dark:text-slate-400">{o.desc}</span>
+              </button>
+            ))}
           </div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-[#0052CC]">USHQN</h1>
-          <p className="mt-0.5 text-sm font-semibold text-[#6B778C]">{t('login.slogan')}</p>
+          <input type="hidden" {...register('role')} />
         </div>
-
-        <h2 className="mb-5 text-center text-lg font-bold text-[#172B4D]">{t('register.title')}</h2>
-
-        {/* Google */}
-        <button
-          type="button"
-          disabled={googleLoading}
-          onClick={() => void signInWithGoogle()}
-          className="mb-5 flex w-full items-center justify-center gap-3 rounded-xl border border-[#DFE1E6] bg-white px-4 py-2.5 text-sm font-semibold text-[#172B4D] shadow-sm transition hover:border-[#C7CDD6] hover:bg-[#FAFBFC] active:scale-[0.99] disabled:opacity-60"
-        >
-          <GoogleIcon />
-          {googleLoading ? t('login.googleLoading') : t('register.google')}
-        </button>
-
-        <div className="mb-5 flex items-center gap-3">
-          <div className="h-px flex-1 bg-[#DFE1E6]" />
-          <span className="text-xs font-medium text-[#97A0AF]">{t('register.orEmail')}</span>
-          <div className="h-px flex-1 bg-[#DFE1E6]" />
-        </div>
-
-        <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
-          {/* Role selector */}
-          <div>
-            <label className="ushqn-label mb-2">{t('register.roleDesc')}</label>
-            <div className="grid grid-cols-3 gap-2">
-              {roleOptions.map((o) => (
-                <button
-                  key={o.value}
-                  type="button"
-                  onClick={() => { setSelectedRole(o.value); setValue('role', o.value) }}
-                  className={`flex flex-col items-center gap-1 rounded-xl border-2 p-3 text-center transition-all ${
-                    selectedRole === o.value
-                      ? 'border-[#0052CC] bg-[#DEEBFF] text-[#0052CC]'
-                      : 'border-[#DFE1E6] bg-white text-[#172B4D] hover:border-[#0052CC]/40'
-                  }`}
-                >
-                  <span className="text-2xl">{o.icon}</span>
-                  <span className="text-xs font-bold">{o.label}</span>
-                  <span className="text-[10px] text-[#6B778C] leading-tight">{o.desc}</span>
-                </button>
-              ))}
-            </div>
-            <input type="hidden" {...register('role')} />
-          </div>
 
           <div>
             <label className="ushqn-label" htmlFor="display_name">{t('register.displayName')}</label>
@@ -254,7 +253,7 @@ export function RegisterPage() {
               <button
                 type="button"
                 tabIndex={-1}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#97A0AF] hover:text-[#6B778C]"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
                 onClick={() => setShowPassword((v) => !v)}
               >
                 {showPassword ? (
@@ -274,27 +273,32 @@ export function RegisterPage() {
             {errors.password ? <p className="mt-1 text-xs text-red-600">{errors.password.message}</p> : null}
           </div>
 
-          {error ? (
-            <p className="rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-sm leading-snug text-red-700">{error}</p>
-          ) : null}
-          {info ? (
-            <p className="rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-sm leading-snug text-green-900">{info}</p>
-          ) : null}
+        {error ? (
+          <p className="rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-sm leading-snug text-red-700 dark:border-red-900/40 dark:bg-red-950/40 dark:text-red-200">
+            {error}
+          </p>
+        ) : null}
+        {info ? (
+          <p className="rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-sm leading-snug text-green-900 dark:border-emerald-900/40 dark:bg-emerald-950/35 dark:text-emerald-100">
+            {info}
+          </p>
+        ) : null}
 
-          <button type="submit" disabled={isSubmitting} className="ushqn-btn-primary w-full py-3 text-base">
-            {isSubmitting ? t('register.submitting') : `${t('register.submit')} 🚀`}
-          </button>
-        </form>
+        <button type="submit" disabled={isSubmitting} className="ushqn-btn-primary w-full py-3 text-base shadow-lg shadow-[#0052CC]/25">
+          {isSubmitting ? t('register.submitting') : `${t('register.submit')} 🚀`}
+        </button>
+      </form>
 
-        <div className="mt-4 rounded-xl bg-gradient-to-r from-[#E3FCEF] to-[#DEEBFF] px-4 py-3 text-center">
-          <p className="text-sm font-bold text-[#006644]">🎁 +500 {t('common.points')}!</p>
-        </div>
-
-        <p className="mt-4 text-center text-sm text-[#6B778C]">
-          {t('register.hasAccount')}{' '}
-          <Link to="/login" className="font-bold text-[#0052CC] hover:underline">{t('register.login')}</Link>
-        </p>
+      <div className="mt-4 rounded-2xl border border-emerald-200/60 bg-gradient-to-r from-emerald-50/95 to-sky-50/90 px-4 py-3.5 text-center dark:border-emerald-900/40 dark:from-emerald-950/40 dark:to-sky-950/30">
+        <p className="text-sm font-bold text-emerald-800 dark:text-emerald-200">🎁 +500 {t('common.points')}!</p>
       </div>
-    </div>
+
+      <p className="mt-4 text-center text-sm text-slate-500 dark:text-slate-400">
+        {t('register.hasAccount')}{' '}
+        <Link to="/login" className="font-bold text-[#0052CC] hover:underline dark:text-[#79b8ff]">
+          {t('register.login')}
+        </Link>
+      </p>
+    </AuthShell>
   )
 }

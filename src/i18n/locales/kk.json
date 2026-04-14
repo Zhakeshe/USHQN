@@ -57,6 +57,9 @@
     "home": "Басты бет",
     "logout": "Шығу"
   },
+  "auth": {
+    "backToLanding": "Басты бетке"
+  },
   "login": {
     "title": "Аккаунтқа кіру",
     "slogan": "Discover. Grow. Achieve.",

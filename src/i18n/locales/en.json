@@ -57,6 +57,9 @@
     "home": "Home",
     "logout": "Log out"
   },
+  "auth": {
+    "backToLanding": "Back to home"
+  },
   "login": {
     "title": "Sign in to your account",
     "slogan": "Discover. Grow. Achieve.",

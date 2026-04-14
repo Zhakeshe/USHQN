@@ -493,3 +493,64 @@ html.dark .ushqn-rating-hero-mesh {
     radial-gradient(ellipse 60% 50% at 80% 60%, rgba(38, 132, 255, 0.25), transparent 50%),
     linear-gradient(135deg, #0c1e3d 0%, #1e3a5f 48%, #0d4f5c 100%);
 }
+
+/* ── Auth pages (login / register) — match landing mood ───── */
+@keyframes ushqn-auth-orb {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translate(18px, -22px) scale(1.06);
+    opacity: 0.65;
+  }
+}
+
+@keyframes ushqn-auth-orb2 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.35;
+  }
+  50% {
+    transform: translate(-20px, 14px) scale(1.05);
+    opacity: 0.55;
+  }
+}
+
+@keyframes ushqn-auth-card {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.ushqn-auth-orb-a {
+  animation: ushqn-auth-orb 19s ease-in-out infinite;
+}
+
+.ushqn-auth-orb-b {
+  animation: ushqn-auth-orb2 24s ease-in-out infinite;
+}
+
+.ushqn-auth-card-in {
+  animation: ushqn-auth-card 0.55s cubic-bezier(0.34, 1.35, 0.64, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ushqn-auth-orb-a,
+  .ushqn-auth-orb-b {
+    animation: none;
+    opacity: 0.35;
+  }
+  .ushqn-auth-card-in {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}

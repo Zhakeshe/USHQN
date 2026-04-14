@@ -57,6 +57,9 @@
     "home": "Главная",
     "logout": "Выйти"
   },
+  "auth": {
+    "backToLanding": "На главную"
+  },
   "login": {
     "title": "Вход в аккаунт",
     "slogan": "Discover. Grow. Achieve.",
