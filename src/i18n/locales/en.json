@@ -683,6 +683,10 @@
       "title": "👤 Profile & social",
       "bio": "About (up to 300 chars)",
       "bioPlaceholder": "Tell about yourself, your goals and interests…",
+      "username": "Username",
+      "usernamePh": "yourname",
+      "usernameHint": "3–30 characters: lowercase letters, numbers, underscore. Example: asel_dev",
+      "usernameInvalid": "Only lowercase letters, numbers and underscore, 3–30 characters",
       "github": "GitHub",
       "githubPlaceholder": "https://github.com/username",
       "telegram": "Telegram",
@@ -782,6 +786,7 @@
     "shareLink": "Copy profile link",
     "follow": "Follow",
     "unfollow": "Unfollow",
+    "following": "following",
     "message": "Send message",
     "achievements": "Achievements",
     "noAchievements": "No achievements yet"

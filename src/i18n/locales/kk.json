@@ -677,6 +677,10 @@
       "title": "👤 Профиль және әлеуметтік желілер",
       "bio": "Өзі туралы (300 таңбаға дейін)",
       "bioPlaceholder": "Өзіңіз, мақсаттарыңыз және қызығушылықтарыңыз туралы айтыңыз…",
+      "username": "Пайдаланушы аты",
+      "usernamePh": "yourname",
+      "usernameHint": "3–30 таңба: кіші әріптер, сандар, астын сызу. Мысалы: asel_dev",
+      "usernameInvalid": "Тек кіші әріптер, сандар және _, 3–30 таңба",
       "github": "GitHub",
       "githubPlaceholder": "https://github.com/username",
       "telegram": "Telegram",
@@ -776,6 +780,7 @@
     "shareLink": "Профиль сілтемесін көшіру",
     "follow": "Жазылу",
     "unfollow": "Жазылымнан шығу",
+    "following": "жазылым",
     "message": "Хабарлама жазу",
     "achievements": "Жетістіктер",
     "noAchievements": "Жетістіктер жоқ"

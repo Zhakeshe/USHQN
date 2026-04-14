@@ -685,6 +685,10 @@
       "title": "👤 Профиль и соцсети",
       "bio": "О себе (до 300 символов)",
       "bioPlaceholder": "Расскажите о себе, своих целях и интересах…",
+      "username": "Имя пользователя",
+      "usernamePh": "yourname",
+      "usernameHint": "3–30 символов: строчные буквы, цифры, нижнее подчёркивание. Пример: asel_dev",
+      "usernameInvalid": "Только строчные буквы, цифры и _, 3–30 символов",
       "github": "GitHub",
       "githubPlaceholder": "https://github.com/username",
       "telegram": "Telegram",
@@ -784,6 +788,7 @@
     "shareLink": "Скопировать ссылку на профиль",
     "follow": "Подписаться",
     "unfollow": "Отписаться",
+    "following": "подписок",
     "message": "Написать сообщение",
     "achievements": "Достижения",
     "noAchievements": "Пока нет достижений"

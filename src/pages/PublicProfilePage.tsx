@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Helmet } from 'react-helmet-async'
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -34,6 +34,55 @@ export function PublicProfilePage() {
   const [recText, setRecText] = useState('')
   const [recPublic, setRecPublic] = useState(true)
   const [mentorNote, setMentorNote] = useState('')
+
+  const followersQuery = useQuery({
+    queryKey: ['followers-count', id],
+    enabled: Boolean(id),
+    queryFn: async () => {
+      const [{ count: followersCount }, { count: followingCount }] = await Promise.all([
+        supabase.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', id!),
+        supabase.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', id!),
+      ])
+      return { followers: followersCount ?? 0, following: followingCount ?? 0 }
+    },
+  })
+
+  const isFollowingQuery = useQuery({
+    queryKey: ['is-following', userId, id],
+    enabled: Boolean(userId && id && !isSelf),
+    queryFn: async () => {
+      const { data } = await supabase.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', userId!).eq('following_id', id!)
+      return (data as unknown as { count: number } | null)?.count !== undefined
+        ? false
+        : Boolean(data)
+    },
+  })
+
+  const followMutation = useMutation({
+    mutationFn: async () => {
+      if (!userId || !id) return
+      const isFollowing = isFollowingQuery.data
+      if (isFollowing) {
+        await supabase.from('follows').delete().eq('follower_id', userId).eq('following_id', id)
+      } else {
+        await supabase.from('follows').insert({ follower_id: userId, following_id: id })
+      }
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['is-following', userId, id] })
+      void qc.invalidateQueries({ queryKey: ['followers-count', id] })
+      void qc.invalidateQueries({ queryKey: ['people-all', userId] })
+    },
+  })
+
+  // Proper check using count
+  const [isFollowing, setIsFollowing] = useState(false)
+  useEffect(() => {
+    if (!userId || !id || isSelf) return
+    void supabase.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', userId).eq('following_id', id).then(({ count }) => {
+      setIsFollowing((count ?? 0) > 0)
+    })
+  }, [userId, id, isSelf, followMutation.isSuccess])
 
   const profileQuery = useQuery({
     queryKey: ['profile', id],
@@ -244,9 +293,39 @@ export function PublicProfilePage() {
             </section>
           ) : null}
 
+          {/* Followers / Following stats */}
+          {followersQuery.data ? (
+            <div className="mt-4 flex gap-4 px-1">
+              <div className="text-center">
+                <span className="block text-lg font-black text-[#172B4D]">{followersQuery.data.followers}</span>
+                <span className="text-[11px] font-semibold text-[#6B778C]">{t('profile.followersCount')}</span>
+              </div>
+              <div className="text-center">
+                <span className="block text-lg font-black text-[#172B4D]">{followersQuery.data.following}</span>
+                <span className="text-[11px] font-semibold text-[#6B778C]">{t('publicProfile.following')}</span>
+              </div>
+            </div>
+          ) : null}
+
           <div className="mt-4 flex flex-wrap items-center gap-2">
             {!isSelf && userId ? (
               <>
+                {/* Follow button */}
+                <button
+                  type="button"
+                  disabled={followMutation.isPending}
+                  onClick={() => {
+                    setIsFollowing((v) => !v)
+                    followMutation.mutate()
+                  }}
+                  className={`rounded-full border px-5 py-2 text-sm font-semibold transition ${
+                    isFollowing
+                      ? 'border-[#0052CC] bg-[#EFF6FF] text-[#0052CC] hover:bg-[#DEEBFF]'
+                      : 'border-[#DFE1E6] bg-white text-[#172B4D] hover:border-[#0052CC] hover:bg-[#DEEBFF]/40'
+                  }`}
+                >
+                  {isFollowing ? `✓ ${t('publicProfile.follow')}` : `+ ${t('publicProfile.follow')}`}
+                </button>
                 <button
                   type="button"
                   className="rounded-full px-5 py-2 text-sm font-semibold text-white"

@@ -398,14 +398,12 @@ export function ChatPage() {
 
   const membersQuery = useQuery({
     queryKey: ['conv-members', conversationId],
-    enabled: Boolean(conversationId),
+    enabled: Boolean(conversationId && userId),
     queryFn: async () => {
-      const { data: parts, error } = await supabase
-        .from('conversation_participants')
-        .select('user_id')
-        .eq('conversation_id', conversationId!)
+      const { data: parts, error } = await supabase.rpc('get_conversation_members', { p_conv_id: conversationId! })
       if (error) throw error
-      const ids = [...new Set((parts ?? []).map((p) => p.user_id))]
+      const ids = [...new Set((parts ?? []).map((p: { user_id: string }) => p.user_id))]
+      if (ids.length === 0) return { ids: [], byId: new Map<string, string>() }
       const { data: profs, error: e2 } = await supabase.from('profiles').select('id,display_name').in('id', ids)
       if (e2) throw e2
       const byId = new Map((profs ?? []).map((p) => [p.id, p.display_name ?? t('chat.unknownPeer')]))

@@ -459,6 +459,10 @@ export interface Database {
           other_user_ids: string[]
         }[]
       }
+      get_conversation_members: {
+        Args: { p_conv_id: string }
+        Returns: { user_id: string }[]
+      }
       get_or_create_community_chat: {
         Args: { p_community_id: string }
         Returns: string

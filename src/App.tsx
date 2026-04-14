@@ -1,6 +1,5 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom'
-import { useEffect } from 'react'
 import { AppLayout } from './components/Layout'
 import { AchievementsPage } from './pages/AchievementsPage'
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage'

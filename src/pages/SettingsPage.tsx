@@ -23,6 +23,7 @@ type SocialForm = {
   telegram_url?: string
   linkedin_url?: string
   website_url?: string
+  username?: string
 }
 
 type PasswordForm = {
@@ -115,6 +116,9 @@ export function SettingsPage() {
 
   const socialSchema = z.object({
     bio: z.string().max(300).optional(),
+    username: z.string().optional().refine((v) => !v || /^[a-z0-9_]{3,30}$/.test(v), {
+      message: t('settings.profile.usernameInvalid'),
+    }),
     github_url: z.string().url(t('settings.profile.invalidUrl')).or(z.literal('')).optional(),
     telegram_url: z.string().optional(),
     linkedin_url: z.string().url(t('settings.profile.invalidUrl')).or(z.literal('')).optional(),
@@ -159,6 +163,7 @@ export function SettingsPage() {
     if (!p) return
     socialForm.reset({
       bio: p.bio ?? '',
+      username: (p as { username?: string | null }).username ?? '',
       github_url: p.github_url ?? '',
       telegram_url: p.telegram_url ?? '',
       linkedin_url: p.linkedin_url ?? '',
@@ -170,6 +175,7 @@ export function SettingsPage() {
     mutationFn: async (values: SocialForm) => {
       const { error } = await supabase.from('profiles').update({
         bio: values.bio || null,
+        username: values.username ? values.username.toLowerCase().trim() : null,
         github_url: values.github_url || null,
         telegram_url: values.telegram_url || null,
         linkedin_url: values.linkedin_url || null,
@@ -254,6 +260,21 @@ export function SettingsPage() {
           {section === 'profile' ? (
             <form onSubmit={socialForm.handleSubmit((v) => saveSocial.mutate(v))} className="space-y-4">
               <h2 className="ushqn-section-title">{t('settings.profile.title')}</h2>
+              {/* Username */}
+              <div>
+                <label className="ushqn-label">{t('settings.profile.username')}</label>
+                <div className="flex items-center overflow-hidden rounded-xl border border-[var(--color-ushqn-border)] bg-[var(--color-ushqn-surface-muted)] focus-within:border-[#0052CC] focus-within:ring-2 focus-within:ring-[#0052CC]/20">
+                  <span className="border-r border-[var(--color-ushqn-border)] bg-[var(--color-ushqn-surface)] px-3 py-2.5 text-sm font-bold text-[var(--color-ushqn-muted)]">@</span>
+                  <input
+                    className="flex-1 bg-transparent px-3 py-2.5 text-sm text-[var(--color-ushqn-text)] outline-none placeholder:text-[var(--color-ushqn-muted)]"
+                    placeholder={t('settings.profile.usernamePh')}
+                    {...socialForm.register('username')}
+                  />
+                </div>
+                <p className="mt-1 text-[11px] text-[var(--color-ushqn-muted)]">{t('settings.profile.usernameHint')}</p>
+                {socialForm.formState.errors.username ? <p className="mt-1 text-xs text-red-600">{socialForm.formState.errors.username.message}</p> : null}
+              </div>
+              {/* Bio */}
               <div>
                 <label className="ushqn-label">{t('settings.profile.bio')}</label>
                 <textarea
