@@ -126,6 +126,60 @@ function previewLine(
   return shortened
 }
 
+function ChatConvItem({
+  c,
+  conversationId,
+  i18n,
+  t,
+  nowTs,
+}: {
+  c: ConvListItem
+  conversationId: string | undefined
+  i18n: { language: string }
+  t: TFunction
+  nowTs: number
+}) {
+  const isActive = c.id === conversationId
+  const grad = colorFor(c.avatarKey)
+  const timeStr = c.lastAt ? formatRelativeListTime(c.lastAt, i18n.language, t, nowTs) : ''
+  return (
+    <div className="border-b border-[var(--color-ushqn-border)]/30 last:border-0">
+      <Link
+        to={`/chat/${c.id}`}
+        className={`flex items-center gap-3 px-3 py-2.5 transition ${
+          isActive
+            ? 'bg-[var(--color-ushqn-surface)] shadow-[inset_3px_0_0_#0052CC]'
+            : 'hover:bg-[var(--color-ushqn-surface)]'
+        }`}
+      >
+        <div
+          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${grad} text-xs font-bold text-white shadow-inner`}
+        >
+          {c.isGroup ? '⎔' : getInitials(c.displayName)}
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-baseline justify-between gap-1">
+            <p className={`truncate text-sm font-bold ${isActive ? 'text-[#0052CC]' : 'text-[var(--color-ushqn-text)]'}`}>
+              {c.displayName}
+            </p>
+            <div className="flex shrink-0 items-center gap-1">
+              {c.hasUnread && !isActive ? (
+                <span className="flex min-w-[1.1rem] items-center justify-center rounded-full bg-[#0052CC] px-1.5 py-[1px] text-[9px] font-extrabold text-white">
+                  {c.unreadCount > 9 ? '9+' : c.unreadCount}
+                </span>
+              ) : null}
+              {timeStr ? (
+                <span className="text-[9px] text-[var(--color-ushqn-muted)]">{timeStr}</span>
+              ) : null}
+            </div>
+          </div>
+          <p className="mt-0.5 line-clamp-1 text-[11px] leading-snug text-[var(--color-ushqn-muted)]">{c.subtitle}</p>
+        </div>
+      </Link>
+    </div>
+  )
+}
+
 const AVATAR_COLORS = [
   'from-[#0d8abc] to-[#2eb88a]',
   'from-[#6b4dc8] to-[#9d74e8]',
@@ -319,6 +373,25 @@ export function ChatPage() {
   const [typingUsers, setTypingUsers] = useState<string[]>([])
   const [replyDraft, setReplyDraft] = useState<MsgRow | null>(null)
   const [nowTs, setNowTs] = useState(() => Date.now())
+  const [chatSearch, setChatSearch] = useState('')
+  const [chatSearchFocused, setChatSearchFocused] = useState(false)
+  const chatSearchDebounced = useDebouncedValue(chatSearch.trim(), 300)
+
+  const userSearchQuery = useQuery({
+    queryKey: ['chat-user-search', chatSearchDebounced],
+    enabled: chatSearchFocused && chatSearchDebounced.length >= 1,
+    queryFn: async () => {
+      const q = chatSearchDebounced
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id,display_name,username,avatar_url')
+        .neq('id', userId ?? '')
+        .or(`display_name.ilike.%${q}%,username.ilike.%${q}%`)
+        .limit(10)
+      if (error) throw error
+      return data ?? []
+    },
+  })
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const typingChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null)
@@ -653,77 +726,114 @@ export function ChatPage() {
 
       {/* Sidebar — messenger rail */}
       <aside
-        className={`flex min-h-[320px] flex-col overflow-hidden rounded-2xl border border-[var(--color-ushqn-border)] bg-[#e8eaed] shadow-sm dark:bg-[#1a2332] lg:min-h-0 ${
+        className={`flex min-h-[320px] flex-col overflow-hidden rounded-2xl border border-[var(--color-ushqn-border)] bg-[var(--color-ushqn-surface-muted)] shadow-sm lg:min-h-0 ${
           conversationId ? 'hidden lg:flex' : 'flex'
         }`}
       >
-        <div className="flex items-center justify-between gap-2 border-b border-black/5 px-3 py-3 dark:border-white/10">
+        {/* Top bar: title + new group */}
+        <div className="flex items-center justify-between gap-2 border-b border-[var(--color-ushqn-border)] px-3 py-2.5">
           <h2 className="text-sm font-extrabold tracking-tight text-[var(--color-ushqn-text)]">{t('chat.sidebarTitle')}</h2>
           <button
             type="button"
             onClick={() => setGroupModalOpen(true)}
-            className="shrink-0 rounded-full bg-[#0052CC] px-3 py-1.5 text-xs font-bold text-white shadow-md shadow-[#0052CC]/20 transition hover:bg-[#0747A6] active:scale-95"
+            className="shrink-0 rounded-full bg-[#0052CC] px-2.5 py-1.5 text-[11px] font-bold text-white shadow-sm transition hover:bg-[#0747A6] active:scale-95"
           >
             + {t('chat.newGroup')}
           </button>
         </div>
-        <ul className="flex-1 overflow-y-auto">
-          {(sidebarQuery.data ?? []).length === 0 && !sidebarQuery.isLoading ? (
-            <li className="flex flex-col items-center px-4 py-12 text-center">
-              <span className="text-4xl opacity-90">💬</span>
-              <p className="mt-3 text-sm font-bold text-[var(--color-ushqn-text)]">{t('chat.noThreadsTitle')}</p>
-              <p className="mt-1 text-xs leading-relaxed text-[var(--color-ushqn-muted)]">{t('chat.noThreadsHint')}</p>
-              <Link
-                to="/people"
-                className="mt-4 text-xs font-bold uppercase tracking-wide text-[#0052CC] hover:underline"
-              >
-                {t('nav.people')} →
-              </Link>
-            </li>
-          ) : (
-            convList.map((c) => {
-              const isActive = c.id === conversationId
-              const grad = colorFor(c.avatarKey)
-              const timeStr = c.lastAt ? formatRelativeListTime(c.lastAt, i18n.language, t, nowTs) : ''
-              return (
-                <li key={c.id} className="border-b border-black/[0.06] dark:border-white/[0.06]">
-                  <Link
-                    to={`/chat/${c.id}`}
-                    className={`flex items-start gap-3 px-3 py-3 transition ${
-                      isActive
-                        ? 'bg-white shadow-[inset_3px_0_0_#0052CC] dark:bg-[#243045]'
-                        : 'hover:bg-black/[0.04] dark:hover:bg-white/[0.05]'
-                    }`}
-                  >
-                    <div
-                      className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${grad} text-sm font-bold text-white shadow-inner`}
+
+        {/* Search bar */}
+        <div className="relative px-3 py-2">
+          <svg className="pointer-events-none absolute left-5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--color-ushqn-muted)]" viewBox="0 0 16 16" fill="currentColor">
+            <path fillRule="evenodd" d="M9.965 11.026a5 5 0 1 1 1.06-1.06l2.755 2.754a.75.75 0 1 1-1.06 1.06l-2.755-2.754ZM10.5 7a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z" clipRule="evenodd" />
+          </svg>
+          <input
+            value={chatSearch}
+            onChange={(e) => setChatSearch(e.target.value)}
+            onFocus={() => setChatSearchFocused(true)}
+            onBlur={() => setTimeout(() => setChatSearchFocused(false), 200)}
+            placeholder={t('chat.searchPeople')}
+            className="w-full rounded-xl border border-[var(--color-ushqn-border)] bg-[var(--color-ushqn-surface)] py-2 pl-8 pr-3 text-xs text-[var(--color-ushqn-text)] outline-none transition focus:border-[#0052CC] focus:ring-1 focus:ring-[#0052CC]/20 placeholder:text-[var(--color-ushqn-muted)]"
+          />
+          {chatSearch ? (
+            <button type="button" onClick={() => setChatSearch('')} className="absolute right-5 top-1/2 -translate-y-1/2 text-[var(--color-ushqn-muted)] hover:text-[var(--color-ushqn-text)]">
+              ×
+            </button>
+          ) : null}
+        </div>
+
+        {/* Search results — user list */}
+        {chatSearch && chatSearchDebounced.length >= 1 ? (
+          <div className="flex-1 overflow-y-auto">
+            {userSearchQuery.isLoading ? (
+              <p className="px-4 py-3 text-xs text-[var(--color-ushqn-muted)]">…</p>
+            ) : (userSearchQuery.data ?? []).length === 0 ? (
+              <p className="px-4 py-3 text-xs text-[var(--color-ushqn-muted)]">—</p>
+            ) : (
+              <ul>
+                {(userSearchQuery.data ?? []).map((p) => (
+                  <li key={p.id} className="border-b border-[var(--color-ushqn-border)]/40 last:border-0">
+                    <button
+                      type="button"
+                      className="flex w-full items-center gap-3 px-3 py-3 transition hover:bg-[var(--color-ushqn-surface)]"
+                      onClick={async () => {
+                        const { data, error } = await supabase.rpc('get_or_create_dm', { other_id: p.id })
+                        if (!error && data) {
+                          setChatSearch('')
+                          void import('react-router-dom').then(({ useNavigate: _ }) => {})
+                          window.location.href = `/chat/${data as string}`
+                        }
+                      }}
                     >
-                      {c.isGroup ? '⎔' : getInitials(c.displayName)}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-baseline justify-between gap-2">
-                        <p className={`truncate text-sm font-bold ${isActive ? 'text-[#0052CC]' : 'text-[var(--color-ushqn-text)]'}`}>
-                          {c.displayName}
-                        </p>
-                        <div className="ml-2 flex shrink-0 items-center gap-1.5">
-                          {c.hasUnread && !isActive ? (
-                            <span className="inline-flex min-w-[1.05rem] justify-center rounded-full bg-[#0052CC] px-1.5 py-[1px] text-[9px] font-extrabold leading-tight text-white shadow-[0_0_0_2px_rgba(0,82,204,0.15)]">
-                              {c.unreadCount > 5 ? '5+' : c.unreadCount}
-                            </span>
-                          ) : null}
-                          {timeStr ? (
-                            <span className="text-[10px] font-semibold tabular-nums text-[var(--color-ushqn-muted)]">{timeStr}</span>
-                          ) : null}
-                        </div>
+                      <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${colorFor(p.id)} text-xs font-bold text-white`}>
+                        {p.avatar_url
+                          ? <img src={p.avatar_url} alt="" className="h-10 w-10 rounded-xl object-cover" />
+                          : getInitials(p.display_name ?? '?')}
                       </div>
-                      <p className="mt-0.5 line-clamp-2 text-xs leading-snug text-[var(--color-ushqn-muted)]">{c.subtitle}</p>
-                    </div>
-                  </Link>
-                </li>
-              )
-            })
-          )}
-        </ul>
+                      <div className="min-w-0 text-left">
+                        <p className="truncate text-sm font-semibold text-[var(--color-ushqn-text)]">{sanitizeUserText(p.display_name ?? '')}</p>
+                        {(p as { username?: string | null }).username ? (
+                          <p className="text-xs text-[var(--color-ushqn-muted)]">@{(p as { username?: string }).username}</p>
+                        ) : null}
+                      </div>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        ) : (
+          <div className="flex-1 overflow-y-auto">
+            {(sidebarQuery.data ?? []).length === 0 && !sidebarQuery.isLoading ? (
+              <div className="flex flex-col items-center px-4 py-10 text-center">
+                <span className="text-4xl opacity-90">💬</span>
+                <p className="mt-3 text-sm font-bold text-[var(--color-ushqn-text)]">{t('chat.noThreadsTitle')}</p>
+                <p className="mt-1 text-xs leading-relaxed text-[var(--color-ushqn-muted)]">{t('chat.noThreadsHint')}</p>
+              </div>
+            ) : (
+              <>
+                {/* Groups */}
+                {convList.filter((c) => c.isGroup).length > 0 ? (
+                  <>
+                    <p className="px-3 pb-1 pt-2.5 text-[10px] font-black uppercase tracking-[0.12em] text-[var(--color-ushqn-muted)]">{t('chat.groupsLabel')}</p>
+                    {convList.filter((c) => c.isGroup).map((c) => (
+                      <ChatConvItem key={c.id} c={c} conversationId={conversationId} i18n={i18n} t={t} nowTs={nowTs} />
+                    ))}
+                  </>
+                ) : null}
+                {/* DMs */}
+                {convList.filter((c) => !c.isGroup).length > 0 ? (
+                  <>
+                    <p className="px-3 pb-1 pt-2.5 text-[10px] font-black uppercase tracking-[0.12em] text-[var(--color-ushqn-muted)]">{t('chat.dmsLabel')}</p>
+                    {convList.filter((c) => !c.isGroup).map((c) => (
+                      <ChatConvItem key={c.id} c={c} conversationId={conversationId} i18n={i18n} t={t} nowTs={nowTs} />
+                    ))}
+                  </>
+                ) : null}
+              </>
+            )}
+          </div>
+        )}
       </aside>
 
       {/* Thread */}

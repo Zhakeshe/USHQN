@@ -95,11 +95,8 @@ export function AppLayout() {
       {/* Desktop sidebar */}
       <Sidebar />
 
-      {/* Main area */}
-      <div
-        className="flex min-w-0 flex-1 flex-col"
-        style={{ marginLeft: 0 }}
-      >
+      {/* Main area — offset for fixed desktop sidebar */}
+      <div className="flex min-w-0 flex-1 flex-col lg:ml-[220px]">
         <a href="#main-content" className="ushqn-skip-link">{t('ui.skipToContent')}</a>
         <PrivacyBanner />
         <OfflineBanner />
@@ -109,12 +106,9 @@ export function AppLayout() {
 
         <main
           id="main-content"
-          className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 outline-none sm:px-5 sm:py-8 lg:px-6 lg:py-8"
+          className="mx-auto w-full max-w-5xl flex-1 px-3 py-5 outline-none sm:px-5 sm:py-7 lg:px-6 lg:py-8"
           tabIndex={-1}
-          style={{
-            paddingBottom: 'calc(5.5rem + env(safe-area-inset-bottom, 0px))',
-            paddingLeft: undefined,
-          }}
+          style={{ paddingBottom: 'calc(5.5rem + env(safe-area-inset-bottom, 0px))' }}
         >
           <Outlet />
         </main>

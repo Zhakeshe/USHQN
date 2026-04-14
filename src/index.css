@@ -333,6 +333,84 @@ html.reduce-motion *::after {
   scroll-behavior: auto !important;
 }
 
+/* ══════════════════════════════════════════════════════════════
+   DARK MODE — comprehensive overrides for hardcoded Tailwind colors
+══════════════════════════════════════════════════════════════ */
+html.dark {
+  /* Input overrides */
+  .ushqn-input {
+    background-color: var(--color-ushqn-surface-muted) !important;
+    border-color: var(--color-ushqn-border) !important;
+    color: var(--color-ushqn-text) !important;
+  }
+  .ushqn-input::placeholder { color: var(--color-ushqn-muted) !important; }
+  .ushqn-input:hover {
+    background-color: #334155 !important;
+    border-color: #64748b !important;
+  }
+  .ushqn-input:focus {
+    background-color: #1e293b !important;
+    border-color: var(--color-ushqn-primary) !important;
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.18) !important;
+  }
+  .ushqn-section-header { border-bottom-color: var(--color-ushqn-border); }
+  .ushqn-badge { background-color: rgba(96,165,250,.15); color: #93c5fd; }
+
+  /* Override white backgrounds */
+  [class~="bg-white"] { background-color: var(--color-ushqn-surface) !important; }
+  [class~="bg-[#FAFBFC]"] { background-color: var(--color-ushqn-surface-muted) !important; }
+  [class~="bg-[#F4F5F7]"] { background-color: var(--color-ushqn-surface-muted) !important; }
+  [class~="bg-[#fafbfc]"] { background-color: var(--color-ushqn-surface-muted) !important; }
+
+  /* Override light blue pill backgrounds */
+  [class~="bg-[#EFF6FF]"] { background-color: rgba(96,165,250,.15) !important; }
+  [class~="bg-[#DEEBFF]"] { background-color: rgba(96,165,250,.12) !important; }
+  [class~="bg-[#eff3f8]"] { background-color: var(--color-ushqn-surface-muted) !important; }
+
+  /* Override dark text colors */
+  [class~="text-[#172B4D]"] { color: var(--color-ushqn-text) !important; }
+  [class~="text-[#0d1f3c]"] { color: var(--color-ushqn-text) !important; }
+  [class~="text-[#505F79]"] { color: var(--color-ushqn-muted) !important; }
+  [class~="text-[#6B778C]"] { color: var(--color-ushqn-muted) !important; }
+  [class~="text-[#97A0AF]"] { color: var(--color-ushqn-muted) !important; }
+  [class~="text-[#97a0af]"] { color: var(--color-ushqn-muted) !important; }
+  [class~="text-[#64748b]"] { color: var(--color-ushqn-muted) !important; }
+
+  /* Override light borders */
+  [class~="border-[#eef1f4]"] { border-color: var(--color-ushqn-border) !important; }
+  [class~="border-[#DFE1E6]"] { border-color: var(--color-ushqn-border) !important; }
+  [class~="border-[#E4E9EF]"] { border-color: var(--color-ushqn-border) !important; }
+  [class~="divide-[#f4f5f7]"] { --tw-divide-opacity: 1; border-color: var(--color-ushqn-border) !important; }
+
+  /* Override section cards */
+  .ushqn-card [class~="bg-[#F4F5F7]"] { background-color: var(--color-ushqn-surface-muted) !important; }
+  .ushqn-card [class~="bg-[#EFF6FF]"] { background-color: rgba(96,165,250,.12) !important; }
+
+  /* Hover states */
+  [class~="hover:bg-[#F4F5F7]"]:hover { background-color: var(--color-ushqn-surface-muted) !important; }
+  [class~="hover:bg-[#DEEBFF]"]:hover { background-color: rgba(96,165,250,.15) !important; }
+  [class~="hover:bg-[#f8f9fc]"]:hover { background-color: rgba(255,255,255,.04) !important; }
+  [class~="hover:bg-gray-50"]:hover { background-color: var(--color-ushqn-surface-muted) !important; }
+
+  /* Red tints */
+  [class~="bg-red-50"] { background-color: rgba(239,68,68,.12) !important; }
+  [class~="bg-[#E3FCEF]"] { background-color: rgba(52,211,153,.1) !important; }
+  [class~="bg-[#FFF3B0]"] { background-color: rgba(251,191,36,.1) !important; }
+  [class~="bg-[#FFF0B3]"] { background-color: rgba(251,191,36,.1) !important; }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   MOBILE IMPROVEMENTS
+══════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  /* Tighter padding on mobile */
+  .ushqn-card { border-radius: 0.875rem; }
+  /* Better tap targets */
+  button, [role="button"] { min-height: 2.25rem; }
+  /* Prevent horizontal overflow */
+  main { overflow-x: hidden; }
+}
+
 /* ── Typography improvements ────────────────────────────── */
 h1, h2, h3, h4 {
   text-wrap: balance;

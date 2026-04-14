@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState, type ReactNode } from 'react'
+import { useDebouncedValue } from '../hooks/useDebouncedValue'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -103,6 +104,8 @@ export function SettingsPage() {
   const { t, i18n } = useTranslation()
   const [section, setSection] = useState<Section>('profile')
   const [showPass, setShowPass] = useState(false)
+  const [usernameInput, setUsernameInput] = useState('')
+  const debouncedUsername = useDebouncedValue(usernameInput, 500)
 
   const SECTIONS: { id: Section; label: string; icon: ReactNode }[] = [
     { id: 'profile', label: t('settings.sections.profile'), icon: <NavIcon name="profile" /> },
@@ -143,6 +146,19 @@ export function SettingsPage() {
       const { data, error } = await supabase.from('profiles').select('*').eq('id', userId!).single()
       if (error) throw error
       return data
+    },
+  })
+
+  const usernameCheckQuery = useQuery({
+    queryKey: ['username-check', debouncedUsername, userId],
+    enabled: /^[a-z0-9_]{3,30}$/.test(debouncedUsername) && Boolean(userId),
+    queryFn: async () => {
+      const { count } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true })
+        .eq('username', debouncedUsername.toLowerCase())
+        .neq('id', userId!)
+      return (count ?? 0) === 0
     },
   })
 
@@ -263,15 +279,35 @@ export function SettingsPage() {
               {/* Username */}
               <div>
                 <label className="ushqn-label">{t('settings.profile.username')}</label>
-                <div className="flex items-center overflow-hidden rounded-xl border border-[var(--color-ushqn-border)] bg-[var(--color-ushqn-surface-muted)] focus-within:border-[#0052CC] focus-within:ring-2 focus-within:ring-[#0052CC]/20">
+                <div
+                  className={`flex items-center overflow-hidden rounded-xl border bg-[var(--color-ushqn-surface-muted)] focus-within:ring-2 ${
+                    usernameCheckQuery.data === false
+                      ? 'border-red-400 focus-within:border-red-400 focus-within:ring-red-400/20'
+                      : usernameCheckQuery.data === true && debouncedUsername.length >= 3
+                      ? 'border-emerald-400 focus-within:border-emerald-400 focus-within:ring-emerald-400/20'
+                      : 'border-[var(--color-ushqn-border)] focus-within:border-[#0052CC] focus-within:ring-[#0052CC]/20'
+                  }`}
+                >
                   <span className="border-r border-[var(--color-ushqn-border)] bg-[var(--color-ushqn-surface)] px-3 py-2.5 text-sm font-bold text-[var(--color-ushqn-muted)]">@</span>
                   <input
                     className="flex-1 bg-transparent px-3 py-2.5 text-sm text-[var(--color-ushqn-text)] outline-none placeholder:text-[var(--color-ushqn-muted)]"
                     placeholder={t('settings.profile.usernamePh')}
-                    {...socialForm.register('username')}
+                    {...socialForm.register('username', {
+                      onChange: (e) => setUsernameInput((e.target as HTMLInputElement).value),
+                    })}
                   />
+                  {usernameCheckQuery.isFetching ? (
+                    <span className="pr-3 text-xs text-[var(--color-ushqn-muted)]">…</span>
+                  ) : usernameCheckQuery.data === true && debouncedUsername.length >= 3 ? (
+                    <span className="pr-3 text-xs font-bold text-emerald-500">✓</span>
+                  ) : usernameCheckQuery.data === false ? (
+                    <span className="pr-3 text-xs font-bold text-red-500">✕</span>
+                  ) : null}
                 </div>
                 <p className="mt-1 text-[11px] text-[var(--color-ushqn-muted)]">{t('settings.profile.usernameHint')}</p>
+                {usernameCheckQuery.data === false ? (
+                  <p className="mt-1 text-xs font-semibold text-red-500">{t('settings.profile.usernameTaken')}</p>
+                ) : null}
                 {socialForm.formState.errors.username ? <p className="mt-1 text-xs text-red-600">{socialForm.formState.errors.username.message}</p> : null}
               </div>
               {/* Bio */}

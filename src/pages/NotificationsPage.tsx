@@ -23,6 +23,9 @@ const KIND_ICON: Record<string, string> = {
   message: '💬',
   system: '🏆',
   achievement_like: '❤️',
+  job_alert: '💼',
+  mention: '🔔',
+  community: '📍',
 }
 
 export function NotificationsPage() {

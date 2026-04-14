@@ -2,7 +2,6 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { MiniProfileSidebar } from '../components/MiniProfileSidebar'
 import { OnboardingPanel } from '../components/OnboardingPanel'
 import { WeeklyDigestCard } from '../components/WeeklyDigestCard'
 import { MissionsTeaserCard } from '../components/MissionsTeaserCard'
@@ -105,72 +104,99 @@ export function HomePage() {
   })
 
   return (
-    <div className="grid gap-5 md:grid-cols-4 md:gap-6">
-      <aside className="md:col-span-1">
-        <MiniProfileSidebar />
-      </aside>
-
-      <div className="space-y-5 md:col-span-3">
-        {/* Welcome banner */}
-        <section className="ushqn-card relative overflow-hidden p-6">
-          <div className="absolute inset-0 bg-gradient-to-br from-[#0052CC]/5 to-transparent" aria-hidden />
-          <div className="absolute top-0 left-0 h-full w-1 bg-gradient-to-b from-[#0052CC] to-[#79B8FF]" aria-hidden />
-          <div className="relative pl-4">
-            <p className="text-xs font-black uppercase tracking-widest text-[#0052CC]">{t('home.breadcrumb')}</p>
-            <h1 className="mt-1 text-2xl font-extrabold tracking-tight text-[#172B4D] sm:text-3xl">{t('home.welcome')}</h1>
-            <p className="mt-2 text-sm leading-relaxed text-[#6B778C]">{t('home.subtitle')}</p>
-            {statsQuery.data ? (
-              <div className="mt-4 flex flex-wrap gap-3">
-                <span className="rounded-full bg-[#DEEBFF] px-3 py-1 text-xs font-bold text-[#0052CC]">
-                  🏆 {statsQuery.data.achCount} {t('home.achievements')}
-                </span>
-                <span className="rounded-full bg-[#E3FCEF] px-3 py-1 text-xs font-bold text-[#006644]">
-                  👥 {statsQuery.data.followersCount} {t('home.followers')}
-                </span>
-                {streakQuery.data && (streakQuery.data.activity_streak_count ?? 0) > 0 ? (
-                  <span
-                    className="rounded-full bg-[#FFF0B3] px-3 py-1 text-xs font-bold text-[#974F00]"
-                    title={t('home.streakTitle')}
-                  >
-                    🔥 {streakQuery.data.activity_streak_count} {t('home.streakDays')}
-                  </span>
-                ) : null}
-              </div>
-            ) : null}
+    <div className="space-y-4">
+      {/* Quick stats row */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div
+          className="ushqn-card flex items-center gap-3 p-3.5 transition hover:shadow-md cursor-pointer"
+          onClick={() => window.location.href = '/achievements'}
+        >
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#0052CC]/10 to-[#2684FF]/5 text-xl">🏆</span>
+          <div>
+            <p className="text-lg font-extrabold text-[var(--color-ushqn-text)]">{statsQuery.data?.achCount ?? '—'}</p>
+            <p className="text-[11px] text-[var(--color-ushqn-muted)]">{t('home.achievements')}</p>
           </div>
-        </section>
+        </div>
+        <div
+          className="ushqn-card flex items-center gap-3 p-3.5 transition hover:shadow-md cursor-pointer"
+          onClick={() => window.location.href = '/people'}
+        >
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#36B37E]/10 to-[#00875A]/5 text-xl">👥</span>
+          <div>
+            <p className="text-lg font-extrabold text-[var(--color-ushqn-text)]">{statsQuery.data?.followersCount ?? '—'}</p>
+            <p className="text-[11px] text-[var(--color-ushqn-muted)]">{t('home.followers')}</p>
+          </div>
+        </div>
+        <div
+          className="ushqn-card flex items-center gap-3 p-3.5 transition hover:shadow-md cursor-pointer"
+          onClick={() => window.location.href = '/chat'}
+        >
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#6554C0]/10 to-[#8777D9]/5 text-xl">💬</span>
+          <div>
+            <p className="text-sm font-bold text-[var(--color-ushqn-text)]">{t('home.cards.chat.title')}</p>
+            <p className="text-[11px] text-[var(--color-ushqn-muted)]">{t('home.cards.chat.desc')}</p>
+          </div>
+        </div>
+        {streakQuery.data && (streakQuery.data.activity_streak_count ?? 0) > 0 ? (
+          <div className="ushqn-card flex items-center gap-3 p-3.5">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#FF8B00]/15 to-[#FFAB00]/5 text-xl">🔥</span>
+            <div>
+              <p className="text-lg font-extrabold text-[var(--color-ushqn-text)]">{streakQuery.data.activity_streak_count}</p>
+              <p className="text-[11px] text-[var(--color-ushqn-muted)]">{t('home.streakDays')}</p>
+            </div>
+          </div>
+        ) : (
+          <div
+            className="ushqn-card flex items-center gap-3 p-3.5 transition hover:shadow-md cursor-pointer"
+            onClick={() => window.location.href = '/jobs'}
+          >
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#FF5630]/10 to-[#FF8B00]/5 text-xl">💼</span>
+            <div>
+              <p className="text-sm font-bold text-[var(--color-ushqn-text)]">{t('home.cards.jobs.title')}</p>
+              <p className="text-[11px] text-[var(--color-ushqn-muted)]">{t('home.cards.jobs.desc')}</p>
+            </div>
+          </div>
+        )}
+      </div>
 
-        <OnboardingPanel />
-        <WeeklyDigestCard />
-        <MissionsTeaserCard />
+      <OnboardingPanel />
 
-        {/* Quick actions */}
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+      {/* Quick actions */}
+      <div>
+        <p className="mb-2.5 text-[10px] font-black uppercase tracking-widest text-[var(--color-ushqn-muted)]">{t('home.quickActionsLabel')}</p>
+        <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
           {QUICK_ACTIONS.map((a) => (
             <Link key={a.to} to={a.to}
-              className={`flex flex-col items-center gap-2 rounded-2xl bg-gradient-to-br ${a.color} p-4 text-center text-white shadow-md transition hover:scale-[1.03] hover:shadow-lg active:scale-[0.98]`}>
+              className={`flex flex-col items-center gap-2 rounded-2xl bg-gradient-to-br ${a.color} p-3.5 text-center text-white shadow-md transition hover:scale-[1.03] hover:shadow-lg active:scale-[0.98]`}
+            >
               <span className="text-2xl">{a.emoji}</span>
-              <span className="text-xs font-bold leading-tight">{a.label}</span>
+              <span className="text-[11px] font-bold leading-tight">{a.label}</span>
             </Link>
           ))}
         </div>
+      </div>
 
+      <WeeklyDigestCard />
+      <MissionsTeaserCard />
+
+      {/* Recent achievements + events in 2-col on wider screens */}
+      <div className="grid gap-4 lg:grid-cols-2">
         {/* Recent achievements */}
         {(recentAchievements.data ?? []).length > 0 ? (
-          <section className="ushqn-card p-5">
-            <div className="ushqn-section-header">
-              <h2 className="ushqn-section-title">{t('home.recentAchievements')}</h2>
-              <Link to="/achievements" className="text-sm font-bold text-[#0052CC] hover:underline">{t('common.viewAll')}</Link>
+          <section className="ushqn-card p-4">
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-sm font-extrabold text-[var(--color-ushqn-text)]">{t('home.recentAchievements')}</h2>
+              <Link to="/achievements" className="text-xs font-bold text-[#0052CC] hover:underline">{t('common.viewAll')}</Link>
             </div>
             <ul className="space-y-2">
               {(recentAchievements.data ?? []).map((a) => (
-                <li key={a.id} className="flex items-center gap-3 rounded-xl border border-[#eef1f4] bg-[#FAFBFC] p-3 transition hover:border-[#DEEBFF]">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#DEEBFF] to-[#B3D4FF] text-lg">
+                <li key={a.id} className="flex items-center gap-3 rounded-xl border border-[var(--color-ushqn-border)] bg-[var(--color-ushqn-surface-muted)] p-3 transition hover:border-[#B3D4FF]">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#DEEBFF] to-[#B3D4FF] text-base">
                     {CATEGORY_EMOJI[a.slug] ?? '🏅'}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-bold text-[#172B4D]">{a.title}</p>
-                    <p className="text-xs text-[#36B37E] font-semibold">+{a.points_awarded} {t('common.points')} · {new Date(a.created_at).toLocaleDateString()}</p>
+                    <p className="truncate text-sm font-bold text-[var(--color-ushqn-text)]">{a.title}</p>
+                    <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">+{a.points_awarded} {t('common.points')}</p>
                   </div>
                 </li>
               ))}
@@ -180,25 +206,21 @@ export function HomePage() {
 
         {/* Upcoming events */}
         {(upcomingEvents.data ?? []).length > 0 ? (
-          <section className="ushqn-card p-5">
-            <div className="ushqn-section-header">
-              <h2 className="ushqn-section-title">{t('home.upcomingEvents')}</h2>
-              <Link to="/calendar" className="text-sm font-bold text-[#0052CC] hover:underline">{t('common.viewAll')}</Link>
+          <section className="ushqn-card p-4">
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-sm font-extrabold text-[var(--color-ushqn-text)]">{t('home.upcomingEvents')}</h2>
+              <Link to="/calendar" className="text-xs font-bold text-[#0052CC] hover:underline">{t('common.viewAll')}</Link>
             </div>
             <ul className="space-y-2">
               {(upcomingEvents.data ?? []).map((e) => (
-                <li key={e.id} className="flex items-center gap-3 rounded-xl border border-[#eef1f4] p-3 transition hover:border-[#E3FCEF]">
-                  <div className="flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-xl bg-gradient-to-br from-[#E3FCEF] to-[#ABF5D1] text-center">
-                    <span className="text-xs font-black text-[#00875A]">
-                      {new Date(e.starts_at).getDate()}
-                    </span>
-                    <span className="text-[9px] font-bold uppercase text-[#36B37E]">
-                      {new Date(e.starts_at).toLocaleString(undefined, { month: 'short' })}
-                    </span>
+                <li key={e.id} className="flex items-center gap-3 rounded-xl border border-[var(--color-ushqn-border)] bg-[var(--color-ushqn-surface-muted)] p-3 transition hover:border-[#ABF5D1]">
+                  <div className="flex h-9 w-9 shrink-0 flex-col items-center justify-center rounded-xl bg-gradient-to-br from-[#E3FCEF] to-[#ABF5D1]">
+                    <span className="text-xs font-black text-[#00875A]">{new Date(e.starts_at).getDate()}</span>
+                    <span className="text-[9px] font-bold uppercase text-[#36B37E]">{new Date(e.starts_at).toLocaleString(undefined, { month: 'short' })}</span>
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-bold text-[#172B4D]">{e.title}</p>
-                    <p className="text-xs text-[#6B778C]">
+                    <p className="truncate text-sm font-bold text-[var(--color-ushqn-text)]">{e.title}</p>
+                    <p className="text-[11px] text-[var(--color-ushqn-muted)]">
                       {new Date(e.starts_at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
                       {e.is_online ? ` · ${t('calendar.online')}` : ''}
                     </p>
@@ -208,24 +230,22 @@ export function HomePage() {
             </ul>
           </section>
         ) : null}
+      </div>
 
-        {/* Section cards */}
-        <section>
-          <h2 className="mb-3 text-xs font-black uppercase tracking-widest text-[#6B778C]">{t('home.sections')}</h2>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {SECTION_CARDS.map((c) => (
-              <Link key={c.to} to={c.to}
-                className="group ushqn-card flex flex-col p-4 transition duration-200 hover:-translate-y-0.5 hover:border-[#B3D4FF] hover:shadow-[0_8px_24px_rgba(0,82,204,0.1)]">
-                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#F4F5F7] text-xl transition group-hover:bg-[#EFF6FF]">
-                  {c.emoji}
-                </span>
-                <h3 className="mt-3 text-sm font-bold text-[#172B4D] group-hover:text-[#0052CC]">{c.title}</h3>
-                <p className="mt-0.5 text-xs leading-snug text-[#6B778C]">{c.desc}</p>
-                <span className="mt-2 text-xs font-bold text-[#0052CC] opacity-0 transition group-hover:opacity-100">{t('common.goTo')}</span>
-              </Link>
-            ))}
-          </div>
-        </section>
+      {/* 4 key section shortcuts */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {SECTION_CARDS.slice(0, 4).map((c) => (
+          <Link key={c.to} to={c.to}
+            className="group ushqn-card flex items-center gap-3 p-3.5 transition hover:-translate-y-0.5 hover:border-[#B3D4FF] hover:shadow-md">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--color-ushqn-surface-muted)] text-xl transition group-hover:bg-[#EFF6FF]">
+              {c.emoji}
+            </span>
+            <div className="min-w-0">
+              <p className="text-sm font-bold text-[var(--color-ushqn-text)] group-hover:text-[#0052CC]">{c.title}</p>
+              <p className="line-clamp-1 text-[11px] text-[var(--color-ushqn-muted)]">{c.desc}</p>
+            </div>
+          </Link>
+        ))}
       </div>
     </div>
   )
