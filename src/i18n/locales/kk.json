@@ -159,6 +159,7 @@
     "upcomingEvents": "📅 Алдағы іс-шаралар",
     "sections": "Платформа бөлімдері",
     "quickActionsLabel": "Жылдам әрекеттер",
+    "recentJobs": "Жаңа вакансиялар",
     "quickActions": {
       "addAchievement": "Жетістік қосу",
       "findJob": "Тәжірибе табу",
@@ -452,11 +453,16 @@
       "project": "🚀 Жоба"
     },
     "sphere": {
-      "all": "🌐 Барлық салалар",
-      "it": "💻 IT",
-      "marketing": "📣 Маркетинг",
-      "design": "🎨 Дизайн"
+      "all": "Барлық салалар",
+      "it": "IT",
+      "marketing": "Маркетинг",
+      "design": "Дизайн",
+      "finance": "Қаржы",
+      "education": "Білім",
+      "medicine": "Медицина",
+      "engineering": "Инженерия"
     },
+    "deleteFailed": "Хабарламаны жою мүмкін болмады.",
     "sortLabel": "Сұрыптау",
     "sortNew": "Алдымен жаңалары",
     "sortRelevance": "Сәйкестік бойынша",

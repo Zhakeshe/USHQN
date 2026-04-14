@@ -104,6 +104,18 @@ export function HomePage() {
     },
   })
 
+  const recentJobs = useQuery({
+    queryKey: ['home-recent-jobs'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('jobs')
+        .select('id,title,company_name,work_mode,employment_type,created_at')
+        .order('created_at', { ascending: false })
+        .limit(5)
+      return data ?? []
+    },
+  })
+
   return (
     <div className="grid gap-5 lg:grid-cols-[280px_1fr] lg:gap-6">
       {/* LinkedIn-style left profile sidebar — sticky on scroll */}
@@ -240,6 +252,36 @@ export function HomePage() {
           </section>
         ) : null}
       </div>
+
+      {/* Recent jobs */}
+      {(recentJobs.data ?? []).length > 0 ? (
+        <section className="ushqn-card p-4">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-sm font-extrabold text-[var(--color-ushqn-text)]">💼 {t('home.recentJobs')}</h2>
+            <Link to="/jobs" className="text-xs font-bold text-[#0052CC] hover:underline">{t('common.viewAll')}</Link>
+          </div>
+          <ul className="space-y-2">
+            {(recentJobs.data ?? []).map((j) => (
+              <li key={j.id}>
+                <Link to="/jobs" className="flex items-center gap-3 rounded-xl border border-[var(--color-ushqn-border)] bg-[var(--color-ushqn-surface-muted)] p-3 transition hover:border-[#B3D4FF] hover:shadow-sm">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#DEEBFF] to-[#B3D4FF] text-sm font-extrabold text-[#0052CC]">
+                    {(j.title ?? 'W').slice(0, 1).toUpperCase()}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold text-[var(--color-ushqn-text)]">{j.title}</p>
+                    <p className="text-[11px] text-[var(--color-ushqn-muted)]">
+                      {j.company_name ?? '—'} · {j.work_mode !== 'any' ? j.work_mode : j.employment_type}
+                    </p>
+                  </div>
+                  <span className="shrink-0 text-[10px] text-[var(--color-ushqn-muted)]">
+                    {new Date(j.created_at).toLocaleDateString()}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       {/* 4 key section shortcuts */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">

@@ -72,10 +72,14 @@ function JobAlertToggle({
         })
       }
     },
-    onSuccess: () => {
+    onSuccess: (_, __, context) => {
       void qc.invalidateQueries({ queryKey: ['job-alert', userId] })
-      const wasOn = alertQuery.data?.enabled
+      // Use the state BEFORE mutation to determine the message
+      const wasOn = Boolean((context as { wasOn?: boolean })?.wasOn)
       toast(wasOn ? t('jobs.alertOff') : t('jobs.alertOn'), 'info')
+    },
+    onMutate: () => {
+      return { wasOn: Boolean(alertQuery.data?.enabled) }
     },
   })
 
@@ -231,6 +235,10 @@ export function JobsPage() {
       { value: 'it', labelKey: 'sphere.it', emoji: '💻' },
       { value: 'marketing', labelKey: 'sphere.marketing', emoji: '📣' },
       { value: 'design', labelKey: 'sphere.design', emoji: '🎨' },
+      { value: 'finance', labelKey: 'sphere.finance', emoji: '💰' },
+      { value: 'education', labelKey: 'sphere.education', emoji: '📚' },
+      { value: 'medicine', labelKey: 'sphere.medicine', emoji: '🏥' },
+      { value: 'engineering', labelKey: 'sphere.engineering', emoji: '⚙️' },
     ],
     [],
   )

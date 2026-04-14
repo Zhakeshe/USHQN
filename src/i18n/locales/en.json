@@ -159,6 +159,7 @@
     "upcomingEvents": "📅 Upcoming events",
     "sections": "Platform sections",
     "quickActionsLabel": "Quick actions",
+    "recentJobs": "Recent jobs",
     "quickActions": {
       "addAchievement": "Add achievement",
       "findJob": "Find internship",
@@ -452,11 +453,16 @@
       "project": "🚀 Project"
     },
     "sphere": {
-      "all": "🌐 All fields",
-      "it": "💻 IT",
-      "marketing": "📣 Marketing",
-      "design": "🎨 Design"
+      "all": "All fields",
+      "it": "IT",
+      "marketing": "Marketing",
+      "design": "Design",
+      "finance": "Finance",
+      "education": "Education",
+      "medicine": "Medicine",
+      "engineering": "Engineering"
     },
+    "deleteFailed": "Could not delete message.",
     "sortLabel": "Sort",
     "sortNew": "Newest first",
     "sortRelevance": "Best match",

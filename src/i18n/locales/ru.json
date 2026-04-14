@@ -159,6 +159,7 @@
     "upcomingEvents": "📅 Ближайшие события",
     "sections": "Разделы платформы",
     "quickActionsLabel": "Быстрые действия",
+    "recentJobs": "Свежие вакансии",
     "quickActions": {
       "addAchievement": "Добавить достижение",
       "findJob": "Найти стажировку",
@@ -452,11 +453,16 @@
       "project": "🚀 Проект"
     },
     "sphere": {
-      "all": "🌐 Все сферы",
-      "it": "💻 IT",
-      "marketing": "📣 Маркетинг",
-      "design": "🎨 Дизайн"
+      "all": "Все сферы",
+      "it": "IT",
+      "marketing": "Маркетинг",
+      "design": "Дизайн",
+      "finance": "Финансы",
+      "education": "Образование",
+      "medicine": "Медицина",
+      "engineering": "Инженерия"
     },
+    "deleteFailed": "Не удалось удалить сообщение.",
     "sortLabel": "Сортировка",
     "sortNew": "Сначала новые",
     "sortRelevance": "По совпадению",

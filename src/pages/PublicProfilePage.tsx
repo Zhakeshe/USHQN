@@ -243,6 +243,15 @@ export function PublicProfilePage() {
             <meta name="twitter:card" content="summary" />
           </Helmet>
 
+          {/* @username badge */}
+          {(profileQuery.data as { username?: string | null }).username ? (
+            <div className="mb-3 flex items-center gap-1.5">
+              <span className="inline-flex items-center gap-1 rounded-full bg-[var(--color-ushqn-surface-muted)] border border-[var(--color-ushqn-border)] px-3 py-1 text-sm font-mono font-semibold text-[var(--color-ushqn-muted)]">
+                @{(profileQuery.data as { username: string }).username}
+              </span>
+            </div>
+          ) : null}
+
           <ProfileCard
             profile={{
               display_name: profileQuery.data.display_name,

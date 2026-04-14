@@ -366,6 +366,7 @@ export function ChatPage() {
   const { conversationId } = useParams<{ conversationId?: string }>()
   const { userId } = useAuth()
   const qc = useQueryClient()
+  const navigate = useNavigate()
   const [body, setBody] = useState('')
   const [pendingFile, setPendingFile] = useState<File | null>(null)
   const [reportMessageId, setReportMessageId] = useState<string | null>(null)
@@ -642,6 +643,17 @@ export function ChatPage() {
 
   const { toast } = useToast()
 
+  const deleteMsg = useMutation({
+    mutationFn: async (msgId: string) => {
+      const { error } = await supabase.from('messages').delete().eq('id', msgId)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['messages', conversationId] })
+    },
+    onError: () => toast(t('chat.deleteFailed'), 'error'),
+  })
+
   const send = useMutation({
     mutationFn: async () => {
       const text = body.trim()
@@ -780,8 +792,7 @@ export function ChatPage() {
                         const { data, error } = await supabase.rpc('get_or_create_dm', { other_id: p.id })
                         if (!error && data) {
                           setChatSearch('')
-                          void import('react-router-dom').then(({ useNavigate: _ }) => {})
-                          window.location.href = `/chat/${data as string}`
+                          navigate(`/chat/${data as string}`)
                         }
                       }}
                     >
@@ -990,6 +1001,15 @@ export function ChatPage() {
                           >
                             {t('chat.reply')}
                           </button>
+                          {isMe ? (
+                            <button
+                              type="button"
+                              className="font-semibold text-red-400 hover:underline"
+                              onClick={() => deleteMsg.mutate(m.id)}
+                            >
+                              {t('common.delete')}
+                            </button>
+                          ) : null}
                           {!isMe && userId ? (
                             <button
                               type="button"
