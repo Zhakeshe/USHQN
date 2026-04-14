@@ -56,18 +56,41 @@ export function PeoplePage() {
     },
   })
 
-  const [interestId, setInterestId] = useState<string>('')
-  const firstInterestId = interestsQuery.data?.[0]?.id ?? ''
-  const effectiveInterestId = interestId || firstInterestId
+  const ALL_ID = '__all__'
+  const [interestId, setInterestId] = useState<string>(ALL_ID)
+
+  const isAll = interestId === ALL_ID
+
+  const allPeopleQuery = useQuery({
+    queryKey: ['people-all', userId],
+    enabled: isAll,
+    queryFn: async () => {
+      const { data: profiles, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .neq('id', userId ?? '')
+        .order('display_name', { ascending: true })
+        .limit(200)
+      if (error) throw error
+      const ids = (profiles ?? []).map((p) => p.id)
+      if (ids.length === 0) return []
+      const { data: vis } = await supabase
+        .from('user_settings')
+        .select('user_id, show_in_people_search')
+        .in('user_id', ids)
+      const hidden = new Set((vis ?? []).filter((v) => v.show_in_people_search === false).map((v) => v.user_id))
+      return (profiles ?? []).filter((p) => !hidden.has(p.id))
+    },
+  })
 
   const peopleQuery = useQuery({
-    queryKey: ['people-by-interest', effectiveInterestId],
-    enabled: Boolean(effectiveInterestId),
+    queryKey: ['people-by-interest', interestId],
+    enabled: !isAll && Boolean(interestId),
     queryFn: async () => {
       const { data: links, error: e1 } = await supabase
         .from('profile_interests')
         .select('user_id')
-        .eq('interest_id', effectiveInterestId)
+        .eq('interest_id', interestId)
       if (e1) throw e1
       const ids = (links ?? []).map((l) => l.user_id).filter((id) => id !== userId)
       if (ids.length === 0) return []
@@ -84,6 +107,9 @@ export function PeoplePage() {
     },
   })
 
+  const activeQuery = isAll ? allPeopleQuery : peopleQuery
+
+  const allPeopleCount = allPeopleQuery.data?.length ?? null
   const [followed, setFollowed] = useState<Set<string>>(new Set())
 
   async function follow(targetId: string) {
@@ -98,16 +124,14 @@ export function PeoplePage() {
     void navigate(`/chat/${data}`)
   }
 
-  const selectedLabel = (interestsQuery.data ?? []).find((i) => i.id === effectiveInterestId)?.label_ru ?? ''
-
   const filteredPeople = useMemo(() => {
-    const raw = peopleQuery.data ?? []
+    const raw = activeQuery.data ?? []
     if (!debouncedQ) return raw
     const q = debouncedQ.toLowerCase()
     return raw.filter((p) =>
       `${p.display_name} ${p.headline ?? ''} ${p.location ?? ''}`.toLowerCase().includes(q),
     )
-  }, [peopleQuery.data, debouncedQ])
+  }, [activeQuery.data, debouncedQ])
 
   return (
     <div className="space-y-5">
@@ -133,8 +157,25 @@ export function PeoplePage() {
 
         {/* Interest chips */}
         <div className="mt-5 flex flex-wrap gap-2">
+          {/* ALL chip */}
+          <button
+            type="button"
+            onClick={() => setInterestId(ALL_ID)}
+            className={`inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm font-semibold transition-all duration-150 ${
+              isAll
+                ? 'border-[#0052CC] bg-[#0052CC] text-white shadow-md shadow-blue-200'
+                : 'border-[#DFE1E6] bg-white text-[#172B4D] hover:border-[#0052CC] hover:bg-[#DEEBFF]/40'
+            }`}
+          >
+            {t('people.all')}
+            {allPeopleCount !== null ? (
+              <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${isAll ? 'bg-white/20 text-white' : 'bg-[#EFF6FF] text-[#0052CC]'}`}>
+                {allPeopleCount}
+              </span>
+            ) : null}
+          </button>
           {(interestsQuery.data ?? []).map((i) => {
-            const active = i.id === effectiveInterestId
+            const active = i.id === interestId
             return (
               <button
                 key={i.id}
@@ -154,15 +195,8 @@ export function PeoplePage() {
       </div>
 
       {/* Results */}
-      {!effectiveInterestId && interestsQuery.isPending ? (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {[1, 2, 3].map((n) => (
-            <div key={n} className="ushqn-card h-36 animate-pulse p-5" />
-          ))}
-        </div>
-      ) : effectiveInterestId ? (
-      <QueryState
-        query={peopleQuery}
+      {<QueryState
+        query={activeQuery}
         skeleton={
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {[1, 2, 3].map((n) => (
@@ -173,11 +207,9 @@ export function PeoplePage() {
       >
         {filteredPeople.length === 0 ? (
           <div className="ushqn-card flex flex-col items-center justify-center gap-3 py-14 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#eff3f8] text-sm font-bold text-[#64748b]">
-              {selectedLabel.slice(0, 1).toUpperCase() || '—'}
-            </div>
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#eff3f8] text-2xl">👥</div>
             <p className="text-base font-semibold text-[#172B4D]">{t('people.empty')}</p>
-            {(peopleQuery.data ?? []).length > 0 ? (
+            {(activeQuery.data ?? []).length > 0 ? (
               <button
                 type="button"
                 className="ushqn-btn-primary mt-2 px-5 py-2 text-sm"
@@ -255,7 +287,7 @@ export function PeoplePage() {
         </div>
         )}
       </QueryState>
-      ) : null}
+      }
     </div>
   )
 }

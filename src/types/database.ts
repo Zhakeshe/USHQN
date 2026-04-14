@@ -47,6 +47,8 @@ export interface Database {
           is_moderator: boolean
           activity_streak_count: number
           activity_streak_last_utc: string | null
+          username: string | null
+          is_verified_employer: boolean
         }
         Insert: Partial<Database['public']['Tables']['profiles']['Row']> & {
           id: string
@@ -340,6 +342,27 @@ export interface Database {
           attachment_name?: string | null
           reply_to_id?: string | null
         }
+      }
+      job_alerts: {
+        Row: {
+          id: string
+          user_id: string
+          employment_type: string | null
+          work_mode: string | null
+          sphere: string | null
+          query_text: string | null
+          enabled: boolean
+          created_at: string
+        }
+        Insert: {
+          user_id: string
+          employment_type?: string | null
+          work_mode?: string | null
+          sphere?: string | null
+          query_text?: string | null
+          enabled?: boolean
+        }
+        Update: Partial<Pick<Database['public']['Tables']['job_alerts']['Row'], 'enabled' | 'employment_type' | 'work_mode' | 'sphere' | 'query_text'>>
       }
       communities: {
         Row: {

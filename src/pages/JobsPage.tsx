@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { format } from 'date-fns'
 import { useAuth } from '../hooks/useAuth'
 import { useDebouncedValue } from '../hooks/useDebouncedValue'
@@ -16,6 +17,88 @@ import { QueryState } from '../components/QueryState'
 import { ContentReportDialog } from '../components/ContentReportDialog'
 import { trackEvent } from '../lib/analytics'
 import type { Database, JobApplicationStatus, JobWorkMode } from '../types/database'
+
+/* ── Job Alert Toggle component ── */
+function JobAlertToggle({
+  userId,
+  employment,
+  workMode,
+  sphere,
+  queryText,
+  t,
+}: {
+  userId: string
+  employment: string | null
+  workMode: string | null
+  sphere: string | null
+  queryText: string | null
+  t: TFunction
+}) {
+  const qc = useQueryClient()
+  const { toast } = useToast()
+
+  const alertQuery = useQuery({
+    queryKey: ['job-alert', userId, employment, workMode, sphere, queryText],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('job_alerts')
+        .select('id,enabled')
+        .eq('user_id', userId)
+        .eq('employment_type', employment ?? '')
+        .eq('work_mode', workMode ?? '')
+        .eq('sphere', sphere ?? '')
+        .eq('query_text', queryText ?? '')
+        .maybeSingle()
+      return data ?? null
+    },
+  })
+
+  const toggleAlert = useMutation({
+    mutationFn: async () => {
+      if (alertQuery.data) {
+        if (alertQuery.data.enabled) {
+          await supabase.from('job_alerts').update({ enabled: false }).eq('id', alertQuery.data.id)
+        } else {
+          await supabase.from('job_alerts').update({ enabled: true }).eq('id', alertQuery.data.id)
+        }
+      } else {
+        await supabase.from('job_alerts').insert({
+          user_id: userId,
+          employment_type: employment,
+          work_mode: workMode,
+          sphere: sphere,
+          query_text: queryText,
+          enabled: true,
+        })
+      }
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['job-alert', userId] })
+      const wasOn = alertQuery.data?.enabled
+      toast(wasOn ? t('jobs.alertOff') : t('jobs.alertOn'), 'info')
+    },
+  })
+
+  const isOn = Boolean(alertQuery.data?.enabled)
+
+  return (
+    <button
+      type="button"
+      onClick={() => toggleAlert.mutate()}
+      disabled={toggleAlert.isPending}
+      className={`flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition ${
+        isOn
+          ? 'border-[#0052CC] bg-[#EFF6FF] text-[#0052CC]'
+          : 'border-[#DFE1E6] text-[#6B778C] hover:border-[#0052CC] hover:text-[#0052CC]'
+      }`}
+    >
+      <svg viewBox="0 0 20 20" fill={isOn ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.5" className="h-4 w-4">
+        <path fillRule="evenodd" d="M10 2a6 6 0 0 0-6 6c0 1.887-.454 3.665-1.257 5.234a.75.75 0 0 0 .515 1.076 32.091 32.091 0 0 0 3.256.508 3.5 3.5 0 0 0 6.972 0 32.085 32.085 0 0 0 3.256-.508.75.75 0 0 0 .515-1.076A11.448 11.448 0 0 1 16 8a6 6 0 0 0-6-6ZM8.05 14.943a33.54 33.54 0 0 0 3.9 0 2 2 0 0 1-3.9 0Z" clipRule="evenodd" />
+      </svg>
+      {isOn ? t('jobs.alertActive') : t('jobs.alertSubscribe')}
+    </button>
+  )
+}
 
 const JOBS_FILTERS_KEY = 'ushqn_jobs_filters_v1'
 
@@ -519,6 +602,18 @@ export function JobsPage() {
         </div>
       </div>
 
+      {/* Job alert toggle */}
+      {userId ? (
+        <JobAlertToggle
+          userId={userId}
+          employment={employment === 'all' ? null : employment}
+          workMode={workMode === 'all' ? null : workMode}
+          sphere={sphere === 'all' ? null : sphere}
+          queryText={debouncedQ || null}
+          t={t}
+        />
+      ) : null}
+
       {/* Add vacancy */}
       {!showForm ? (
         <button type="button" onClick={() => setShowForm(true)}
@@ -648,6 +743,11 @@ export function JobsPage() {
                           className="cursor-help rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-900"
                         >
                           {t('jobs.featuredBadge')}
+                        </span>
+                      ) : null}
+                      {(j as { is_verified_employer?: boolean }).is_verified_employer ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-[#E3FCEF] px-2.5 py-0.5 text-xs font-semibold text-[#006644]">
+                          ✓ {t('jobs.verifiedEmployer')}
                         </span>
                       ) : null}
                       <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${tag.bg} ${tag.text}`}>{tag.label}</span>

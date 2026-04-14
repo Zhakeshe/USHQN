@@ -22,13 +22,18 @@ function HomeIcon({ active }: { active: boolean }) {
   )
 }
 
-function AchievementsIcon({ active }: { active: boolean }) {
+function JobsIcon({ active }: { active: boolean }) {
   return (
     <svg viewBox="0 0 20 20" fill="currentColor" className={`h-5 w-5 ${MN_SPRING} motion-safe:group-active:scale-90`}>
       <path
         fillRule="evenodd"
-        d="M10 1a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 10 1ZM5.05 3.05a.75.75 0 0 1 1.06 0l1.062 1.06A.75.75 0 1 1 6.11 5.173L5.05 4.11a.75.75 0 0 1 0-1.06Zm9.9 0a.75.75 0 0 1 0 1.06l-1.06 1.062a.75.75 0 0 1-1.062-1.061l1.061-1.06a.75.75 0 0 1 1.06 0ZM10 6a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-7 4a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 0 1.5h-1.5A.75.75 0 0 1 3 10Zm13.25-.75a.75.75 0 0 0 0 1.5h1.5a.75.75 0 0 0 0-1.5h-1.5ZM5.05 16.95a.75.75 0 0 1 0-1.06l1.06-1.062a.75.75 0 0 1 1.062 1.061l-1.061 1.06a.75.75 0 0 1-1.06 0Zm9.9 0a.75.75 0 0 1-1.06 0l-1.062-1.06a.75.75 0 0 1 1.061-1.062l1.06 1.061a.75.75 0 0 1 0 1.06ZM10 17.25a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5a.75.75 0 0 1 .75-.75Z"
+        d="M6 3.75A2.75 2.75 0 0 1 8.75 1h2.5A2.75 2.75 0 0 1 14 3.75v.443c.572.055 1.14.122 1.706.2C17.053 4.582 18 5.75 18 7.07v3.469c0 1.126-.694 2.191-1.83 2.54-1.952.599-4.024.921-6.17.921s-4.219-.322-6.17-.921C2.694 12.73 2 11.665 2 10.539V7.07c0-1.32.947-2.489 2.294-2.676A41.047 41.047 0 0 1 6 4.193V3.75Zm6.5 0v.325a41.622 41.622 0 0 0-5 0V3.75c0-.69.56-1.25 1.25-1.25h2.5c.69 0 1.25.56 1.25 1.25ZM10 10a1 1 0 0 0-1 1v.01a1 1 0 0 0 1 1h.01a1 1 0 0 0 1-1V11a1 1 0 0 0-1-1H10Z"
         clipRule="evenodd"
+        className={active ? 'text-white' : 'text-current'}
+        style={{ opacity: active ? 1 : 0.55 }}
+      />
+      <path
+        d="M3 15.055v-.684c.278.071.56.13.844.18A42.097 42.097 0 0 0 10 15c2.113 0 4.27-.312 6.156-.449.284-.05.566-.109.844-.18v.684A1.75 1.75 0 0 1 15.25 16.75h-10.5A1.75 1.75 0 0 1 3 15.055Z"
         className={active ? 'text-white' : 'text-current'}
         style={{ opacity: active ? 1 : 0.55 }}
       />
@@ -36,13 +41,11 @@ function AchievementsIcon({ active }: { active: boolean }) {
   )
 }
 
-function RatingIcon({ active }: { active: boolean }) {
+function PeopleIcon({ active }: { active: boolean }) {
   return (
     <svg viewBox="0 0 20 20" fill="currentColor" className={`h-5 w-5 ${MN_SPRING} motion-safe:group-active:scale-90`}>
       <path
-        fillRule="evenodd"
-        d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.83 4.401-4.753.381c-.833.067-1.171 1.107-.536 1.651l3.62 3.102-1.106 4.637c-.194.813.691 1.456 1.405 1.02L10 15.591l4.069 2.485c.713.436 1.598-.207 1.404-1.02l-1.106-4.637 3.62-3.102c.635-.544.297-1.584-.536-1.65l-4.752-.382-1.83-4.401Z"
-        clipRule="evenodd"
+        d="M7 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM14.5 9a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5ZM1.615 16.428a1.224 1.224 0 0 1-.569-1.175 6.002 6.002 0 0 1 11.908 0c.058.467-.172.92-.57 1.174A9.953 9.953 0 0 1 7 18a9.953 9.953 0 0 1-5.385-1.572ZM14.5 16h-.106c.07-.297.088-.611.048-.933a7.47 7.47 0 0 0-1.588-3.755 4.502 4.502 0 0 1 5.874 2.636.818.818 0 0 1-.36.98A7.465 7.465 0 0 1 14.5 16Z"
         className={active ? 'text-white' : 'text-current'}
         style={{ opacity: active ? 1 : 0.55 }}
       />
@@ -114,8 +117,8 @@ export function MobileNav() {
 
   const navItems = [
     { to: '/home', label: t('nav.home'), icon: HomeIcon },
-    { to: '/achievements', label: t('nav.achievements'), icon: AchievementsIcon },
-    { to: '/rating', label: t('nav.rating'), icon: RatingIcon },
+    { to: '/jobs', label: t('nav.jobs'), icon: JobsIcon },
+    { to: '/people', label: t('nav.people'), icon: PeopleIcon },
     { to: '/chat', label: t('nav.chat'), icon: ChatIcon },
     { to: '/profile', label: t('nav.profile'), icon: ProfileIcon },
   ]
