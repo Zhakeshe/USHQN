@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { MiniProfileSidebar } from '../components/MiniProfileSidebar'
 import { OnboardingPanel } from '../components/OnboardingPanel'
 import { WeeklyDigestCard } from '../components/WeeklyDigestCard'
 import { MissionsTeaserCard } from '../components/MissionsTeaserCard'
@@ -104,7 +105,13 @@ export function HomePage() {
   })
 
   return (
-    <div className="space-y-4">
+    <div className="grid gap-5 lg:grid-cols-[280px_1fr] lg:gap-6">
+      {/* LinkedIn-style left profile sidebar */}
+      <aside className="hidden lg:block">
+        <MiniProfileSidebar />
+      </aside>
+
+      <div className="space-y-4">
       {/* Quick stats row */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <div
@@ -247,6 +254,7 @@ export function HomePage() {
           </Link>
         ))}
       </div>
+      </div>{/* end main col */}
     </div>
   )
 }
