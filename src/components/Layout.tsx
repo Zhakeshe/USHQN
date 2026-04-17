@@ -6,6 +6,7 @@ import { MobileNav } from './MobileNav'
 import { Sidebar } from './Sidebar'
 import { OfflineBanner } from './OfflineBanner'
 import { PrivacyBanner } from './PrivacyBanner'
+import { NotificationPermissionPrompt } from './NotificationPermissionPrompt'
 import { ThemeSync } from './ThemeSync'
 import { ChatMessageNotifications } from './ChatMessageNotifications'
 import { supabase } from '../lib/supabase'
@@ -102,6 +103,7 @@ export function AppLayout() {
         <a href="#main-content" className="ushqn-skip-link">{t('ui.skipToContent')}</a>
         <PrivacyBanner />
         <OfflineBanner />
+        <NotificationPermissionPrompt />
 
         {/* Slim top bar (mobile only) */}
         <TopBar />
