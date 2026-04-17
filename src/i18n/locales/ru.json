@@ -26,9 +26,9 @@
     "or": "или"
   },
   "brand": {
-    "wordmark": "Искра",
-    "titleSuffix": " · Искра",
-    "navTagline": "Рост",
+    "wordmark": "USHQN",
+    "titleSuffix": " · USHQN",
+    "navTagline": "Grow",
     "legalName": "USHQN"
   },
   "errors": {
@@ -779,6 +779,7 @@
       "profileLink": "📋 Ссылка на профиль",
       "profileLinkDesc": "Поделитесь профилем с другими",
       "copyLink": "Копировать",
+      "openProfile": "Открыть в браузере",
       "linkCopied": "Ссылка скопирована!"
     },
     "language": {

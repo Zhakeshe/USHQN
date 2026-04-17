@@ -552,8 +552,8 @@ export function SettingsPage() {
               <div className="rounded-xl border border-[#DFE1E6] p-4">
                 <p className="text-sm font-semibold text-[#172B4D]">{t('settings.privacy.profileLink')}</p>
                 <p className="mt-1 text-xs text-[#6B778C]">{t('settings.privacy.profileLinkDesc')}</p>
-                <div className="mt-2 flex gap-2">
-                  <code className="flex-1 rounded-md bg-[#F4F5F7] px-3 py-1.5 text-xs text-[#172B4D] truncate">
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <code className="min-w-0 flex-1 rounded-md bg-[var(--color-ushqn-surface-muted)] px-3 py-1.5 text-xs text-[var(--color-ushqn-text)] truncate">
                     {typeof window !== 'undefined' ? `${window.location.origin}/u/${userId}` : ''}
                   </code>
                   <button
@@ -562,9 +562,19 @@ export function SettingsPage() {
                       void navigator.clipboard.writeText(`${window.location.origin}/u/${userId}`)
                       toast(t('settings.privacy.linkCopied'), 'info')
                     }}
-                    className="rounded-md border border-[#DFE1E6] px-3 py-1.5 text-xs font-semibold hover:bg-[#F4F5F7] transition"
+                    className="rounded-md border border-[var(--color-ushqn-border)] px-3 py-1.5 text-xs font-semibold text-[var(--color-ushqn-text)] transition hover:bg-[var(--color-ushqn-surface-muted)]"
                   >
                     {t('settings.privacy.copyLink')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const url = `${window.location.origin}/u/${userId}`
+                      window.open(url, '_blank', 'noopener,noreferrer')
+                    }}
+                    className="rounded-md border border-[var(--color-ushqn-border)] bg-[#0052CC] px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-[#0747A6]"
+                  >
+                    {t('settings.privacy.openProfile')}
                   </button>
                 </div>
               </div>

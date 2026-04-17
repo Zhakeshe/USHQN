@@ -26,9 +26,9 @@
     "or": "немесе"
   },
   "brand": {
-    "wordmark": "Үшқын",
-    "titleSuffix": " · Үшқын",
-    "navTagline": "Өсу",
+    "wordmark": "USHQN",
+    "titleSuffix": " · USHQN",
+    "navTagline": "Grow",
     "legalName": "USHQN"
   },
   "errors": {
@@ -771,6 +771,7 @@
       "profileLink": "📋 Профиль сілтемесі",
       "profileLinkDesc": "Профиліңізді басқалармен бөлісіңіз",
       "copyLink": "Көшіру",
+      "openProfile": "Браузерде ашу",
       "linkCopied": "Сілтеме көшірілді!"
     },
     "language": {

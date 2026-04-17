@@ -37,9 +37,9 @@ export function ChatMessageNotifications() {
 
   useEffect(() => {
     if (!userId || typeof window === 'undefined' || !('Notification' in window)) return
+    /* In-tab browser Notification API — only needs notify_messages + permission (not web-push opt-in). */
     const notifyOn = settingsQuery.data?.notify_messages !== false
-    const pushOn = Boolean(settingsQuery.data?.push_notify_opt_in)
-    if (!notifyOn || !pushOn) {
+    if (!notifyOn) {
       for (const ch of channelsRef.current) void supabase.removeChannel(ch)
       channelsRef.current = []
       return

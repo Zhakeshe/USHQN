@@ -1007,7 +1007,7 @@ export function ChatPage() {
                     peerReadAt != null &&
                     !Number.isNaN(peerReadAt) &&
                     peerReadAt >= new Date(m.created_at).getTime()
-                  const showName = activeConv?.isGroup && !isMe
+                  const showName = !isMe
                   const senderName = nameById.get(m.sender_id) ?? t('chat.peerFallback')
                   const incomingDmAvatar =
                     !isMe && activeConv && !activeConv.isGroup && dmPeerId ? activeConv.avatarUrl : null
@@ -1033,13 +1033,13 @@ export function ChatPage() {
                       )}
                       <div className={`max-w-[min(100%,28rem)] ${isMe ? 'items-end' : 'items-start'} flex flex-col gap-0.5`}>
                         {showName ? (
-                          <span className="px-1 text-[11px] font-bold text-[var(--color-ushqn-muted)]">{senderName}</span>
+                          <span className="px-1 text-[11px] font-bold text-slate-600 dark:text-slate-300">{senderName}</span>
                         ) : null}
                         <div
                           className={`rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed shadow-sm ${
                             isMe
                               ? 'rounded-tr-md bg-gradient-to-br from-[#0052CC] to-[#0747A6] text-white'
-                              : 'rounded-tl-md border border-[var(--color-ushqn-border)] bg-white text-[var(--color-ushqn-text)] dark:bg-[#1e293b]'
+                              : 'rounded-tl-md border border-slate-200/90 bg-white text-slate-900 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100'
                           }`}
                         >
                           {m.reply_to_id ? (
@@ -1049,7 +1049,9 @@ export function ChatPage() {
                                 return (
                                   <div
                                     className={`mb-2 rounded-lg border-l-2 px-2 py-1.5 text-left text-[11px] ${
-                                      isMe ? 'border-white/50 bg-black/15 text-white/90' : 'border-[var(--color-ushqn-border)] bg-[var(--color-ushqn-surface-muted)]'
+                                      isMe
+                                        ? 'border-white/50 bg-black/15 text-white/90'
+                                        : 'border-[var(--color-ushqn-border)] bg-slate-100 text-slate-800 dark:bg-slate-900/80 dark:text-slate-100'
                                     }`}
                                   >
                                     {t('chat.originalUnavailable')}
@@ -1071,8 +1073,8 @@ export function ChatPage() {
                                     isMe ? 'border-white/60 bg-black/15' : 'border-[#0052CC] bg-[var(--color-ushqn-surface-muted)]'
                                   }`}
                                 >
-                                  <span className="font-bold">{pName}</span>
-                                  <span className="mt-0.5 block line-clamp-2 opacity-90">{line}</span>
+                                  <span className="font-bold text-slate-800 dark:text-slate-100">{pName}</span>
+                                  <span className="mt-0.5 block line-clamp-2 text-slate-800 opacity-95 dark:text-slate-100">{line}</span>
                                 </div>
                               )
                             })()
@@ -1082,19 +1084,21 @@ export function ChatPage() {
                               href={m.attachment_url}
                               target="_blank"
                               rel="noreferrer"
-                              className={`mb-1 block text-sm font-semibold underline ${isMe ? 'text-white' : 'text-[#0052CC]'}`}
+                              className={`mb-1 block text-sm font-semibold underline ${isMe ? 'text-white' : 'text-[#0052CC] dark:text-sky-300'}`}
                             >
                               📎 {sanitizeUserText(m.attachment_name ?? t('chat.attachment'))}
                             </a>
                           ) : null}
-                          {m.body ? <span className="whitespace-pre-wrap break-words">{sanitizeUserText(m.body)}</span> : null}
+                          {m.body ? (
+                            <span className="whitespace-pre-wrap break-words text-slate-900 dark:text-slate-100">{sanitizeUserText(m.body)}</span>
+                          ) : null}
                         </div>
-                        <span className="flex flex-wrap items-center gap-2 px-1 text-[10px] text-[var(--color-ushqn-muted)]">
+                        <span className="flex flex-wrap items-center gap-2 px-1 text-[10px] text-slate-500 dark:text-slate-400">
                           {formatClock(m.created_at, i18n.language)}
                           {showRead ? <span className="font-semibold text-emerald-600 dark:text-emerald-400">{t('chat.readReceipt')}</span> : null}
                           <button
                             type="button"
-                            className="font-semibold text-[#0052CC] hover:underline"
+                            className="font-semibold text-[#0052CC] hover:underline dark:text-sky-300"
                             onClick={() => setReplyDraft(m)}
                           >
                             {t('chat.reply')}
@@ -1102,7 +1106,7 @@ export function ChatPage() {
                           {isMe ? (
                             <button
                               type="button"
-                              className="font-semibold text-red-400 hover:underline"
+                              className="font-semibold text-red-600 hover:underline dark:text-red-400"
                               onClick={() => deleteMsg.mutate(m.id)}
                             >
                               {t('common.delete')}
@@ -1111,7 +1115,7 @@ export function ChatPage() {
                           {!isMe && userId ? (
                             <button
                               type="button"
-                              className="font-semibold text-red-500 hover:underline"
+                              className="font-semibold text-red-600 hover:underline dark:text-red-400"
                               onClick={() => setReportMessageId(m.id)}
                             >
                               {t('trust.report.open')}

@@ -6,7 +6,7 @@ import { supabase } from '../lib/supabase'
 import { QueryState } from '../components/QueryState'
 
 export function AdminRoute({ children }: { children: ReactNode }) {
-  const { userId } = useAuth()
+  const { userId, loading } = useAuth()
 
   const q = useQuery({
     queryKey: ['profile-staff-flags', userId],
@@ -17,6 +17,10 @@ export function AdminRoute({ children }: { children: ReactNode }) {
       return { isAdmin: Boolean(data?.is_admin), isModerator: Boolean(data?.is_moderator) }
     },
   })
+
+  if (loading) {
+    return <div className="ushqn-card mx-auto max-w-lg animate-pulse p-10" aria-busy="true" />
+  }
 
   if (!userId) {
     return <Navigate to="/login" replace />

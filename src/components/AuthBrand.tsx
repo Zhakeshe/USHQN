@@ -15,9 +15,9 @@ export function AuthBrand({ slogan, extra }: { slogan?: ReactNode; extra?: React
           {t('brand.wordmark')}
         </h1>
       </div>
-      <p className="text-[10px] font-semibold uppercase tracking-[0.32em] text-slate-400 dark:text-slate-500">
-        {t('brand.legalName')}
-      </p>
+      {t('brand.legalName') !== t('brand.wordmark') ? (
+        <p className="text-[10px] font-semibold uppercase tracking-[0.32em] text-slate-400 dark:text-slate-500">{t('brand.legalName')}</p>
+      ) : null}
       {slogan ? <div className="mt-2 text-sm font-medium text-slate-500 dark:text-slate-400">{slogan}</div> : null}
       {extra}
     </div>

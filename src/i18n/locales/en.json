@@ -26,8 +26,8 @@
     "or": "or"
   },
   "brand": {
-    "wordmark": "Ushqyn",
-    "titleSuffix": " · Ushqyn",
+    "wordmark": "USHQN",
+    "titleSuffix": " · USHQN",
     "navTagline": "Grow",
     "legalName": "USHQN"
   },
@@ -777,6 +777,7 @@
       "profileLink": "📋 Profile link",
       "profileLinkDesc": "Share your profile with others",
       "copyLink": "Copy",
+      "openProfile": "Open in browser",
       "linkCopied": "Link copied!"
     },
     "language": {
