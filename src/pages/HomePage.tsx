@@ -20,6 +20,8 @@ export function HomePage() {
   const { userId } = useAuth()
   const { t } = useTranslation()
   const qc = useQueryClient()
+  const hour = new Date().getHours()
+  const greetingKey = hour < 12 ? 'home.greetingMorning' : hour < 18 ? 'home.greetingDay' : 'home.greetingEvening'
 
   useEffect(() => {
     if (!userId) return
@@ -60,6 +62,16 @@ export function HomePage() {
       ])
       const slugMap = new Map((cats ?? []).map((c) => [c.id, c.slug as string]))
       return (rows ?? []).map((a) => ({ ...a, slug: slugMap.get(a.category_id) ?? 'other' }))
+    },
+  })
+
+  const meQuery = useQuery({
+    queryKey: ['home-me', userId],
+    enabled: Boolean(userId),
+    queryFn: async () => {
+      const { data, error } = await supabase.from('profiles').select('display_name').eq('id', userId!).single()
+      if (error) throw error
+      return data
     },
   })
 
@@ -128,6 +140,13 @@ export function HomePage() {
       </aside>
 
       <div className="space-y-4">
+      <section className="ushqn-card p-4 sm:p-5">
+        <p className="text-sm font-semibold text-[var(--color-ushqn-muted)]">{t(greetingKey)}</p>
+        <h1 className="mt-1 text-2xl font-black tracking-tight text-[var(--color-ushqn-text)] sm:text-3xl">
+          {meQuery.data?.display_name || t('home.greetingFallbackName')}
+        </h1>
+      </section>
+
       {/* Quick stats row */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Link

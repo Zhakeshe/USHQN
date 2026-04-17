@@ -1,4 +1,4 @@
-export type UserRole = 'pupil' | 'student' | 'parent'
+export type UserRole = 'pupil' | 'student' | 'parent' | 'teacher'
 export type ListingKind = 'good' | 'service'
 export type ContentReportTarget = 'job' | 'achievement' | 'message' | 'listing' | 'profile'
 export type JobApplicationStatus =
@@ -56,6 +56,25 @@ export interface Database {
           role?: UserRole
         }
         Update: Partial<Database['public']['Tables']['profiles']['Row']>
+      }
+      student_links: {
+        Row: {
+          id: string
+          student_id: string
+          guardian_id: string | null
+          link_type: 'parent' | 'teacher'
+          status: 'pending' | 'accepted' | 'revoked'
+          invite_code: string
+          expires_at: string
+          created_at: string
+          accepted_at: string | null
+        }
+        Insert: Partial<Database['public']['Tables']['student_links']['Row']> & {
+          student_id: string
+          link_type: 'parent' | 'teacher'
+          invite_code: string
+        }
+        Update: Partial<Database['public']['Tables']['student_links']['Row']>
       }
       user_settings: {
         Row: {

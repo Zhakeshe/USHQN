@@ -78,7 +78,7 @@ export function LoginPage() {
       return
     }
     trackEvent('login_success', { method: 'password' })
-    navigate('/home', { replace: true })
+    navigate('/onboarding', { replace: true })
   }
 
   async function signInWithGoogle() {

@@ -116,7 +116,9 @@
       "student": "Student (university)",
       "studentDesc": "University / college student",
       "parent": "Parent",
-      "parentDesc": "Parent or mentor"
+      "parentDesc": "Parent or mentor",
+      "teacher": "Teacher",
+      "teacherDesc": "Teacher or curator"
     },
     "passwordStrength": {
       "chars": "8+ characters",
@@ -168,6 +170,10 @@
     "upcomingEvents": "📅 Upcoming events",
     "sections": "Platform sections",
     "quickActionsLabel": "Quick actions",
+    "greetingMorning": "Good morning,",
+    "greetingDay": "Good afternoon,",
+    "greetingEvening": "Good evening,",
+    "greetingFallbackName": "friend",
     "recentJobs": "Recent jobs",
     "quickActions": {
       "addAchievement": "Add achievement",
@@ -245,7 +251,8 @@
     "roles": {
       "pupil": "School student",
       "student": "University student",
-      "parent": "Parent"
+      "parent": "Parent",
+      "teacher": "Teacher"
     },
     "completion": {
       "label": "Profile completion",
@@ -1066,6 +1073,52 @@
     "footerCopy": "© {{year}} {{legalName}}",
     "seoTitle": "{{wordmark}} — portfolio, ranking, and career",
     "seoDescription": "Achievements, jobs, events, and messaging in one place — for students, learners, and mentors."
+  },
+  "onboarding": {
+    "metaTitle": "Onboarding",
+    "kicker": "First setup",
+    "subtitle": "Complete a few steps to personalize your profile and links.",
+    "next": "Next",
+    "back": "Back",
+    "finish": "Finish",
+    "inviteParent": "Create parent invite",
+    "inviteTeacher": "Create teacher invite",
+    "inviteCreated": "Invite created",
+    "inviteAccepted": "Invite accepted",
+    "inviteCodePh": "Paste invite code",
+    "inviteCodeRequired": "Enter invite code",
+    "acceptInvite": "Connect",
+    "expiresAt": "valid until {{date}}",
+    "roles": {
+      "pupil": { "label": "School student", "desc": "Learning at school" },
+      "student": { "label": "University student", "desc": "Learning at college or university" },
+      "parent": { "label": "Parent", "desc": "Connect with a student via invite" },
+      "teacher": { "label": "Teacher", "desc": "Mentor students via invite" }
+    },
+    "fields": {
+      "displayName": "Display name",
+      "displayNamePh": "Your name",
+      "headline": "Headline",
+      "headlinePh": "What are you focusing on now?",
+      "location": "City",
+      "locationPh": "Almaty",
+      "schoolOrg": "School / organization",
+      "schoolOrgPh": "NIS / KBTU / etc."
+    },
+    "steps": {
+      "welcome": {
+        "title": "Welcome to USHQN",
+        "body": "We'll set up your role and profile so the platform can show the right content from day one."
+      },
+      "role": { "title": "Choose your role" },
+      "profile": { "title": "Fill basic profile" },
+      "invite": {
+        "title": "Connect by invite",
+        "studentBody": "Create invite codes for parent or teacher. They can connect later using these codes.",
+        "guardianBody": "Paste a student's invite code to connect."
+      },
+      "done": { "title": "Ready to go" }
+    }
   },
   "ui": {
     "loadError": "Could not load data.",

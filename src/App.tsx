@@ -15,6 +15,7 @@ import { RatingPage } from './pages/RatingPage'
 import { PublicProfilePage } from './pages/PublicProfilePage'
 import { RegisterPage } from './pages/RegisterPage'
 import { ResetPasswordPage } from './pages/ResetPasswordPage'
+import { OnboardingFlowPage } from './pages/OnboardingFlowPage'
 import { AdminRoute } from './routes/AdminRoute'
 import { ProtectedRoute } from './routes/ProtectedRoute'
 import { trackEvent } from './lib/analytics'
@@ -53,6 +54,7 @@ export default function App() {
 
         {/* Protected app routes */}
         <Route element={<ProtectedRoute />}>
+          <Route path="/onboarding" element={<OnboardingFlowPage />} />
           <Route element={<AppLayout />}>
             <Route path="/home" element={<HomePage />} />
             <Route path="/profile" element={<ProfilePage />} />

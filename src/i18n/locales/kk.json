@@ -116,7 +116,9 @@
       "student": "Студент",
       "studentDesc": "Жоғары оқу орны студенті",
       "parent": "Ата-ана",
-      "parentDesc": "Ата-ана немесе тәлімгер"
+      "parentDesc": "Ата-ана немесе тәлімгер",
+      "teacher": "Мұғалім",
+      "teacherDesc": "Мұғалім немесе куратор"
     },
     "passwordStrength": {
       "chars": "8+ таңба",
@@ -168,6 +170,10 @@
     "upcomingEvents": "📅 Алдағы іс-шаралар",
     "sections": "Платформа бөлімдері",
     "quickActionsLabel": "Жылдам әрекеттер",
+    "greetingMorning": "Қайырлы таң,",
+    "greetingDay": "Қайырлы күн,",
+    "greetingEvening": "Қайырлы кеш,",
+    "greetingFallbackName": "дос",
     "recentJobs": "Жаңа вакансиялар",
     "quickActions": {
       "addAchievement": "Жетістік қосу",
@@ -245,7 +251,8 @@
     "roles": {
       "pupil": "Оқушы",
       "student": "Студент",
-      "parent": "Ата-ана"
+      "parent": "Ата-ана",
+      "teacher": "Мұғалім"
     },
     "completion": {
       "label": "Профиль толтырылуы",
@@ -1060,6 +1067,52 @@
     "footerCopy": "© {{year}} {{legalName}}",
     "seoTitle": "{{wordmark}} — портфолио, рейтинг және мансап",
     "seoDescription": "Жетістіктер, вакансиялар, іс-шаралар және хабарламалар бір жерде — оқушылар, студенттер және менторлар үшін."
+  },
+  "onboarding": {
+    "metaTitle": "Бастапқы баптау",
+    "kicker": "Алғашқы қадам",
+    "subtitle": "Профиль мен байланыстарды баптау үшін қысқа қадамдардан өтіңіз.",
+    "next": "Келесі",
+    "back": "Артқа",
+    "finish": "Аяқтау",
+    "inviteParent": "Ата-ана invite коды",
+    "inviteTeacher": "Мұғалім invite коды",
+    "inviteCreated": "Код жасалды",
+    "inviteAccepted": "Байланыс сәтті қосылды",
+    "inviteCodePh": "Invite кодын енгізіңіз",
+    "inviteCodeRequired": "Invite коды керек",
+    "acceptInvite": "Қосу",
+    "expiresAt": "{{date}} дейін жарамды",
+    "roles": {
+      "pupil": { "label": "Оқушы", "desc": "Мектепте оқимын" },
+      "student": { "label": "Студент", "desc": "Колледж не ЖОО студентімін" },
+      "parent": { "label": "Ата-ана", "desc": "Оқушымен invite арқылы байланысамын" },
+      "teacher": { "label": "Мұғалім", "desc": "Оқушыларды invite арқылы қосамын" }
+    },
+    "fields": {
+      "displayName": "Көрінетін ат",
+      "displayNamePh": "Атыңыз",
+      "headline": "Тақырып",
+      "headlinePh": "Қазір неге көңіл бөліп жүрсіз?",
+      "location": "Қала",
+      "locationPh": "Алматы",
+      "schoolOrg": "Мектеп / ұйым",
+      "schoolOrgPh": "НИШ / КБТУ / т.б."
+    },
+    "steps": {
+      "welcome": {
+        "title": "USHQN-ға қош келдіңіз",
+        "body": "Сізге лайық контент көрсету үшін рөл мен профильді тез баптаймыз."
+      },
+      "role": { "title": "Рөліңізді таңдаңыз" },
+      "profile": { "title": "Негізгі профильді толтырыңыз" },
+      "invite": {
+        "title": "Invite арқылы қосылу",
+        "studentBody": "Ата-ана мен мұғалімге код жасаңыз. Олар кейін осы кодпен қосылады.",
+        "guardianBody": "Оқушы берген invite кодын енгізіп байланысыңыз."
+      },
+      "done": { "title": "Дайын" }
+    }
   },
   "ui": {
     "loadError": "Деректерді жүктеу мүмкін болмады.",

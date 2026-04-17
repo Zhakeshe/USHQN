@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { Navigate, Outlet } from 'react-router-dom'
+import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../hooks/useAuth'
 import { isSupabaseConfigured, supabase } from '../lib/supabase'
@@ -7,18 +7,22 @@ import { isSupabaseConfigured, supabase } from '../lib/supabase'
 export function ProtectedRoute() {
   const { t } = useTranslation()
   const { session, loading } = useAuth()
+  const location = useLocation()
 
-  const banQuery = useQuery({
-    queryKey: ['profile-ban', session?.user?.id],
+  const profileGuardQuery = useQuery({
+    queryKey: ['profile-guard', session?.user?.id],
     enabled: Boolean(session?.user?.id && isSupabaseConfigured),
     queryFn: async () => {
       const { data, error } = await supabase
         .from('profiles')
-        .select('is_banned')
+        .select('is_banned,onboarding_completed_at')
         .eq('id', session!.user.id)
         .single()
       if (error) throw error
-      return Boolean(data?.is_banned)
+      return {
+        isBanned: Boolean(data?.is_banned),
+        onboardingDone: Boolean(data?.onboarding_completed_at),
+      }
     },
   })
 
@@ -45,7 +49,7 @@ export function ProtectedRoute() {
     return <Navigate to="/" replace />
   }
 
-  if (banQuery.isPending) {
+  if (profileGuardQuery.isPending) {
     return (
       <div className="flex min-h-[40vh] items-center justify-center text-[#6B778C]">
         {t('protectedRoute.loading')}
@@ -53,7 +57,7 @@ export function ProtectedRoute() {
     )
   }
 
-  if (banQuery.data === true) {
+  if (profileGuardQuery.data?.isBanned === true) {
     return (
       <div className="ushqn-card mx-auto mt-10 max-w-md space-y-4 p-8 text-center">
         <h1 className="text-lg font-bold text-[#172B4D]">{t('trust.banned.title')}</h1>
@@ -67,6 +71,14 @@ export function ProtectedRoute() {
         </button>
       </div>
     )
+  }
+
+  const atOnboarding = location.pathname === '/onboarding'
+  if (!profileGuardQuery.data?.onboardingDone && !atOnboarding) {
+    return <Navigate to="/onboarding" replace />
+  }
+  if (profileGuardQuery.data?.onboardingDone && atOnboarding) {
+    return <Navigate to="/home" replace />
   }
 
   return <Outlet />

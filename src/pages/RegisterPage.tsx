@@ -82,6 +82,7 @@ export function RegisterPage() {
     { value: 'pupil', label: t('register.roles.pupil'), icon: '🎒', desc: t('register.roles.pupilDesc') },
     { value: 'student', label: t('register.roles.student'), icon: '🎓', desc: t('register.roles.studentDesc') },
     { value: 'parent', label: t('register.roles.parent'), icon: '👨‍👩‍👧', desc: t('register.roles.parentDesc') },
+    { value: 'teacher', label: t('register.roles.teacher'), icon: '🧑‍🏫', desc: t('register.roles.teacherDesc') },
   ]
 
   const schema = z.object({
@@ -91,7 +92,7 @@ export function RegisterPage() {
       .regex(/[A-Z]/, t('register.errors.uppercaseRequired'))
       .regex(/[0-9]/, t('register.errors.digitRequired')),
     display_name: z.string().min(2, t('register.errors.minName')),
-    role: z.enum(['pupil', 'student', 'parent']),
+    role: z.enum(['pupil', 'student', 'parent', 'teacher']),
   })
 
   const {
@@ -154,7 +155,7 @@ export function RegisterPage() {
     if (ref) trackEvent('signup_with_referral_meta')
     if (data.session) {
       clearReferralFromStorage()
-      navigate('/home', { replace: true })
+      navigate('/onboarding', { replace: true })
       return
     }
     if (data.user) {

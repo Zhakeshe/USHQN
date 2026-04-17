@@ -22,7 +22,7 @@ const editSchema = z.object({
   location: z.string().optional(),
   headline: z.string().optional(),
   school_or_org: z.string().optional(),
-  role: z.enum(['pupil', 'student', 'parent']),
+  role: z.enum(['pupil', 'student', 'parent', 'teacher']),
   is_employer: z.boolean(),
   accent_color: z
     .string()
@@ -433,6 +433,7 @@ export function ProfilePage() {
                   <option value="pupil">{t('profile.roles.pupil')}</option>
                   <option value="student">{t('profile.roles.student')}</option>
                   <option value="parent">{t('profile.roles.parent')}</option>
+                  <option value="teacher">{t('profile.roles.teacher')}</option>
                 </select>
               </div>
               <label className="flex items-center gap-2.5 rounded-lg border border-[#DFE1E6] bg-[#fafbfc] px-3 py-2.5 cursor-pointer hover:border-[#0052CC] transition">

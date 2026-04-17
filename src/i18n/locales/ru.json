@@ -116,7 +116,9 @@
       "student": "Студент",
       "studentDesc": "Студент вуза / колледжа",
       "parent": "Родитель",
-      "parentDesc": "Родитель или наставник"
+      "parentDesc": "Родитель или наставник",
+      "teacher": "Учитель",
+      "teacherDesc": "Учитель или куратор"
     },
     "passwordStrength": {
       "chars": "8+ символов",
@@ -168,6 +170,10 @@
     "upcomingEvents": "📅 Ближайшие события",
     "sections": "Разделы платформы",
     "quickActionsLabel": "Быстрые действия",
+    "greetingMorning": "Доброе утро,",
+    "greetingDay": "Добрый день,",
+    "greetingEvening": "Добрый вечер,",
+    "greetingFallbackName": "друг",
     "recentJobs": "Свежие вакансии",
     "quickActions": {
       "addAchievement": "Добавить достижение",
@@ -245,7 +251,8 @@
     "roles": {
       "pupil": "Ученик",
       "student": "Студент",
-      "parent": "Родитель"
+      "parent": "Родитель",
+      "teacher": "Учитель"
     },
     "completion": {
       "label": "Заполненность профиля",
@@ -1068,6 +1075,52 @@
     "footerCopy": "© {{year}} {{legalName}}",
     "seoTitle": "{{wordmark}} — портфолио, рейтинг и карьера",
     "seoDescription": "Достижения, вакансии, события и сообщения в одном месте — для школьников, студентов и менторов."
+  },
+  "onboarding": {
+    "metaTitle": "Первичная настройка",
+    "kicker": "Первый запуск",
+    "subtitle": "Пройдите короткие шаги, чтобы настроить профиль и связи.",
+    "next": "Далее",
+    "back": "Назад",
+    "finish": "Завершить",
+    "inviteParent": "Создать код для родителя",
+    "inviteTeacher": "Создать код для учителя",
+    "inviteCreated": "Код приглашения создан",
+    "inviteAccepted": "Связь успешно добавлена",
+    "inviteCodePh": "Вставьте invite-код",
+    "inviteCodeRequired": "Введите invite-код",
+    "acceptInvite": "Подключить",
+    "expiresAt": "действует до {{date}}",
+    "roles": {
+      "pupil": { "label": "Ученик", "desc": "Учусь в школе" },
+      "student": { "label": "Студент", "desc": "Учусь в колледже/вузе" },
+      "parent": { "label": "Родитель", "desc": "Подключаюсь к ученику по invite-коду" },
+      "teacher": { "label": "Учитель", "desc": "Наставляю учеников по invite-коду" }
+    },
+    "fields": {
+      "displayName": "Отображаемое имя",
+      "displayNamePh": "Ваше имя",
+      "headline": "Заголовок",
+      "headlinePh": "Чем вы сейчас занимаетесь?",
+      "location": "Город",
+      "locationPh": "Алматы",
+      "schoolOrg": "Школа / организация",
+      "schoolOrgPh": "НИШ / КБТУ / и т.д."
+    },
+    "steps": {
+      "welcome": {
+        "title": "Добро пожаловать в USHQN",
+        "body": "Сейчас настроим роль и профиль, чтобы платформа сразу показывала нужный контент."
+      },
+      "role": { "title": "Выберите роль" },
+      "profile": { "title": "Заполните базовый профиль" },
+      "invite": {
+        "title": "Подключение по invite",
+        "studentBody": "Создайте коды для родителя или учителя. Они подключатся позже по этим кодам.",
+        "guardianBody": "Введите invite-код ученика, чтобы подключиться."
+      },
+      "done": { "title": "Готово" }
+    }
   },
   "ui": {
     "loadError": "Не удалось загрузить данные.",
