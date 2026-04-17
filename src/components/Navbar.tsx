@@ -138,12 +138,17 @@ export function Navbar() {
     queryKey: ['profile-staff-flags', userId],
     enabled: Boolean(userId),
     queryFn: async () => {
-      const { data, error } = await supabase.from('profiles').select('is_admin,is_moderator').eq('id', userId!).single()
+      const { data, error } = await supabase.from('profiles').select('is_admin,is_moderator,role').eq('id', userId!).single()
       if (error) throw error
-      return { isAdmin: Boolean(data?.is_admin), isModerator: Boolean(data?.is_moderator) }
+      return {
+        isAdmin: Boolean(data?.is_admin),
+        isModerator: Boolean(data?.is_moderator),
+        role: (data?.role as string) ?? '',
+      }
     },
   })
   const showStaffNav = Boolean(staff?.isAdmin || staff?.isModerator)
+  const showConnectionsNav = ['parent', 'teacher', 'student', 'pupil'].includes(staff?.role ?? '')
 
   const { data: unreadCount } = useQuery({
     queryKey: ['notif-count', userId],
@@ -182,12 +187,15 @@ export function Navbar() {
       { to: '/achievements', label: t('nav.achievements') },
       { to: '/rating', label: t('nav.rating') },
       { to: '/people', label: t('nav.people') },
+    ]
+    if (showConnectionsNav) base.push({ to: '/connections', label: t('nav.connections') })
+    base.push(
       { to: '/communities', label: t('nav.communities') },
       { to: '/settings', label: t('nav.settings') },
-    ]
+    )
     if (showStaffNav) base.push({ to: '/admin', label: t('nav.admin') })
     return base
-  }, [t, showStaffNav])
+  }, [t, showConnectionsNav, showStaffNav])
 
   const morePrefixes = useMemo(() => moreItems.map((x) => x.to), [moreItems])
   const isMoreActive = morePrefixes.some((p) => pathname === p || (p !== '/' && pathname.startsWith(p + '/')))

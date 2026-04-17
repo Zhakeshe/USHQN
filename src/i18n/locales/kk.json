@@ -61,7 +61,8 @@
     "primary": "Негізгі",
     "discover": "Қосымша",
     "home": "Басты бет",
-    "logout": "Шығу"
+    "logout": "Шығу",
+    "connections": "Отбасы мен мектеп"
   },
   "auth": {
     "backToLanding": "Басты бетке"
@@ -1150,6 +1151,32 @@
         "title": "Дайын"
       }
     }
+  },
+  "connections": {
+    "metaTitle": "Байланыстар",
+    "titleParent": "Ата-ана панелі",
+    "titleTeacher": "Мұғалім панелі",
+    "titleStudent": "Оқушы invite-тері",
+    "subtitle": "Invite кодтар мен байланыстарды басқару.",
+    "acceptSection": "Оқушымен байланысу",
+    "acceptHint": "Оқушыдан invite кодын сұраңыз (онбординг немесе осы бет).",
+    "createInvites": "Invite жасау",
+    "createInvitesHint": "Кодты ата-ана немесе мұғалімге жіберіңіз. 14 күннен кейін жарамсыз болады.",
+    "myInvites": "Сіздің invite-тер",
+    "linkedStudents": "Байланысқан оқушылар",
+    "emptyStudent": "Әлі invite жоқ. Жоғарыдан жасаңыз.",
+    "emptyGuardian": "Әлі оқушы жоқ. Жоғарыда кодты енгізіп қосылыңыз.",
+    "statusLabel": "Күй",
+    "openProfile": "Профильді ашу",
+    "copyCode": "Кодты көшіру",
+    "copied": "Көшірілді",
+    "copyFailed": "Көшіру сәтсіз",
+    "revokeInvite": "Invite-ті болдырмау",
+    "inviteRevoked": "Invite жойылды",
+    "linkedTo": "Байланысқан",
+    "unknownStudent": "Оқушы",
+    "unavailableTitle": "Бұл рөл үшін қолжетімсіз",
+    "unavailableBody": "Параметрлерде ата-ана, мұғалім немесе оқушы рөліне ауысыңыз."
   },
   "ui": {
     "loadError": "Деректерді жүктеу мүмкін болмады.",

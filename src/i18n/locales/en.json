@@ -61,7 +61,8 @@
     "primary": "Main",
     "discover": "More",
     "home": "Home",
-    "logout": "Log out"
+    "logout": "Log out",
+    "connections": "Family & school"
   },
   "auth": {
     "backToLanding": "Back to home"
@@ -1156,6 +1157,32 @@
         "title": "Ready to go"
       }
     }
+  },
+  "connections": {
+    "metaTitle": "Connections",
+    "titleParent": "Parent panel",
+    "titleTeacher": "Teacher panel",
+    "titleStudent": "Student invites",
+    "subtitle": "Manage invite codes and linked profiles.",
+    "acceptSection": "Connect with a student",
+    "acceptHint": "Ask the student for their invite code from onboarding or this page.",
+    "createInvites": "Create invites",
+    "createInvitesHint": "Share the code with a parent or teacher. Codes expire after 14 days.",
+    "myInvites": "Your invites",
+    "linkedStudents": "Linked students",
+    "emptyStudent": "No invites yet. Create one above.",
+    "emptyGuardian": "No linked students yet. Accept an invite code above.",
+    "statusLabel": "Status",
+    "openProfile": "Open profile",
+    "copyCode": "Copy code",
+    "copied": "Copied",
+    "copyFailed": "Could not copy",
+    "revokeInvite": "Cancel invite",
+    "inviteRevoked": "Invite removed",
+    "linkedTo": "Connected to",
+    "unknownStudent": "Student",
+    "unavailableTitle": "Not available for this role",
+    "unavailableBody": "Switch to parent, teacher, or student in profile settings to use this page."
   },
   "ui": {
     "loadError": "Could not load data.",

@@ -16,6 +16,7 @@ import { PublicProfilePage } from './pages/PublicProfilePage'
 import { RegisterPage } from './pages/RegisterPage'
 import { ResetPasswordPage } from './pages/ResetPasswordPage'
 import { OnboardingFlowPage } from './pages/OnboardingFlowPage'
+import { ConnectionsPage } from './pages/ConnectionsPage'
 import { AdminRoute } from './routes/AdminRoute'
 import { ProtectedRoute } from './routes/ProtectedRoute'
 import { trackEvent } from './lib/analytics'
@@ -71,6 +72,7 @@ export default function App() {
             />
             <Route path="/jobs" element={<JobsPage />} />
             <Route path="/people" element={<PeoplePage />} />
+            <Route path="/connections" element={<ConnectionsPage />} />
             <Route
               path="/communities"
               element={

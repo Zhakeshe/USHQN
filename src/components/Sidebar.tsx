@@ -51,6 +51,13 @@ function ILogout() {
 function IAdmin() {
   return <svg viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5"><path fillRule="evenodd" d="M9.661 2.237a.531.531 0 0 1 .678 0 11.947 11.947 0 0 0 7.078 2.749.5.5 0 0 1 .479.425c.069.52.104 1.05.104 1.589 0 5.162-3.26 9.563-7.834 11.256a.48.48 0 0 1-.332 0C5.26 16.563 2 12.162 2 7c0-.538.035-1.069.104-1.589a.5.5 0 0 1 .48-.425 11.947 11.947 0 0 0 7.077-2.749Z" clipRule="evenodd" /></svg>
 }
+function IConnections() {
+  return (
+    <svg viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5">
+      <path d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 112.828-2.828l3-3z" />
+    </svg>
+  )
+}
 
 /* ── Lang switcher inside sidebar ── */
 const LANGS = [
@@ -71,8 +78,12 @@ export function Sidebar() {
     queryKey: ['profile-staff-flags', userId],
     enabled: Boolean(userId),
     queryFn: async () => {
-      const { data } = await supabase.from('profiles').select('is_admin,is_moderator').eq('id', userId!).single()
-      return { isAdmin: Boolean(data?.is_admin), isModerator: Boolean(data?.is_moderator) }
+      const { data } = await supabase.from('profiles').select('is_admin,is_moderator,role').eq('id', userId!).single()
+      return {
+        isAdmin: Boolean(data?.is_admin),
+        isModerator: Boolean(data?.is_moderator),
+        role: (data?.role as string) ?? '',
+      }
     },
   })
 
@@ -122,6 +133,7 @@ export function Sidebar() {
   }
 
   const showAdmin = Boolean(staff?.isAdmin || staff?.isModerator)
+  const showConnectionsLink = ['parent', 'teacher', 'student', 'pupil'].includes(staff?.role ?? '')
   const notifBadge = (unreadCount ?? 0) > 0 ? Math.min(unreadCount ?? 0, 99) : null
   const chatBadge = (unreadChat ?? 0) > 0 ? Math.min(unreadChat ?? 0, 99) : null
   const curLang = LANGS.find((l) => l.code === i18n.language) ?? LANGS[0]
@@ -137,6 +149,7 @@ export function Sidebar() {
     { to: '/profile', icon: IProfile, label: t('nav.profile') },
     { to: '/achievements', icon: IAch, label: t('nav.achievements') },
     { to: '/rating', icon: IRating, label: t('nav.rating') },
+    ...(showConnectionsLink ? [{ to: '/connections', icon: IConnections, label: t('nav.connections') }] : []),
     { to: '/communities', icon: IGroups, label: t('nav.communities') },
     { to: '/showcase', icon: IShowcase, label: t('nav.services') },
   ]
