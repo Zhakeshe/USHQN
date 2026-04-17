@@ -41,7 +41,10 @@ create policy conv_select_public_channel on public.conversations
 
 -- ---------------------------------------------------------------------------
 -- Sidebar: include public-channel flags for UI.
+-- OUT columns changed vs 20260409220000 — must drop; CREATE OR REPLACE cannot change return type.
 -- ---------------------------------------------------------------------------
+drop function if exists public.my_chat_sidebar();
+
 create or replace function public.my_chat_sidebar()
 returns table (
   conversation_id uuid,
