@@ -13,6 +13,11 @@ export function chatPeerLabel(p: ChatPeerProfile | undefined, t: TFunction): str
   if (dn) return dn
   const u = p?.username?.trim()
   if (u) return `@${u}`
+  const id = p?.id
+  if (id) {
+    const short = id.replace(/-/g, '').slice(0, 8)
+    if (short) return t('chat.peerShortId', { id: short })
+  }
   return t('chat.peerFallback')
 }
 

@@ -13,6 +13,8 @@ import { ContentReportDialog } from '../components/ContentReportDialog'
 import { useToast } from '../lib/toast'
 import { formatSupabaseError } from '../lib/supabaseErrors'
 import { chatPeerLabel, initialsFromChatLabel, type ChatPeerProfile } from '../lib/chatPeerLabel'
+import { fetchChatProfilesByIds, searchProfilesForChat, searchProfilesForGroupPicker } from '../lib/chatProfiles'
+import { getAppBaseUrl } from '../lib/siteUrl'
 
 type MsgRow = {
   id: string
@@ -32,6 +34,8 @@ type SidebarRpcRow = {
   conversation_id: string
   is_group: boolean
   title: string | null
+  is_public_channel?: boolean
+  channel_slug?: string | null
   last_body: string | null
   last_at: string | null
   last_sender_id: string | null
@@ -44,6 +48,8 @@ type ConvListItem = {
   id: string
   isGroup: boolean
   title: string | null
+  isPublicChannel: boolean
+  channelSlug: string | null
   displayName: string
   subtitle: string
   lastAt: string | null
@@ -163,7 +169,7 @@ function ChatConvItem({
           {showPhoto ? (
             <img src={c.avatarUrl!} alt="" className="h-full w-full object-cover" loading="lazy" />
           ) : c.isGroup ? (
-            '⎔'
+            c.isPublicChannel ? '#' : '⎔'
           ) : (
             initialsFromChatLabel(c.displayName)
           )}
@@ -218,14 +224,18 @@ function GroupModal({
   const navigate = useNavigate()
   const qc = useQueryClient()
   const { toast } = useToast()
+  const [mode, setMode] = useState<'private' | 'public'>('private')
   const [title, setTitle] = useState('')
+  const [channelSlug, setChannelSlug] = useState('')
   const [q, setQ] = useState('')
   const debouncedQ = useDebouncedValue(q.trim(), 320)
   const [picked, setPicked] = useState<Set<string>>(() => new Set())
 
   useEffect(() => {
     if (!open) {
+      setMode('private')
       setTitle('')
+      setChannelSlug('')
       setQ('')
       setPicked(new Set())
     }
@@ -235,14 +245,7 @@ function GroupModal({
     queryKey: ['chat-group-search', debouncedQ, userId],
     enabled: open && Boolean(userId) && debouncedQ.length >= 2,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id,display_name')
-        .neq('id', userId!)
-        .ilike('display_name', `%${debouncedQ}%`)
-        .limit(16)
-      if (error) throw error
-      return data ?? []
+      return searchProfilesForGroupPicker({ q: debouncedQ, excludeId: userId!, limit: 16 })
     },
   })
 
@@ -271,7 +274,47 @@ function GroupModal({
     },
   })
 
+  const createPublic = useMutation({
+    mutationFn: async () => {
+      const name = title.trim()
+      const slug = channelSlug.trim().toLowerCase()
+      if (!name) throw new Error('need-title')
+      if (!/^[a-z0-9_]{3,30}$/.test(slug)) throw new Error('bad-slug')
+      const ids = [...picked]
+      const { data, error } = await supabase.rpc('create_public_channel', {
+        p_title: name,
+        p_slug: slug,
+        p_member_ids: ids,
+      })
+      if (error) throw error
+      return data as string
+    },
+    onSuccess: (id) => {
+      void qc.invalidateQueries({ queryKey: ['chat-sidebar'] })
+      onClose()
+      void navigate(`/chat/${id}`)
+    },
+    onError: (e: unknown) => {
+      const blob = formatSupabaseError(e, t).toLowerCase()
+      if (e instanceof Error && e.message === 'need-title') {
+        toast(t('chat.groupNeedTitle'), 'error')
+        return
+      }
+      if (e instanceof Error && e.message === 'bad-slug') {
+        toast(t('chat.channelSlugInvalid'), 'error')
+        return
+      }
+      if (blob.includes('slug taken') || blob.includes('unique')) {
+        toast(t('chat.channelSlugTaken'), 'error')
+        return
+      }
+      toast(t('chat.channelCreateFailed'), 'error')
+    },
+  })
+
   if (!open) return null
+
+  const primaryPending = createGroup.isPending || createPublic.isPending
 
   return (
     <div
@@ -294,6 +337,26 @@ function GroupModal({
             {t('common.cancel')}
           </button>
         </div>
+        <div className="flex gap-1 border-b border-[var(--color-ushqn-border)] px-3 pb-2 pt-2">
+          <button
+            type="button"
+            onClick={() => setMode('private')}
+            className={`flex-1 rounded-lg py-2 text-xs font-bold transition ${
+              mode === 'private' ? 'bg-[#DEEBFF] text-[#0052CC]' : 'text-[var(--color-ushqn-muted)] hover:bg-[var(--color-ushqn-surface-muted)]'
+            }`}
+          >
+            {t('chat.privateGroupTab')}
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode('public')}
+            className={`flex-1 rounded-lg py-2 text-xs font-bold transition ${
+              mode === 'public' ? 'bg-[#DEEBFF] text-[#0052CC]' : 'text-[var(--color-ushqn-muted)] hover:bg-[var(--color-ushqn-surface-muted)]'
+            }`}
+          >
+            {t('chat.publicChannelTab')}
+          </button>
+        </div>
         <div className="flex-1 space-y-4 overflow-y-auto p-4">
           <div>
             <label className="text-xs font-bold uppercase tracking-wide text-[var(--color-ushqn-muted)]">
@@ -306,7 +369,23 @@ function GroupModal({
               className="ushqn-input mt-1"
             />
           </div>
-          <p className="text-sm text-[var(--color-ushqn-muted)]">{t('chat.groupPickHint')}</p>
+          {mode === 'public' ? (
+            <div>
+              <label className="text-xs font-bold uppercase tracking-wide text-[var(--color-ushqn-muted)]">
+                {t('chat.channelSlugLabel')}
+              </label>
+              <input
+                value={channelSlug}
+                onChange={(e) => setChannelSlug(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+                placeholder={t('chat.channelSlugPh')}
+                className="ushqn-input mt-1 font-mono text-sm"
+              />
+              <p className="mt-1 text-xs text-[var(--color-ushqn-muted)]">{t('chat.channelSlugHint')}</p>
+            </div>
+          ) : null}
+          <p className="text-sm text-[var(--color-ushqn-muted)]">
+            {mode === 'public' ? t('chat.channelPickHint') : t('chat.groupPickHint')}
+          </p>
           <div>
             <input
               value={q}
@@ -324,6 +403,7 @@ function GroupModal({
               ) : (
                 (searchQuery.data ?? []).map((p) => {
                   const on = picked.has(p.id)
+                  const label = p.display_name?.trim() || (p.username ? `@${p.username}` : chatPeerLabel({ id: p.id, display_name: null, username: null }, t))
                   return (
                     <li key={p.id}>
                       <button
@@ -345,9 +425,9 @@ function GroupModal({
                         <span
                           className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br ${colorFor(p.id)} text-xs font-bold text-white`}
                         >
-                          {getInitials(p.display_name ?? '?')}
+                          {getInitials(label)}
                         </span>
-                        <span className="min-w-0 truncate">{sanitizeUserText(p.display_name ?? '')}</span>
+                        <span className="min-w-0 truncate">{sanitizeUserText(label)}</span>
                         <span className="ml-auto text-xs font-bold">{on ? '✓' : '+'}</span>
                       </button>
                     </li>
@@ -360,11 +440,11 @@ function GroupModal({
         <div className="border-t border-[var(--color-ushqn-border)] p-4">
           <button
             type="button"
-            disabled={createGroup.isPending}
-            onClick={() => createGroup.mutate()}
+            disabled={primaryPending}
+            onClick={() => (mode === 'private' ? createGroup.mutate() : createPublic.mutate())}
             className="w-full rounded-xl bg-[#0052CC] py-3 text-sm font-bold text-white shadow-lg shadow-[#0052CC]/25 transition hover:bg-[#0747A6] disabled:opacity-50"
           >
-            {createGroup.isPending ? t('chat.groupCreating') : t('chat.groupCreate')}
+            {primaryPending ? t('chat.groupCreating') : mode === 'private' ? t('chat.groupCreate') : t('chat.channelCreate')}
           </button>
         </div>
       </div>
@@ -388,21 +468,16 @@ export function ChatPage() {
   const [chatSearch, setChatSearch] = useState('')
   const [chatSearchFocused, setChatSearchFocused] = useState(false)
   const chatSearchDebounced = useDebouncedValue(chatSearch.trim(), 300)
+  const [membersModalOpen, setMembersModalOpen] = useState(false)
+  const [joinChannelOpen, setJoinChannelOpen] = useState(false)
+  const [joinChannelSlug, setJoinChannelSlug] = useState('')
+  const [renameOpen, setRenameOpen] = useState(false)
+  const [renameDraft, setRenameDraft] = useState('')
 
   const userSearchQuery = useQuery({
-    queryKey: ['chat-user-search', chatSearchDebounced],
-    enabled: chatSearchFocused && chatSearchDebounced.length >= 1,
-    queryFn: async () => {
-      const q = chatSearchDebounced
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id,display_name,username,avatar_url')
-        .neq('id', userId ?? '')
-        .or(`display_name.ilike.%${q}%,username.ilike.%${q}%`)
-        .limit(10)
-      if (error) throw error
-      return data ?? []
-    },
+    queryKey: ['chat-user-search', chatSearchDebounced, userId],
+    enabled: chatSearchFocused && chatSearchDebounced.length >= 1 && Boolean(userId),
+    queryFn: async () => searchProfilesForChat({ q: chatSearchDebounced, excludeId: userId!, limit: 10 }),
   })
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -440,14 +515,7 @@ export function ChatPage() {
   const peerProfilesQuery = useQuery({
     queryKey: ['chat-peer-profiles', [...profileIds].sort().join('|')],
     enabled: profileIds.length > 0,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id,display_name,username,avatar_url')
-        .in('id', profileIds)
-      if (error) throw error
-      return new Map((data ?? []).map((p) => [p.id, p as ChatPeerProfile]))
-    },
+    queryFn: async () => fetchChatProfilesByIds(profileIds),
   })
 
   const communitiesPeekQuery = useQuery({
@@ -464,10 +532,14 @@ export function ChatPage() {
     const pmap = peerProfilesQuery.data ?? new Map<string, ChatPeerProfile>()
     return rows.map((r) => {
       const isGroup = Boolean(r.is_group)
+      const isPublicChannel = Boolean(r.is_public_channel)
+      const channelSlug = (r.channel_slug ?? '').trim() || null
       let displayName: string
       let avatarUrl: string | null = null
       if (isGroup) {
-        displayName = r.title?.trim() || t('chat.groupChat')
+        const baseTitle = r.title?.trim() || (isPublicChannel ? t('chat.publicChannel') : t('chat.groupChat'))
+        displayName =
+          isPublicChannel && channelSlug ? t('chat.channelDisplayTitle', { title: baseTitle, slug: channelSlug }) : baseTitle
       } else if ((r.other_user_ids?.length ?? 0) === 1) {
         const pid = r.other_user_ids[0]!
         const prof = pmap.get(pid)
@@ -486,6 +558,8 @@ export function ChatPage() {
         id: r.conversation_id,
         isGroup,
         title: r.title,
+        isPublicChannel,
+        channelSlug,
         displayName,
         subtitle,
         lastAt: r.last_at,
@@ -500,26 +574,52 @@ export function ChatPage() {
 
   const activeConv = useMemo(() => convList.find((c) => c.id === conversationId) ?? null, [convList, conversationId])
 
+  const convMetaQuery = useQuery({
+    queryKey: ['conv-meta', conversationId],
+    enabled: Boolean(conversationId && userId && activeConv?.isGroup),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('conversations')
+        .select('created_by,title,is_public_channel,channel_slug')
+        .eq('id', conversationId!)
+        .single()
+      if (error) throw error
+      return data as {
+        created_by: string | null
+        title: string | null
+        is_public_channel: boolean
+        channel_slug: string | null
+      }
+    },
+  })
+
+  const isGroupOwner = Boolean(userId && convMetaQuery.data?.created_by === userId)
+
+  useEffect(() => {
+    if (renameOpen && convMetaQuery.data?.title != null) setRenameDraft(convMetaQuery.data.title ?? '')
+  }, [renameOpen, convMetaQuery.data?.title])
+
   const membersQuery = useQuery({
-    queryKey: ['conv-members', conversationId],
+    queryKey: ['conv-members', conversationId, i18n.language],
     enabled: Boolean(conversationId && userId),
     queryFn: async () => {
       const { data: parts, error } = await supabase.rpc('get_conversation_members', { p_conv_id: conversationId! })
       if (error) throw error
-      const ids = [...new Set((parts ?? []).map((p: { user_id: string }) => p.user_id))]
-      if (ids.length === 0) return { ids: [], byId: new Map<string, string>(), avatarById: new Map<string, string | null>() }
-      const { data: profs, error: e2 } = await supabase
-        .from('profiles')
-        .select('id,display_name,username,avatar_url')
-        .in('id', ids)
-      if (e2) throw e2
+      const memberRows = (parts ?? []) as { user_id: string }[]
+      const ids = [...new Set(memberRows.map((p) => p.user_id))]
+      if (ids.length === 0) {
+        return { ids: [] as string[], byId: new Map<string, string>(), avatarById: new Map<string, string | null>() }
+      }
+      const pmap = await fetchChatProfilesByIds(ids)
       const byId = new Map<string, string>()
       const avatarById = new Map<string, string | null>()
-      for (const p of profs ?? []) {
-        byId.set(p.id, chatPeerLabel({ id: p.id, display_name: p.display_name, username: p.username }, t))
-        avatarById.set(p.id, p.avatar_url?.trim() || null)
+      for (const id of ids) {
+        const p = pmap.get(id)
+        const peer: ChatPeerProfile = p ?? { id, display_name: null, username: null }
+        byId.set(id, chatPeerLabel(peer, t))
+        avatarById.set(id, p?.avatar_url?.trim() || null)
       }
-      return { ids, byId, avatarById }
+      return { ids: ids as string[], byId, avatarById }
     },
   })
 
@@ -728,6 +828,38 @@ export function ChatPage() {
     },
   })
 
+  const renameGroup = useMutation({
+    mutationFn: async (nextTitle: string) => {
+      const { error } = await supabase.rpc('rename_group_conversation', {
+        p_conv_id: conversationId!,
+        p_title: nextTitle.trim(),
+      })
+      if (error) throw error
+    },
+    onSuccess: () => {
+      setRenameOpen(false)
+      void qc.invalidateQueries({ queryKey: ['chat-sidebar'] })
+      void qc.invalidateQueries({ queryKey: ['conv-meta', conversationId] })
+      toast(t('chat.titleSaved'), 'success')
+    },
+    onError: () => toast(t('chat.renameFailed'), 'error'),
+  })
+
+  const joinBySlug = useMutation({
+    mutationFn: async (slug: string) => {
+      const { data, error } = await supabase.rpc('join_public_channel', { p_slug: slug.trim().toLowerCase() })
+      if (error) throw error
+      return data as string
+    },
+    onSuccess: (id) => {
+      setJoinChannelOpen(false)
+      setJoinChannelSlug('')
+      void qc.invalidateQueries({ queryKey: ['chat-sidebar'] })
+      void navigate(`/chat/${id}`)
+    },
+    onError: (e) => toast(formatSupabaseError(e, t), 'error'),
+  })
+
   const peerReadAt = peerReadQuery.data ? new Date(peerReadQuery.data).getTime() : null
   const nameById = membersQuery.data?.byId ?? new Map<string, string>()
   const avatarById = membersQuery.data?.avatarById ?? new Map<string, string | null>()
@@ -776,6 +908,153 @@ export function ChatPage() {
       />
       <GroupModal open={groupModalOpen} onClose={() => setGroupModalOpen(false)} userId={userId} />
 
+      {joinChannelOpen ? (
+        <div
+          className="fixed inset-0 z-[100] flex items-end justify-center bg-black/45 p-0 sm:items-center sm:p-4"
+          role="dialog"
+          aria-modal
+          aria-labelledby="join-channel-title"
+        >
+          <button
+            type="button"
+            className="absolute inset-0 cursor-default"
+            aria-label={t('common.close')}
+            onClick={() => {
+              setJoinChannelOpen(false)
+              setJoinChannelSlug('')
+            }}
+          />
+          <div className="relative z-10 w-full max-w-md rounded-t-3xl border border-[var(--color-ushqn-border)] bg-[var(--color-ushqn-surface)] p-4 shadow-2xl sm:rounded-3xl">
+            <h2 id="join-channel-title" className="text-base font-bold text-[var(--color-ushqn-text)]">
+              {t('chat.joinChannelModalTitle')}
+            </h2>
+            <p className="mt-1 text-xs text-[var(--color-ushqn-muted)]">{t('chat.joinChannelModalHint')}</p>
+            <input
+              value={joinChannelSlug}
+              onChange={(e) => setJoinChannelSlug(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+              placeholder={t('chat.channelSlugPh')}
+              className="ushqn-input mt-3 font-mono text-sm"
+            />
+            <div className="mt-4 flex gap-2">
+              <button
+                type="button"
+                className="flex-1 rounded-xl border border-[var(--color-ushqn-border)] py-2.5 text-sm font-bold text-[var(--color-ushqn-text)]"
+                onClick={() => {
+                  setJoinChannelOpen(false)
+                  setJoinChannelSlug('')
+                }}
+              >
+                {t('common.cancel')}
+              </button>
+              <button
+                type="button"
+                disabled={joinBySlug.isPending || joinChannelSlug.trim().length < 3}
+                className="flex-1 rounded-xl bg-[#0052CC] py-2.5 text-sm font-bold text-white shadow-lg disabled:opacity-50"
+                onClick={() => joinBySlug.mutate(joinChannelSlug)}
+              >
+                {joinBySlug.isPending ? '…' : t('chat.joinChannelSubmit')}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {membersModalOpen && conversationId ? (
+        <div
+          className="fixed inset-0 z-[100] flex items-end justify-center bg-black/45 p-0 sm:items-center sm:p-4"
+          role="dialog"
+          aria-modal
+          aria-labelledby="members-modal-title"
+        >
+          <button
+            type="button"
+            className="absolute inset-0 cursor-default"
+            aria-label={t('common.close')}
+            onClick={() => setMembersModalOpen(false)}
+          />
+          <div className="relative z-10 flex max-h-[min(88dvh,560px)] w-full max-w-md flex-col rounded-t-3xl border border-[var(--color-ushqn-border)] bg-[var(--color-ushqn-surface)] shadow-2xl sm:rounded-3xl">
+            <div className="flex items-center justify-between border-b border-[var(--color-ushqn-border)] px-4 py-3">
+              <h2 id="members-modal-title" className="text-base font-bold text-[var(--color-ushqn-text)]">
+                {t('chat.membersTitle')}
+              </h2>
+              <button
+                type="button"
+                onClick={() => setMembersModalOpen(false)}
+                className="rounded-full px-2 py-1 text-sm font-semibold text-[var(--color-ushqn-muted)] hover:bg-[var(--color-ushqn-surface-muted)]"
+              >
+                {t('common.close')}
+              </button>
+            </div>
+            <ul className="flex-1 overflow-y-auto p-2">
+              {(membersQuery.data?.ids ?? []).map((id) => {
+                const label = nameById.get(id) ?? t('chat.peerFallback')
+                const ph = avatarById.get(id) ?? null
+                return (
+                  <li key={id} className="border-b border-[var(--color-ushqn-border)]/30 last:border-0">
+                    <div className="flex items-center gap-3 px-2 py-2.5">
+                      <div className="h-9 w-9 shrink-0 overflow-hidden rounded-xl">
+                        {ph ? (
+                          <img src={ph} alt="" className="h-full w-full object-cover" loading="lazy" />
+                        ) : (
+                          <div
+                            className={`flex h-full w-full items-center justify-center bg-gradient-to-br ${colorFor(id)} text-[10px] font-bold text-white`}
+                          >
+                            {initialsFromChatLabel(label)}
+                          </div>
+                        )}
+                      </div>
+                      <p className="min-w-0 flex-1 truncate text-sm font-semibold text-[var(--color-ushqn-text)]">{sanitizeUserText(label)}</p>
+                      {id === userId ? (
+                        <span className="shrink-0 text-[10px] font-bold uppercase text-[var(--color-ushqn-muted)]">{t('chat.youBadge')}</span>
+                      ) : null}
+                    </div>
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
+        </div>
+      ) : null}
+
+      {renameOpen ? (
+        <div
+          className="fixed inset-0 z-[100] flex items-end justify-center bg-black/45 p-0 sm:items-center sm:p-4"
+          role="dialog"
+          aria-modal
+          aria-labelledby="rename-group-title"
+        >
+          <button type="button" className="absolute inset-0 cursor-default" aria-label={t('common.close')} onClick={() => setRenameOpen(false)} />
+          <div className="relative z-10 w-full max-w-md rounded-t-3xl border border-[var(--color-ushqn-border)] bg-[var(--color-ushqn-surface)] p-4 shadow-2xl sm:rounded-3xl">
+            <h2 id="rename-group-title" className="text-base font-bold text-[var(--color-ushqn-text)]">
+              {t('chat.renameGroupTitle')}
+            </h2>
+            <input
+              value={renameDraft}
+              onChange={(e) => setRenameDraft(e.target.value)}
+              className="ushqn-input mt-3"
+              placeholder={t('chat.groupNamePlaceholder')}
+            />
+            <div className="mt-4 flex gap-2">
+              <button
+                type="button"
+                className="flex-1 rounded-xl border border-[var(--color-ushqn-border)] py-2.5 text-sm font-bold"
+                onClick={() => setRenameOpen(false)}
+              >
+                {t('common.cancel')}
+              </button>
+              <button
+                type="button"
+                disabled={renameGroup.isPending || !renameDraft.trim()}
+                className="flex-1 rounded-xl bg-[#0052CC] py-2.5 text-sm font-bold text-white disabled:opacity-50"
+                onClick={() => renameGroup.mutate(renameDraft)}
+              >
+                {renameGroup.isPending ? '…' : t('common.save')}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       {/* Sidebar — messenger rail */}
       <aside
         className={`flex min-h-[320px] flex-col overflow-hidden rounded-2xl border border-[var(--color-ushqn-border)] bg-[var(--color-ushqn-surface-muted)] shadow-sm lg:min-h-0 ${
@@ -785,13 +1064,22 @@ export function ChatPage() {
         {/* Top bar: title + new group */}
         <div className="flex items-center justify-between gap-2 border-b border-[var(--color-ushqn-border)] px-3 py-2.5">
           <h2 className="text-sm font-extrabold tracking-tight text-[var(--color-ushqn-text)]">{t('chat.sidebarTitle')}</h2>
-          <button
-            type="button"
-            onClick={() => setGroupModalOpen(true)}
-            className="shrink-0 rounded-full bg-[#0052CC] px-2.5 py-1.5 text-[11px] font-bold text-white shadow-sm transition hover:bg-[#0747A6] active:scale-95"
-          >
-            + {t('chat.newGroup')}
-          </button>
+          <div className="flex shrink-0 items-center gap-1">
+            <button
+              type="button"
+              onClick={() => setJoinChannelOpen(true)}
+              className="rounded-full border border-[var(--color-ushqn-border)] bg-[var(--color-ushqn-surface)] px-2.5 py-1.5 text-[11px] font-bold text-[var(--color-ushqn-text)] shadow-sm transition hover:bg-[var(--color-ushqn-surface-muted)] active:scale-95"
+            >
+              {t('chat.joinChannelBtn')}
+            </button>
+            <button
+              type="button"
+              onClick={() => setGroupModalOpen(true)}
+              className="rounded-full bg-[#0052CC] px-2.5 py-1.5 text-[11px] font-bold text-white shadow-sm transition hover:bg-[#0747A6] active:scale-95"
+            >
+              + {t('chat.newGroup')}
+            </button>
+          </div>
         </div>
 
         {/* Search bar */}
@@ -957,7 +1245,7 @@ export function ChatPage() {
                     {!activeConv.isGroup && activeConv.avatarUrl ? (
                       <img src={activeConv.avatarUrl} alt="" className="h-full w-full object-cover" loading="lazy" />
                     ) : activeConv.isGroup ? (
-                      '⎔'
+                      activeConv.isPublicChannel ? '#' : '⎔'
                     ) : (
                       initialsFromChatLabel(activeConv.displayName)
                     )}
@@ -966,6 +1254,43 @@ export function ChatPage() {
                     <p className="truncate text-sm font-extrabold text-[var(--color-ushqn-text)]">{activeConv.displayName}</p>
                     <p className="text-xs font-medium text-[var(--color-ushqn-muted)]">{typingLabel || headerSub}</p>
                   </div>
+                  {activeConv.isGroup ? (
+                    <div className="flex shrink-0 flex-col items-end gap-1 sm:flex-row sm:items-center">
+                      <button
+                        type="button"
+                        onClick={() => setMembersModalOpen(true)}
+                        className="rounded-lg border border-[var(--color-ushqn-border)] bg-[var(--color-ushqn-surface)] px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-[var(--color-ushqn-text)] shadow-sm"
+                      >
+                        {t('chat.members')}
+                      </button>
+                      {isGroupOwner ? (
+                        <button
+                          type="button"
+                          onClick={() => setRenameOpen(true)}
+                          className="rounded-lg border border-[var(--color-ushqn-border)] bg-[var(--color-ushqn-surface)] px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-[#0052CC] shadow-sm"
+                        >
+                          {t('chat.rename')}
+                        </button>
+                      ) : null}
+                      {convMetaQuery.data?.is_public_channel && convMetaQuery.data.channel_slug ? (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const base = getAppBaseUrl()
+                            const slug = convMetaQuery.data!.channel_slug!
+                            const url = `${base}/chat/join/${encodeURIComponent(slug)}`
+                            void navigator.clipboard.writeText(url).then(
+                              () => toast(t('chat.linkCopied'), 'success'),
+                              () => toast(t('chat.copyFailed'), 'error'),
+                            )
+                          }}
+                          className="rounded-lg bg-[#0052CC] px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow-sm"
+                        >
+                          {t('chat.copyPublicLink')}
+                        </button>
+                      ) : null}
+                    </div>
+                  ) : null}
                 </>
               ) : (
                 <p className="text-sm font-bold text-[var(--color-ushqn-text)]">{t('chat.chatHeader')}</p>

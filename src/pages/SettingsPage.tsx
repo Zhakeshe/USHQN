@@ -20,6 +20,15 @@ function trimOrNull(s: string | undefined | null): string | null {
 }
 
 /** Maps Postgres / PostgREST errors to a readable toast (duplicate username, format, etc.). */
+function isProfilePatchSchemaError(err: unknown): boolean {
+  const msg = `${(err as { message?: string; code?: string })?.message ?? ''} ${(err as { code?: string })?.code ?? ''}`.toLowerCase()
+  return (
+    msg.includes('schema cache') ||
+    msg.includes('pgrst204') ||
+    (msg.includes('could not find') && msg.includes('column'))
+  )
+}
+
 function profileSaveErrorMessage(err: unknown, t: TFunction): string {
   const e = err as { message?: string; details?: string; hint?: string; code?: string }
   const blob = `${e.message ?? ''} ${e.details ?? ''} ${e.hint ?? ''}`.toLowerCase()
@@ -216,14 +225,20 @@ export function SettingsPage() {
   const saveSocial = useMutation({
     mutationFn: async (values: SocialForm) => {
       const username = trimOrNull(values.username)?.toLowerCase() ?? null
-      const { error } = await supabase.from('profiles').update({
+      const patch = {
         bio: trimOrNull(values.bio),
         username,
         github_url: trimOrNull(values.github_url),
         telegram_url: trimOrNull(values.telegram_url),
         linkedin_url: trimOrNull(values.linkedin_url),
         website_url: trimOrNull(values.website_url),
-      }).eq('id', userId!)
+      }
+      let { error } = await supabase.from('profiles').update(patch).eq('id', userId!)
+      if (error && isProfilePatchSchemaError(error)) {
+        const { bio: _dropBio, ...withoutBio } = patch
+        const second = await supabase.from('profiles').update(withoutBio).eq('id', userId!)
+        error = second.error
+      }
       if (error) throw error
     },
     onSuccess: () => {

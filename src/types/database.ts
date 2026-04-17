@@ -388,6 +388,9 @@ export interface Database {
           created_at: string
           is_group: boolean
           title: string | null
+          created_by: string | null
+          is_public_channel: boolean
+          channel_slug: string | null
         }
       }
       conversation_participants: {

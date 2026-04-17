@@ -23,6 +23,7 @@ import { trackEvent } from './lib/analytics'
 
 const CalendarPage = lazy(() => import('./pages/CalendarPage').then((m) => ({ default: m.CalendarPage })))
 const ChatPage = lazy(() => import('./pages/ChatPage').then((m) => ({ default: m.ChatPage })))
+const ChatJoinPage = lazy(() => import('./pages/ChatJoinPage').then((m) => ({ default: m.ChatJoinPage })))
 const ShowcasePage = lazy(() => import('./pages/ShowcasePage').then((m) => ({ default: m.ShowcasePage })))
 const AdminPage = lazy(() => import('./pages/AdminPage').then((m) => ({ default: m.AdminPage })))
 const CommunitiesPage = lazy(() => import('./pages/CommunitiesPage').then((m) => ({ default: m.CommunitiesPage })))
@@ -78,6 +79,14 @@ export default function App() {
               element={
                 <Suspense fallback={<RouteFallback />}>
                   <CommunitiesPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/chat/join/:channelSlug"
+              element={
+                <Suspense fallback={<RouteFallback />}>
+                  <ChatJoinPage />
                 </Suspense>
               }
             />
