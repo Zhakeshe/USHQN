@@ -174,6 +174,10 @@
     "greetingDay": "Қайырлы күн,",
     "greetingEvening": "Қайырлы кеш,",
     "greetingFallbackName": "дос",
+    "news": {
+      "title": "Жаңалықтар",
+      "pinned": "Бекітілген"
+    },
     "recentJobs": "Жаңа вакансиялар",
     "quickActions": {
       "addAchievement": "Жетістік қосу",
@@ -837,6 +841,7 @@
     "tab.reports": "Шағымдар",
     "tab.audit": "Аудит",
     "tab.featured": "Топтағы жұмыс",
+    "tab.news": "Жаңалықтар",
     "recentUsers": "Пайдаланушылар",
     "searchUsersPh": "Аты немесе рөлі бойынша іздеу",
     "openProfile": "Ашу",
@@ -880,7 +885,16 @@
     "stat.listings": "Жарнамалар",
     "stat.events": "Іс-шаралар",
     "stat.achievements": "Жетістіктер",
-    "stat.messages": "Хабарламалар"
+    "stat.messages": "Хабарламалар",
+    "news.editorTitle": "Басты бетке жаңалық жариялау",
+    "news.titlePh": "Атауы",
+    "news.bodyPh": "Жаңалық немесе хабарландыру мәтіні",
+    "news.ctaLabelPh": "Батырма атауы (қосымша)",
+    "news.ctaUrlPh": "Батырма сілтемесі (қосымша)",
+    "news.publishNow": "Қазір жариялау",
+    "news.pinTop": "Жоғарыға бекіту",
+    "news.create": "Жариялау",
+    "news.update": "Жаңарту"
   },
   "growth": {
     "onboarding": {
@@ -1089,10 +1103,22 @@
     "acceptInvite": "Қосу",
     "expiresAt": "{{date}} дейін жарамды",
     "roles": {
-      "pupil": { "label": "Оқушы", "desc": "Мектепте оқимын" },
-      "student": { "label": "Студент", "desc": "Колледж не ЖОО студентімін" },
-      "parent": { "label": "Ата-ана", "desc": "Оқушымен invite арқылы байланысамын" },
-      "teacher": { "label": "Мұғалім", "desc": "Оқушыларды invite арқылы қосамын" }
+      "pupil": {
+        "label": "Оқушы",
+        "desc": "Мектепте оқимын"
+      },
+      "student": {
+        "label": "Студент",
+        "desc": "Колледж не ЖОО студентімін"
+      },
+      "parent": {
+        "label": "Ата-ана",
+        "desc": "Оқушымен invite арқылы байланысамын"
+      },
+      "teacher": {
+        "label": "Мұғалім",
+        "desc": "Оқушыларды invite арқылы қосамын"
+      }
     },
     "fields": {
       "displayName": "Көрінетін ат",
@@ -1109,14 +1135,20 @@
         "title": "USHQN-ға қош келдіңіз",
         "body": "Сізге лайық контент көрсету үшін рөл мен профильді тез баптаймыз."
       },
-      "role": { "title": "Рөліңізді таңдаңыз" },
-      "profile": { "title": "Негізгі профильді толтырыңыз" },
+      "role": {
+        "title": "Рөліңізді таңдаңыз"
+      },
+      "profile": {
+        "title": "Негізгі профильді толтырыңыз"
+      },
       "invite": {
         "title": "Invite арқылы қосылу",
         "studentBody": "Ата-ана мен мұғалімге код жасаңыз. Олар кейін осы кодпен қосылады.",
         "guardianBody": "Оқушы берген invite кодын енгізіп байланысыңыз."
       },
-      "done": { "title": "Дайын" }
+      "done": {
+        "title": "Дайын"
+      }
     }
   },
   "ui": {
@@ -1132,4 +1164,3 @@
     "accept": "Түсінікті"
   }
 }
-

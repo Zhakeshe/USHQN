@@ -174,6 +174,10 @@
     "greetingDay": "Добрый день,",
     "greetingEvening": "Добрый вечер,",
     "greetingFallbackName": "друг",
+    "news": {
+      "title": "Новости",
+      "pinned": "Закреп"
+    },
     "recentJobs": "Свежие вакансии",
     "quickActions": {
       "addAchievement": "Добавить достижение",
@@ -845,6 +849,7 @@
     "tab.reports": "Жалобы",
     "tab.audit": "Журнал",
     "tab.featured": "Вакансии в топе",
+    "tab.news": "Новости",
     "recentUsers": "Пользователи",
     "searchUsersPh": "Поиск по имени или роли",
     "openProfile": "Открыть",
@@ -888,7 +893,16 @@
     "stat.listings": "Объявления",
     "stat.events": "События",
     "stat.achievements": "Достижения",
-    "stat.messages": "Сообщения"
+    "stat.messages": "Сообщения",
+    "news.editorTitle": "Публикация новости на главную",
+    "news.titlePh": "Заголовок",
+    "news.bodyPh": "Текст обновления или объявления",
+    "news.ctaLabelPh": "Текст кнопки (необязательно)",
+    "news.ctaUrlPh": "Ссылка кнопки (необязательно)",
+    "news.publishNow": "Опубликовать сразу",
+    "news.pinTop": "Закрепить сверху",
+    "news.create": "Создать пост",
+    "news.update": "Обновить пост"
   },
   "growth": {
     "onboarding": {
@@ -1097,10 +1111,22 @@
     "acceptInvite": "Подключить",
     "expiresAt": "действует до {{date}}",
     "roles": {
-      "pupil": { "label": "Ученик", "desc": "Учусь в школе" },
-      "student": { "label": "Студент", "desc": "Учусь в колледже/вузе" },
-      "parent": { "label": "Родитель", "desc": "Подключаюсь к ученику по invite-коду" },
-      "teacher": { "label": "Учитель", "desc": "Наставляю учеников по invite-коду" }
+      "pupil": {
+        "label": "Ученик",
+        "desc": "Учусь в школе"
+      },
+      "student": {
+        "label": "Студент",
+        "desc": "Учусь в колледже/вузе"
+      },
+      "parent": {
+        "label": "Родитель",
+        "desc": "Подключаюсь к ученику по invite-коду"
+      },
+      "teacher": {
+        "label": "Учитель",
+        "desc": "Наставляю учеников по invite-коду"
+      }
     },
     "fields": {
       "displayName": "Отображаемое имя",
@@ -1117,14 +1143,20 @@
         "title": "Добро пожаловать в USHQN",
         "body": "Сейчас настроим роль и профиль, чтобы платформа сразу показывала нужный контент."
       },
-      "role": { "title": "Выберите роль" },
-      "profile": { "title": "Заполните базовый профиль" },
+      "role": {
+        "title": "Выберите роль"
+      },
+      "profile": {
+        "title": "Заполните базовый профиль"
+      },
       "invite": {
         "title": "Подключение по invite",
         "studentBody": "Создайте коды для родителя или учителя. Они подключатся позже по этим кодам.",
         "guardianBody": "Введите invite-код ученика, чтобы подключиться."
       },
-      "done": { "title": "Готово" }
+      "done": {
+        "title": "Готово"
+      }
     }
   },
   "ui": {
@@ -1140,4 +1172,3 @@
     "accept": "Понятно"
   }
 }
-

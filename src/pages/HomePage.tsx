@@ -87,6 +87,24 @@ export function HomePage() {
     },
   })
 
+  const newsQuery = useQuery({
+    queryKey: ['home-news'],
+    queryFn: async () => {
+      const nowIso = new Date().toISOString()
+      const { data, error } = await supabase
+        .from('admin_news')
+        .select('id,title,body,cta_label,cta_url,is_pinned,created_at')
+        .eq('is_published', true)
+        .or(`starts_at.is.null,starts_at.lte.${nowIso}`)
+        .or(`ends_at.is.null,ends_at.gte.${nowIso}`)
+        .order('is_pinned', { ascending: false })
+        .order('created_at', { ascending: false })
+        .limit(4)
+      if (error) throw error
+      return data ?? []
+    },
+  })
+
   const streakQuery = useQuery({
     queryKey: ['profile-streak', userId],
     enabled: Boolean(userId),
@@ -146,6 +164,32 @@ export function HomePage() {
           {meQuery.data?.display_name || t('home.greetingFallbackName')}
         </h1>
       </section>
+
+      {(newsQuery.data ?? []).length > 0 ? (
+        <section className="ushqn-card p-4 sm:p-5">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-sm font-extrabold uppercase tracking-wider text-[var(--color-ushqn-muted)]">{t('home.news.title')}</h2>
+          </div>
+          <ul className="space-y-2">
+            {(newsQuery.data ?? []).map((n) => (
+              <li key={n.id} className="rounded-xl border border-[var(--color-ushqn-border)] bg-[var(--color-ushqn-surface-muted)] p-3">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-sm font-bold text-[var(--color-ushqn-text)]">{n.title}</p>
+                  {n.is_pinned ? (
+                    <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-800">{t('home.news.pinned')}</span>
+                  ) : null}
+                </div>
+                <p className="mt-1 text-xs leading-relaxed text-[var(--color-ushqn-text)]/85">{n.body}</p>
+                {n.cta_label && n.cta_url ? (
+                  <a href={n.cta_url} target="_blank" rel="noreferrer" className="mt-2 inline-block text-xs font-bold text-[#0052CC] hover:underline">
+                    {n.cta_label}
+                  </a>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       {/* Quick stats row */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">

@@ -76,6 +76,28 @@ export interface Database {
         }
         Update: Partial<Database['public']['Tables']['student_links']['Row']>
       }
+      admin_news: {
+        Row: {
+          id: string
+          title: string
+          body: string
+          cta_label: string | null
+          cta_url: string | null
+          is_published: boolean
+          is_pinned: boolean
+          starts_at: string | null
+          ends_at: string | null
+          created_by: string | null
+          updated_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: Partial<Database['public']['Tables']['admin_news']['Row']> & {
+          title: string
+          body: string
+        }
+        Update: Partial<Database['public']['Tables']['admin_news']['Row']>
+      }
       user_settings: {
         Row: {
           user_id: string

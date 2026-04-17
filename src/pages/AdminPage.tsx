@@ -32,7 +32,7 @@ function csvEscape(c: string | number) {
   return `"${String(c).replace(/"/g, '""')}"`
 }
 
-type AdminTab = 'overview' | 'reports' | 'audit' | 'featured'
+type AdminTab = 'overview' | 'reports' | 'audit' | 'featured' | 'news'
 
 export function AdminPage() {
   const { t } = useTranslation()
@@ -41,6 +41,13 @@ export function AdminPage() {
   const [tab, setTab] = useState<AdminTab>('overview')
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
+  const [newsEditingId, setNewsEditingId] = useState<string | null>(null)
+  const [newsTitle, setNewsTitle] = useState('')
+  const [newsBody, setNewsBody] = useState('')
+  const [newsCtaLabel, setNewsCtaLabel] = useState('')
+  const [newsCtaUrl, setNewsCtaUrl] = useState('')
+  const [newsPublished, setNewsPublished] = useState(true)
+  const [newsPinned, setNewsPinned] = useState(false)
   const pageSize = 10
 
   const staffQuery = useQuery({
@@ -125,6 +132,21 @@ export function AdminPage() {
     },
   })
 
+  const newsQuery = useQuery({
+    queryKey: ['admin-news'],
+    enabled: tab === 'news',
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('admin_news')
+        .select('*')
+        .order('is_pinned', { ascending: false })
+        .order('created_at', { ascending: false })
+        .limit(80)
+      if (error) throw error
+      return data ?? []
+    },
+  })
+
   const patchProfile = useMutation({
     mutationFn: async (p: { id: string; patch: Record<string, boolean> }) => {
       const { error } = await supabase.from('profiles').update(p.patch).eq('id', p.id)
@@ -166,6 +188,50 @@ export function AdminPage() {
     },
   })
 
+  const saveNews = useMutation({
+    mutationFn: async () => {
+      const payload = {
+        title: newsTitle.trim(),
+        body: newsBody.trim(),
+        cta_label: newsCtaLabel.trim() || null,
+        cta_url: newsCtaUrl.trim() || null,
+        is_published: newsPublished,
+        is_pinned: newsPinned,
+        updated_by: userId,
+        ...(newsEditingId ? {} : { created_by: userId }),
+      }
+      if (newsEditingId) {
+        const { error } = await supabase.from('admin_news').update(payload).eq('id', newsEditingId)
+        if (error) throw error
+      } else {
+        const { error } = await supabase.from('admin_news').insert(payload)
+        if (error) throw error
+      }
+    },
+    onSuccess: () => {
+      setNewsEditingId(null)
+      setNewsTitle('')
+      setNewsBody('')
+      setNewsCtaLabel('')
+      setNewsCtaUrl('')
+      setNewsPinned(false)
+      setNewsPublished(true)
+      void qc.invalidateQueries({ queryKey: ['admin-news'] })
+      void qc.invalidateQueries({ queryKey: ['home-news'] })
+    },
+  })
+
+  const deleteNews = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('admin_news').delete().eq('id', id)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['admin-news'] })
+      void qc.invalidateQueries({ queryKey: ['home-news'] })
+    },
+  })
+
   const recentFiltered = useMemo(() => {
     const q = search.trim().toLowerCase()
     if (!q) return recentQuery.data ?? []
@@ -186,8 +252,9 @@ export function AdminPage() {
       { id: 'reports', label: t('admin.tab.reports') },
       { id: 'audit', label: t('admin.tab.audit') },
       { id: 'featured', label: t('admin.tab.featured') },
+      { id: 'news', label: t('admin.tab.news') },
     ]
-    if (isModeratorOnly) return all.filter((x) => x.id === 'reports' || x.id === 'audit')
+    if (isModeratorOnly) return all.filter((x) => x.id === 'reports' || x.id === 'audit' || x.id === 'news')
     return all
   }, [t, isModeratorOnly])
 
@@ -579,6 +646,122 @@ export function AdminPage() {
                 </li>
               ))}
             </ul>
+          </div>
+        </QueryState>
+      ) : null}
+
+      {tab === 'news' ? (
+        <QueryState query={newsQuery} skeleton={<div className="ushqn-card h-40 animate-pulse" />}>
+          <div className="space-y-4">
+            <div className="ushqn-card space-y-3 p-4">
+              <p className="text-sm font-semibold text-[var(--color-ushqn-text)]">{t('admin.news.editorTitle')}</p>
+              <input
+                value={newsTitle}
+                onChange={(e) => setNewsTitle(e.target.value)}
+                className="ushqn-input"
+                placeholder={t('admin.news.titlePh')}
+              />
+              <textarea
+                value={newsBody}
+                onChange={(e) => setNewsBody(e.target.value)}
+                className="ushqn-input min-h-24 resize-y"
+                placeholder={t('admin.news.bodyPh')}
+              />
+              <div className="grid gap-2 sm:grid-cols-2">
+                <input
+                  value={newsCtaLabel}
+                  onChange={(e) => setNewsCtaLabel(e.target.value)}
+                  className="ushqn-input"
+                  placeholder={t('admin.news.ctaLabelPh')}
+                />
+                <input
+                  value={newsCtaUrl}
+                  onChange={(e) => setNewsCtaUrl(e.target.value)}
+                  className="ushqn-input"
+                  placeholder={t('admin.news.ctaUrlPh')}
+                />
+              </div>
+              <div className="flex flex-wrap gap-4 text-xs font-semibold text-[var(--color-ushqn-text)]">
+                <label className="inline-flex items-center gap-2">
+                  <input type="checkbox" checked={newsPublished} onChange={(e) => setNewsPublished(e.target.checked)} />
+                  {t('admin.news.publishNow')}
+                </label>
+                <label className="inline-flex items-center gap-2">
+                  <input type="checkbox" checked={newsPinned} onChange={(e) => setNewsPinned(e.target.checked)} />
+                  {t('admin.news.pinTop')}
+                </label>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  disabled={!newsTitle.trim() || !newsBody.trim() || saveNews.isPending || !isAdmin}
+                  className="rounded-lg bg-[var(--color-ushqn-primary)] px-3 py-1.5 text-xs font-bold text-white disabled:opacity-50"
+                  onClick={() => saveNews.mutate()}
+                >
+                  {newsEditingId ? t('admin.news.update') : t('admin.news.create')}
+                </button>
+                {newsEditingId ? (
+                  <button
+                    type="button"
+                    className="rounded-lg border border-[var(--color-ushqn-border)] px-3 py-1.5 text-xs font-bold"
+                    onClick={() => {
+                      setNewsEditingId(null)
+                      setNewsTitle('')
+                      setNewsBody('')
+                      setNewsCtaLabel('')
+                      setNewsCtaUrl('')
+                      setNewsPinned(false)
+                      setNewsPublished(true)
+                    }}
+                  >
+                    {t('common.cancel')}
+                  </button>
+                ) : null}
+              </div>
+            </div>
+
+            <div className="ushqn-card overflow-hidden p-0">
+              <ul className="divide-y divide-[var(--color-ushqn-border)]">
+                {(newsQuery.data ?? []).map((n) => (
+                  <li key={n.id} className="space-y-2 p-4">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <p className="font-bold text-[var(--color-ushqn-text)]">{n.title}</p>
+                      <div className="flex gap-2 text-[10px]">
+                        {n.is_pinned ? <span className="rounded bg-amber-100 px-1.5 py-0.5 font-bold text-amber-800">PIN</span> : null}
+                        {n.is_published ? <span className="rounded bg-emerald-100 px-1.5 py-0.5 font-bold text-emerald-700">LIVE</span> : <span className="rounded bg-slate-200 px-1.5 py-0.5 font-bold text-slate-700">DRAFT</span>}
+                      </div>
+                    </div>
+                    <p className="text-sm text-[var(--color-ushqn-text)]/90">{n.body}</p>
+                    <p className="text-xs text-[var(--color-ushqn-muted)]">{new Date(n.created_at).toLocaleString()}</p>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        className="text-xs font-bold text-[var(--color-ushqn-primary)] hover:underline"
+                        onClick={() => {
+                          setNewsEditingId(n.id)
+                          setNewsTitle(n.title)
+                          setNewsBody(n.body)
+                          setNewsCtaLabel(n.cta_label ?? '')
+                          setNewsCtaUrl(n.cta_url ?? '')
+                          setNewsPinned(Boolean(n.is_pinned))
+                          setNewsPublished(Boolean(n.is_published))
+                        }}
+                      >
+                        {t('common.edit')}
+                      </button>
+                      <button
+                        type="button"
+                        disabled={!isAdmin || deleteNews.isPending}
+                        className="text-xs font-bold text-red-600 hover:underline disabled:opacity-50"
+                        onClick={() => deleteNews.mutate(n.id)}
+                      >
+                        {t('common.delete')}
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </QueryState>
       ) : null}
