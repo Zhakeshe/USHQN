@@ -725,7 +725,8 @@
       "save": "Save",
       "saving": "Saving…",
       "saved": "Profile updated",
-      "invalidUrl": "Invalid URL"
+      "invalidUrl": "Invalid URL",
+      "saveFailed": "Could not save: {{detail}}"
     },
     "security": {
       "title": "🔒 Security",

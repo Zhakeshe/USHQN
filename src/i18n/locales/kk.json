@@ -719,7 +719,8 @@
       "save": "Сақтау",
       "saving": "Сақталуда…",
       "saved": "Профиль жаңартылды",
-      "invalidUrl": "Дұрыс емес URL"
+      "invalidUrl": "Дұрыс емес URL",
+      "saveFailed": "Сақталмады: {{detail}}"
     },
     "security": {
       "title": "🔒 Қауіпсіздік",

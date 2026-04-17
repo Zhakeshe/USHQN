@@ -727,7 +727,8 @@
       "save": "Сохранить",
       "saving": "Сохранение…",
       "saved": "Профиль обновлён",
-      "invalidUrl": "Некорректный URL"
+      "invalidUrl": "Некорректный URL",
+      "saveFailed": "Не удалось сохранить: {{detail}}"
     },
     "security": {
       "title": "🔒 Безопасность",

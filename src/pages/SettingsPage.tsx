@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
 import { useToast } from '../lib/toast'
@@ -12,6 +13,26 @@ import { useConfirm } from '../lib/confirm'
 import { getAppBaseUrl } from '../lib/siteUrl'
 import { trackEvent } from '../lib/analytics'
 import { AppPageMeta } from '../components/AppPageMeta'
+
+function trimOrNull(s: string | undefined | null): string | null {
+  const x = (s ?? '').trim()
+  return x.length ? x : null
+}
+
+/** Maps Postgres / PostgREST errors to a readable toast (duplicate username, format, etc.). */
+function profileSaveErrorMessage(err: unknown, t: TFunction): string {
+  const e = err as { message?: string; details?: string; hint?: string; code?: string }
+  const blob = `${e.message ?? ''} ${e.details ?? ''} ${e.hint ?? ''}`.toLowerCase()
+  if (blob.includes('profiles_username_lower') || (blob.includes('duplicate') && blob.includes('username'))) {
+    return t('settings.profile.usernameTaken')
+  }
+  if (blob.includes('profiles_username_format')) {
+    return t('settings.profile.usernameInvalid')
+  }
+  const raw = (e.message || e.details || e.code || '').trim()
+  const detail = raw.slice(0, 160) || String(t('common.error'))
+  return t('settings.profile.saveFailed', { detail })
+}
 
 const LANG_OPTIONS = [
   { code: 'ru', key: 'settings.language.ru' },
@@ -154,12 +175,16 @@ export function SettingsPage() {
     queryKey: ['username-check', debouncedUsername, userId],
     enabled: /^[a-z0-9_]{3,30}$/.test(debouncedUsername) && Boolean(userId),
     queryFn: async () => {
-      const { count } = await supabase
+      const q = debouncedUsername.toLowerCase()
+      /* GET + maybeSingle avoids HEAD-only issues in some browsers/CDNs. */
+      const { data, error } = await supabase
         .from('profiles')
-        .select('*', { count: 'exact', head: true })
-        .eq('username', debouncedUsername.toLowerCase())
+        .select('id')
+        .eq('username', q)
         .neq('id', userId!)
-      return (count ?? 0) === 0
+        .maybeSingle()
+      if (error) throw error
+      return data == null
     },
   })
 
@@ -190,13 +215,14 @@ export function SettingsPage() {
 
   const saveSocial = useMutation({
     mutationFn: async (values: SocialForm) => {
+      const username = trimOrNull(values.username)?.toLowerCase() ?? null
       const { error } = await supabase.from('profiles').update({
-        bio: values.bio || null,
-        username: values.username ? values.username.toLowerCase().trim() : null,
-        github_url: values.github_url || null,
-        telegram_url: values.telegram_url || null,
-        linkedin_url: values.linkedin_url || null,
-        website_url: values.website_url || null,
+        bio: trimOrNull(values.bio),
+        username,
+        github_url: trimOrNull(values.github_url),
+        telegram_url: trimOrNull(values.telegram_url),
+        linkedin_url: trimOrNull(values.linkedin_url),
+        website_url: trimOrNull(values.website_url),
       }).eq('id', userId!)
       if (error) throw error
     },
@@ -204,7 +230,7 @@ export function SettingsPage() {
       void qc.invalidateQueries({ queryKey: ['profile', userId] })
       toast(t('settings.profile.saved'))
     },
-    onError: () => toast(t('common.error'), 'error'),
+    onError: (e) => toast(profileSaveErrorMessage(e, t), 'error'),
   })
 
   const changePassword = useMutation({
