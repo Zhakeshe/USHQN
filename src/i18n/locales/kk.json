@@ -302,6 +302,12 @@
       "portfolioVideo": "Бейне",
       "portfolioKindLink": "Сайт",
       "portfolioKindVideo": "Бейне"
+    },
+    "teacher": {
+      "currentTitle": "Мұғалімдер",
+      "currentLabel": "Қазіргі мұғалім",
+      "noneCurrent": "Қазіргі мұғалім қосылмаған",
+      "historyTitle": "Мұғалімдер тарихы"
     }
   },
   "profileCard": {
@@ -1176,7 +1182,47 @@
     "linkedTo": "Байланысқан",
     "unknownStudent": "Оқушы",
     "unavailableTitle": "Бұл рөл үшін қолжетімсіз",
-    "unavailableBody": "Параметрлерде ата-ана, мұғалім немесе оқушы рөліне ауысыңыз."
+    "unavailableBody": "Параметрлерде ата-ана, мұғалім немесе оқушы рөліне ауысыңыз.",
+    "groups": {
+      "teacherGroups": "Сыныптар мен кружоктар",
+      "teacherGroupsHint": "Сабақтан тыс кез келген топ ашыңыз: сынып, дебат, спорт, басқа бағыттар.",
+      "groupTitlePh": "Топ атауы",
+      "createGroup": "Топ ашу",
+      "groupCreated": "Топ құрылды",
+      "groupList": "Менің топтарым",
+      "emptyTeacherGroups": "Әзірге топ жоқ.",
+      "joinedGroups": "Мен қатысатын топтар",
+      "emptyStudentGroups": "Сіз әлі еш топқа қосылмадыңыз.",
+      "studentsCount": "оқушы",
+      "teacherLabel": "Мұғалім тобы",
+      "selectStudent": "Оқушыны таңдаңыз",
+      "addStudent": "Оқушыны қосу",
+      "studentAdded": "Оқушы топқа қосылды",
+      "noStudentsYet": "Бұл топта әзірге оқушы жоқ.",
+      "pickStudent": "Алдымен оқушыны таңдаңыз",
+      "titleRequired": "Топ атауын енгізіңіз",
+      "kind": {
+        "class": "Сынып",
+        "club": "Кружок",
+        "debate": "Дебат",
+        "sports": "Спорт",
+        "other": "Басқа"
+      },
+      "joinByCode": "Кодпен топқа қосылу",
+      "joinByCodeHint": "Мұғалім берген топ кодын енгізіп өзіңіз қосылыңыз.",
+      "joinCodePh": "Топ коды",
+      "joinByCodeBtn": "Топқа қосылу",
+      "joinCodeRequired": "Топ кодын енгізіңіз",
+      "joinedByCode": "Топқа қосылдыңыз",
+      "joinCodeLabel": "Қосылу коды"
+    },
+    "currentTeacher": "Мұғалімді бекіту",
+    "currentTeacherNow": "Қазіргі мұғалім",
+    "currentTeacherEmpty": "Қазіргі мұғалім жоқ",
+    "selectTeacher": "Мұғалімді таңдаңыз",
+    "switchTeacher": "Қазіргі мұғалімді ауыстыру",
+    "teacherSwitched": "Қазіргі мұғалім жаңартылды",
+    "makeCurrentTeacher": "Қазіргі мұғалім ету"
   },
   "ui": {
     "loadError": "Деректерді жүктеу мүмкін болмады.",

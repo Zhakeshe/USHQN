@@ -25,7 +25,7 @@ create index if not exists admin_news_published_idx
 drop trigger if exists admin_news_updated_at on public.admin_news;
 create trigger admin_news_updated_at
 before update on public.admin_news
-for each row execute function public.tg_set_updated_at();
+for each row execute function public.set_updated_at();
 
 alter table public.admin_news enable row level security;
 

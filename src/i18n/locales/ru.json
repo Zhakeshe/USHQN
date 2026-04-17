@@ -302,6 +302,12 @@
       "portfolioVideo": "Видео",
       "portfolioKindLink": "Сайт",
       "portfolioKindVideo": "Видео"
+    },
+    "teacher": {
+      "currentTitle": "Учителя",
+      "currentLabel": "Текущий учитель",
+      "noneCurrent": "Текущий учитель не указан",
+      "historyTitle": "История учителей"
     }
   },
   "profileCard": {
@@ -1184,7 +1190,47 @@
     "linkedTo": "Подключено к",
     "unknownStudent": "Ученик",
     "unavailableTitle": "Недоступно для этой роли",
-    "unavailableBody": "Переключите роль на родителя, учителя или ученика в настройках профиля."
+    "unavailableBody": "Переключите роль на родителя, учителя или ученика в настройках профиля.",
+    "groups": {
+      "teacherGroups": "Классы и кружки",
+      "teacherGroupsHint": "Создавайте любые группы: класс, дебаты, спорт или другие кружки.",
+      "groupTitlePh": "Название группы",
+      "createGroup": "Создать группу",
+      "groupCreated": "Группа создана",
+      "groupList": "Мои группы",
+      "emptyTeacherGroups": "Пока нет групп.",
+      "joinedGroups": "Мои классы и кружки",
+      "emptyStudentGroups": "Вы пока не состоите ни в одной группе.",
+      "studentsCount": "учеников",
+      "teacherLabel": "Группа учителя",
+      "selectStudent": "Выберите ученика",
+      "addStudent": "Добавить ученика",
+      "studentAdded": "Ученик добавлен в группу",
+      "noStudentsYet": "В этой группе пока нет учеников.",
+      "pickStudent": "Сначала выберите ученика",
+      "titleRequired": "Введите название группы",
+      "kind": {
+        "class": "Класс",
+        "club": "Кружок",
+        "debate": "Дебаты",
+        "sports": "Спорт",
+        "other": "Другое"
+      },
+      "joinByCode": "Вступить в группу по коду",
+      "joinByCodeHint": "Введите код группы от учителя и присоединитесь самостоятельно.",
+      "joinCodePh": "Код группы",
+      "joinByCodeBtn": "Вступить",
+      "joinCodeRequired": "Введите код группы",
+      "joinedByCode": "Вы вступили в группу",
+      "joinCodeLabel": "Код вступления"
+    },
+    "currentTeacher": "Назначение учителя",
+    "currentTeacherNow": "Текущий учитель",
+    "currentTeacherEmpty": "Текущий учитель не выбран",
+    "selectTeacher": "Выберите учителя",
+    "switchTeacher": "Сменить текущего учителя",
+    "teacherSwitched": "Текущий учитель обновлён",
+    "makeCurrentTeacher": "Сделать текущим учителем"
   },
   "ui": {
     "loadError": "Не удалось загрузить данные.",

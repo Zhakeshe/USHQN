@@ -86,6 +86,37 @@ export function ProfilePage() {
     },
   })
 
+  const teacherLinksQuery = useQuery({
+    queryKey: ['profile-teacher-links', userId],
+    enabled: Boolean(userId),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('student_links')
+        .select('id,guardian_id,status,accepted_at,created_at')
+        .eq('student_id', userId!)
+        .eq('link_type', 'teacher')
+        .not('guardian_id', 'is', null)
+        .order('accepted_at', { ascending: false })
+        .order('created_at', { ascending: false })
+      if (error) throw error
+      return data ?? []
+    },
+  })
+
+  const teacherProfilesQuery = useQuery({
+    queryKey: [
+      'profile-teacher-profiles',
+      (teacherLinksQuery.data ?? []).map((x) => String(x.guardian_id)).filter(Boolean).join(','),
+    ],
+    enabled: (teacherLinksQuery.data ?? []).length > 0,
+    queryFn: async () => {
+      const ids = [...new Set((teacherLinksQuery.data ?? []).map((x) => x.guardian_id).filter(Boolean))]
+      const { data, error } = await supabase.from('profiles').select('id,display_name').in('id', ids as string[])
+      if (error) throw error
+      return new Map((data ?? []).map((p) => [p.id as string, p.display_name as string]))
+    },
+  })
+
   const interestsQuery = useQuery({
     queryKey: ['interests-all'],
     queryFn: async () => {
@@ -265,6 +296,50 @@ export function ProfilePage() {
         userId={userId ?? undefined}
         onEdit={() => setEditing(true)}
       />
+
+      {(p.role === 'student' || p.role === 'pupil') && (teacherLinksQuery.data ?? []).length > 0 ? (
+        <section className="ushqn-card p-5">
+          <h2 className="text-base font-bold text-[var(--color-ushqn-text)]">{t('profile.teacher.currentTitle')}</h2>
+          {(() => {
+            const rows = teacherLinksQuery.data ?? []
+            const current = rows.find((r) => r.status === 'accepted')
+            const history = rows.filter((r) => r !== current)
+            return (
+              <div className="mt-3 space-y-2">
+                {current ? (
+                  <p className="text-sm text-[var(--color-ushqn-text)]">
+                    {t('profile.teacher.currentLabel')}:{' '}
+                    <span className="font-semibold">
+                      {teacherProfilesQuery.data?.get(current.guardian_id as string) ??
+                        String(current.guardian_id).slice(0, 8) + '…'}
+                    </span>
+                  </p>
+                ) : (
+                  <p className="text-sm text-[var(--color-ushqn-muted)]">{t('profile.teacher.noneCurrent')}</p>
+                )}
+                {history.length > 0 ? (
+                  <div className="pt-1">
+                    <p className="text-xs font-bold uppercase tracking-wide text-[var(--color-ushqn-muted)]">
+                      {t('profile.teacher.historyTitle')}
+                    </p>
+                    <ul className="mt-2 flex flex-wrap gap-2">
+                      {history.map((h) => (
+                        <li
+                          key={h.id}
+                          className="rounded-full border border-[var(--color-ushqn-border)] bg-[var(--color-ushqn-surface-muted)] px-3 py-1 text-xs font-semibold text-[var(--color-ushqn-text)]"
+                        >
+                          {teacherProfilesQuery.data?.get(h.guardian_id as string) ??
+                            String(h.guardian_id).slice(0, 8) + '…'}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+              </div>
+            )
+          })()}
+        </section>
+      ) : null}
 
       <SkillsCard
         skills={skillsQuery.data ?? []}

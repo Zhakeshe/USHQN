@@ -98,6 +98,39 @@ export interface Database {
         }
         Update: Partial<Database['public']['Tables']['admin_news']['Row']>
       }
+      teacher_groups: {
+        Row: {
+          id: string
+          owner_id: string
+          title: string
+          kind: 'class' | 'club' | 'debate' | 'sports' | 'other'
+          join_code: string
+          description: string | null
+          is_archived: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: Partial<Database['public']['Tables']['teacher_groups']['Row']> & {
+          owner_id: string
+          title: string
+        }
+        Update: Partial<Database['public']['Tables']['teacher_groups']['Row']>
+      }
+      teacher_group_members: {
+        Row: {
+          id: string
+          group_id: string
+          student_id: string
+          joined_at: string
+          left_at: string | null
+          is_active: boolean
+        }
+        Insert: Partial<Database['public']['Tables']['teacher_group_members']['Row']> & {
+          group_id: string
+          student_id: string
+        }
+        Update: Partial<Database['public']['Tables']['teacher_group_members']['Row']>
+      }
       user_settings: {
         Row: {
           user_id: string
