@@ -108,6 +108,7 @@ as $$
     c.is_public_channel,
     c.channel_slug,
     c.created_at,
+    me.last_read_at,
     lm.body,
     lm.created_at,
     lm.sender_id
