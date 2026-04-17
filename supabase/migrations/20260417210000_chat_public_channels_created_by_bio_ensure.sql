@@ -17,11 +17,13 @@ create unique index if not exists conversations_public_channel_slug_uq
   on public.conversations (lower(channel_slug))
   where coalesce(is_public_channel, false) = true and channel_slug is not null;
 
--- Deterministic surrogate owner for existing group threads (lexicographically smallest member).
+-- Deterministic surrogate owner for existing group threads (smallest user_id by text sort; avoids min(uuid) on older Postgres).
 update public.conversations c
 set created_by = sub.owner_id
 from (
-  select cp.conversation_id, min(cp.user_id) as owner_id
+  select
+    cp.conversation_id,
+    (array_agg(cp.user_id order by cp.user_id::text))[1] as owner_id
   from public.conversation_participants cp
   inner join public.conversations conv on conv.id = cp.conversation_id
     and coalesce(conv.is_group, false) = true
