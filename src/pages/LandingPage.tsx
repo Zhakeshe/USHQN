@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
 import { useAuth } from '../hooks/useAuth'
+import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion'
 
 /* ─── CSS keyframes injected once ─── */
 const LANDING_CSS = `
@@ -30,6 +31,11 @@ const LANDING_CSS = `
 .landing-hero-sweep{position:absolute;inset:0;overflow:hidden;pointer-events:none}
 .landing-hero-sweep::before{content:'';position:absolute;top:-25%;left:-30%;width:55%;height:150%;background:linear-gradient(105deg,transparent,rgba(147,197,253,.12),rgba(167,139,250,.08),transparent);animation:ushqn-beam-sweep 8.5s ease-in-out infinite}
 .landing-aurora-mesh{animation:ushqn-aurora-drift 22s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){
+.landing-reveal,.landing-reveal-l,.landing-reveal-r{opacity:1!important;transform:none!important;transition:none!important}
+.landing-hero-sweep::before{animation:none!important;opacity:0}
+.landing-aurora-mesh{animation:none!important}
+}
 `
 
 /* ─── Arrow icon ─── */
@@ -42,10 +48,14 @@ function ArrowRight() {
 }
 
 /* ─── CountUp hook ─── */
-function useCountUp(target: number, started: boolean, duration = 1400) {
+function useCountUp(target: number, started: boolean, duration = 1400, reducedMotion = false) {
   const [val, setVal] = useState(0)
   useEffect(() => {
     if (!started) return
+    if (reducedMotion) {
+      setVal(target)
+      return
+    }
     setVal(0)
     const start = performance.now()
     const tick = (now: number) => {
@@ -55,7 +65,7 @@ function useCountUp(target: number, started: boolean, duration = 1400) {
       if (t < 1) requestAnimationFrame(tick)
     }
     requestAnimationFrame(tick)
-  }, [started, target, duration])
+  }, [started, target, duration, reducedMotion])
   return val
 }
 
@@ -67,17 +77,18 @@ const STATS_DATA = [
   { n: 100, suffix: '%', labelKey: 'landing.statFreeL' },
 ]
 
-function StatCard({ n, suffix, labelKey, started, delay, t }: {
-  n: number; suffix: string; labelKey: string; started: boolean; delay: number; t: TFunction
+function StatCard({ n, suffix, labelKey, started, delay, t, reducedMotion }: {
+  n: number; suffix: string; labelKey: string; started: boolean; delay: number; t: TFunction; reducedMotion: boolean
 }) {
-  const val = useCountUp(n, started, 1400)
+  const val = useCountUp(n, started, 1400, reducedMotion)
+  const d = reducedMotion ? 0 : delay
   return (
     <div
       className="flex flex-col items-center rounded-2xl border border-white/10 bg-white/6 px-3 py-4 text-center backdrop-blur-sm"
       style={{
         opacity: started ? 1 : 0,
         transform: started ? 'translateY(0)' : 'translateY(10px)',
-        transition: `opacity .6s ease ${delay}ms, transform .6s ease ${delay}ms`,
+        transition: `opacity .6s ease ${d}ms, transform .6s ease ${d}ms`,
       }}
     >
       <div
@@ -104,18 +115,22 @@ const CHAT_MSGS_KEYS = [
   { me: true, key: 'landing.chatMsg4', nameKey: 'landing.chatFrom2' },
 ]
 
-function useChatStep(len: number) {
-  const [step, setStep] = useState(0)
+function useChatStep(len: number, reducedMotion: boolean) {
+  const [step, setStep] = useState(() => (reducedMotion ? len : 0))
   useEffect(() => {
+    if (reducedMotion) {
+      setStep(len)
+      return
+    }
     const delay = step >= len ? 3000 : 1300
     const id = setTimeout(() => setStep((s) => (s >= len ? 0 : s + 1)), delay)
     return () => clearTimeout(id)
-  }, [step, len])
+  }, [step, len, reducedMotion])
   return step
 }
 
-function ChatMockup({ t }: { t: TFunction }) {
-  const step = useChatStep(CHAT_MSGS_KEYS.length)
+function ChatMockup({ t, reducedMotion }: { t: TFunction; reducedMotion: boolean }) {
+  const step = useChatStep(CHAT_MSGS_KEYS.length, reducedMotion)
   const visible = CHAT_MSGS_KEYS.slice(0, step)
   const typing = step < CHAT_MSGS_KEYS.length
 
@@ -228,14 +243,15 @@ function useScrolled(thr = 10) {
   return s
 }
 
-function useScrollParallax() {
+function useScrollParallax(disabled: boolean) {
   const [y, setY] = useState(0)
   useEffect(() => {
+    if (disabled) return
     const h = () => setY(window.scrollY)
     window.addEventListener('scroll', h, { passive: true })
     return () => window.removeEventListener('scroll', h)
-  }, [])
-  return y
+  }, [disabled])
+  return disabled ? 0 : y
 }
 
 /* ════════════════════════════════════════════
@@ -245,7 +261,8 @@ export function LandingPage() {
   const { t, i18n } = useTranslation()
   const { session } = useAuth()
   const scrolled = useScrolled()
-  const scrollY = useScrollParallax()
+  const reducedMotion = usePrefersReducedMotion()
+  const scrollY = useScrollParallax(reducedMotion)
   const statsRef = useRef<HTMLDivElement>(null)
   const [statsVisible, setStatsVisible] = useState(false)
   const primary = session ? '/home' : '/register'
@@ -273,14 +290,34 @@ export function LandingPage() {
   useScrollReveal()
 
   const canonical = typeof window !== 'undefined' ? `${window.location.origin}/` : '/'
+  const seoTitle = t('landing.seoTitle', { wordmark: t('brand.wordmark') })
+  const seoDesc = t('landing.seoDescription')
+  const ogImage = typeof window !== 'undefined' ? `${window.location.origin}/favicon.svg` : '/favicon.svg'
+  const heroFade = (delay: string, dur = '.8s') =>
+    reducedMotion
+      ? ({ opacity: 1, transform: 'none' } as const)
+      : ({ animation: `ushqn-fade-up ${dur} ease-out ${delay} both` } as const)
 
   return (
-    <div className="overflow-x-hidden">
+    <div className="relative overflow-x-hidden">
+      <a href="#landing-main" className="ushqn-skip-link z-[60]">
+        {t('ui.skipToContent')}
+      </a>
       <Helmet>
         <html lang={i18n.language} />
-        <title>{t('landing.seoTitle', { wordmark: t('brand.wordmark') })}</title>
-        <meta name="description" content={t('landing.seoDescription')} />
+        <title>{seoTitle}</title>
+        <meta name="description" content={seoDesc} />
         <link rel="canonical" href={canonical} />
+        <meta property="og:title" content={seoTitle} />
+        <meta property="og:description" content={seoDesc} />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={canonical} />
+        <meta property="og:image" content={ogImage} />
+        <meta property="og:locale" content={i18n.language === 'kk' ? 'kk_KZ' : i18n.language === 'ru' ? 'ru_RU' : 'en_US'} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={seoTitle} />
+        <meta name="twitter:description" content={seoDesc} />
+        <meta name="twitter:image" content={ogImage} />
       </Helmet>
 
       {/* ── STICKY NAV ── */}
@@ -296,18 +333,27 @@ export function LandingPage() {
           <Link to="/" className="flex items-center gap-2">
             <span className="landing-wordmark-shimmer text-lg font-black tracking-tight sm:text-xl">{t('brand.wordmark')}</span>
           </Link>
-          <nav className="hidden items-center gap-6 md:flex">
+          <nav className="hidden items-center gap-6 md:flex" aria-label={t('landing.navAriaLabel')}>
             {[['#features', t('landing.navFeatures')], ['#chat', t('landing.chatSectionKicker')], ['#people', t('landing.peopleSectionKicker')]].map(([href, label]) => (
-              <a key={href} href={href} className="text-sm font-semibold text-white/55 transition hover:text-white">{label}</a>
+              <a
+                key={href}
+                href={href}
+                className="rounded-lg text-sm font-semibold text-white/55 transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/90 focus-visible:ring-offset-2 focus-visible:ring-offset-[#020818]"
+              >
+                {label}
+              </a>
             ))}
           </nav>
           <div className="flex items-center gap-2">
-            <Link to="/login" className="rounded-lg px-3 py-2 text-sm font-semibold text-white/60 transition hover:text-white">
+            <Link
+              to="/login"
+              className="rounded-lg px-3 py-2 text-sm font-semibold text-white/60 transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/90 focus-visible:ring-offset-2 focus-visible:ring-offset-[#020818]"
+            >
               {t('landing.login')}
             </Link>
             <Link
               to="/register"
-              className="ushqn-glow-btn rounded-xl px-4 py-2 text-sm font-bold text-white"
+              className="ushqn-glow-btn rounded-xl px-4 py-2 text-sm font-bold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300 focus-visible:ring-offset-2 focus-visible:ring-offset-[#020818]"
               style={{ background: 'linear-gradient(135deg,#0052CC,#2684FF)', boxShadow: '0 4px 20px rgba(0,82,204,.45)' }}
             >
               {t('landing.register')}
@@ -316,6 +362,7 @@ export function LandingPage() {
         </div>
       </header>
 
+      <main id="landing-main" tabIndex={-1} className="outline-none">
       {/* ══════════════════════════════════════════
           HERO
       ══════════════════════════════════════════ */}
@@ -339,7 +386,7 @@ export function LandingPage() {
               background: 'radial-gradient(circle,rgba(0,82,204,.44) 0%,transparent 65%)',
               top: '-12%',
               right: '-8%',
-              animation: 'ushqn-glow 8s ease-in-out infinite',
+              animation: reducedMotion ? 'none' : 'ushqn-glow 8s ease-in-out infinite',
               transform: `translate3d(0, ${scrollY * 0.045}px, 0)`,
             }}
           />
@@ -354,7 +401,7 @@ export function LandingPage() {
               background: 'radial-gradient(circle,rgba(101,84,192,.32) 0%,transparent 65%)',
               bottom: '-8%',
               left: '-8%',
-              animation: 'ushqn-glow 11s ease-in-out infinite 4s',
+              animation: reducedMotion ? 'none' : 'ushqn-glow 11s ease-in-out infinite 4s',
               transform: `translate3d(0, ${scrollY * -0.035}px, 0)`,
             }}
           />
@@ -368,7 +415,7 @@ export function LandingPage() {
               background: 'radial-gradient(circle,rgba(0,184,217,.22) 0%,transparent 70%)',
               top: '35%',
               left: '25%',
-              animation: 'ushqn-float 14s ease-in-out infinite 2s',
+              animation: reducedMotion ? 'none' : 'ushqn-float 14s ease-in-out infinite 2s',
               transform: `translate3d(0, ${scrollY * 0.06}px, 0)`,
             }}
           />
@@ -377,21 +424,29 @@ export function LandingPage() {
         {/* Grid lines */}
         <div className="pointer-events-none absolute inset-0" aria-hidden style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,.028) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.028) 1px,transparent 1px)', backgroundSize: '72px 72px' }} />
 
-        <div className="landing-hero-sweep" aria-hidden />
+        {!reducedMotion ? <div className="landing-hero-sweep" aria-hidden /> : null}
 
         <div className="relative z-10 mx-auto max-w-6xl px-4 py-20 sm:py-28 lg:py-36 sm:px-5">
           <div className="mx-auto max-w-3xl text-center">
             {/* Badge */}
             <div
               className="mb-6 inline-flex items-center gap-2 rounded-full px-4 py-1.5"
-              style={{ border: '1px solid rgba(255,255,255,.1)', background: 'rgba(255,255,255,.05)', backdropFilter: 'blur(12px)', animation: 'ushqn-fade-up .7s ease-out both' }}
+              style={{
+                border: '1px solid rgba(255,255,255,.1)',
+                background: 'rgba(255,255,255,.05)',
+                backdropFilter: 'blur(12px)',
+                ...heroFade('.05s', '.7s'),
+              }}
             >
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" style={{ animation: 'ushqn-glow 2s ease-in-out infinite' }} />
+              <span
+                className="h-1.5 w-1.5 rounded-full bg-emerald-400"
+                style={reducedMotion ? undefined : { animation: 'ushqn-glow 2s ease-in-out infinite' }}
+              />
               <span className="text-[11px] font-bold uppercase tracking-[0.15em] text-white/65">{t('landing.badge')}</span>
             </div>
 
             {/* Headline */}
-            <h1 className="tracking-tight" style={{ animation: 'ushqn-fade-up .85s ease-out .08s both' }}>
+            <h1 className="tracking-tight" style={heroFade('.08s')}>
               <span className="landing-wordmark-shimmer block text-5xl font-black leading-none sm:text-6xl lg:text-7xl">
                 {t('brand.wordmark')}
               </span>
@@ -403,7 +458,7 @@ export function LandingPage() {
             {/* Subline */}
             <p
               className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-white/55 sm:text-lg"
-              style={{ animation: 'ushqn-fade-up .8s ease-out .22s both' }}
+              style={heroFade('.22s')}
             >
               {t('landing.heroSub')}
             </p>
@@ -411,11 +466,11 @@ export function LandingPage() {
             {/* CTAs */}
             <div
               className="mt-8 flex flex-wrap items-center justify-center gap-3"
-              style={{ animation: 'ushqn-fade-up .8s ease-out .34s both' }}
+              style={heroFade('.34s')}
             >
               <Link
                 to={primary}
-                className="ushqn-glow-btn inline-flex items-center gap-2 rounded-xl px-6 py-3.5 text-sm font-bold text-white"
+                className="ushqn-glow-btn inline-flex items-center gap-2 rounded-xl px-6 py-3.5 text-sm font-bold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300 focus-visible:ring-offset-2 focus-visible:ring-offset-[#020818]"
                 style={{ background: 'linear-gradient(135deg,#0052CC,#2684FF)', boxShadow: '0 8px 32px rgba(0,82,204,.5),0 1px 0 rgba(255,255,255,.15) inset' }}
               >
                 {session ? t('landing.toApp') : t('landing.ctaPrimary')}
@@ -423,7 +478,7 @@ export function LandingPage() {
               </Link>
               <a
                 href="#features"
-                className="inline-flex items-center rounded-xl px-6 py-3.5 text-sm font-bold text-white/75 transition hover:text-white"
+                className="inline-flex items-center rounded-xl px-6 py-3.5 text-sm font-bold text-white/75 transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/90 focus-visible:ring-offset-2 focus-visible:ring-offset-[#020818]"
                 style={{ border: '1px solid rgba(255,255,255,.12)', background: 'rgba(255,255,255,.04)', backdropFilter: 'blur(8px)' }}
               >
                 {t('landing.ctaSecondary')}
@@ -431,7 +486,7 @@ export function LandingPage() {
             </div>
 
             {/* Trust note */}
-            <p className="mt-4 text-xs text-white/30" style={{ animation: 'ushqn-fade-up .8s ease-out .44s both' }}>
+            <p className="mt-4 text-xs text-white/30" style={heroFade('.44s')}>
               {t('landing.ctaNote')}
             </p>
 
@@ -439,18 +494,21 @@ export function LandingPage() {
             <div
               ref={statsRef}
               className="mt-12 grid grid-cols-2 gap-3 sm:grid-cols-4"
-              style={{ animation: 'ushqn-fade-up .8s ease-out .5s both' }}
+              style={heroFade('.5s')}
             >
               {STATS_DATA.map((s, i) => (
-                <StatCard key={i} {...s} started={statsVisible} delay={i * 120} t={t} />
+                <StatCard key={i} {...s} started={statsVisible} delay={i * 120} t={t} reducedMotion={reducedMotion} />
               ))}
             </div>
           </div>
         </div>
 
         {/* Scroll hint */}
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-center" style={{ animation: 'ushqn-fade-up 1s ease-out .8s both' }}>
-          <a href="#features" className="flex flex-col items-center gap-1 text-white/25 transition hover:text-white/50">
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-center" style={heroFade('.8s', '1s')}>
+          <a
+            href="#features"
+            className="flex flex-col items-center gap-1 rounded-lg text-white/25 transition hover:text-white/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/80 focus-visible:ring-offset-2 focus-visible:ring-offset-[#020818]"
+          >
             <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" /></svg>
           </a>
         </div>
@@ -552,7 +610,7 @@ export function LandingPage() {
               </div>
             </div>
             <div className="landing-reveal-r">
-              <ChatMockup t={t} />
+              <ChatMockup t={t} reducedMotion={reducedMotion} />
             </div>
           </div>
         </div>
@@ -661,6 +719,7 @@ export function LandingPage() {
           </div>
         </div>
       </section>
+      </main>
 
       {/* ── FOOTER ── */}
       <footer
@@ -673,9 +732,15 @@ export function LandingPage() {
             <div className="mt-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/35">{t('brand.navTagline')}</div>
           </div>
           <div className="flex flex-wrap justify-center gap-6 text-sm font-semibold text-white/35">
-            <a href="#features" className="transition hover:text-white/70">{t('landing.navFeatures')}</a>
-            <Link to="/login" className="transition hover:text-white/70">{t('landing.login')}</Link>
-            <Link to="/register" className="transition hover:text-white/70">{t('landing.register')}</Link>
+            <a href="#features" className="rounded transition hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/80 focus-visible:ring-offset-2 focus-visible:ring-offset-[#020818]">
+              {t('landing.navFeatures')}
+            </a>
+            <Link to="/login" className="rounded transition hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/80 focus-visible:ring-offset-2 focus-visible:ring-offset-[#020818]">
+              {t('landing.login')}
+            </Link>
+            <Link to="/register" className="rounded transition hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/80 focus-visible:ring-offset-2 focus-visible:ring-offset-[#020818]">
+              {t('landing.register')}
+            </Link>
           </div>
           <p className="text-xs text-white/25">{t('landing.footerCopy', { year: new Date().getFullYear(), legalName: t('brand.legalName') })}</p>
         </div>

@@ -964,6 +964,7 @@
     "loading": "Загрузка…"
   },
   "landing": {
+    "navAriaLabel": "Разделы страницы",
     "navFeatures": "Возможности",
     "navHow": "Как начать",
     "navVoices": "Отзывы",

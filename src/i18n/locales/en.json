@@ -962,6 +962,7 @@
     "loading": "Loading…"
   },
   "landing": {
+    "navAriaLabel": "Landing page sections",
     "navFeatures": "Features",
     "navHow": "How to start",
     "navVoices": "Stories",

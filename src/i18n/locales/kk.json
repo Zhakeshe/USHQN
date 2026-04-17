@@ -956,6 +956,7 @@
     "loading": "Жүктелуде…"
   },
   "landing": {
+    "navAriaLabel": "Бет бөлімдері",
     "navFeatures": "Мүмкіндіктер",
     "navHow": "Қалай бастауға",
     "navVoices": "Пікірлер",
