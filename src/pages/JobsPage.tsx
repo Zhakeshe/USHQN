@@ -17,7 +17,7 @@ import { AppPageMeta } from '../components/AppPageMeta'
 import { QueryState } from '../components/QueryState'
 import { ContentReportDialog } from '../components/ContentReportDialog'
 import { trackEvent } from '../lib/analytics'
-import type { Database, JobApplicationStatus, JobWorkMode } from '../types/database'
+import type { Database, JobApplicationStatus, JobVacancyStatus, JobWorkMode } from '../types/database'
 
 /* ── Job Alert Toggle component ── */
 function JobAlertToggle({
@@ -108,6 +108,15 @@ function JobAlertToggle({
 const JOBS_FILTERS_KEY = 'ushqn_jobs_filters_v1'
 
 type JobRow = Database['public']['Tables']['jobs']['Row']
+
+function vacancyOf(j: JobRow): JobVacancyStatus {
+  return j.vacancy_status ?? 'open'
+}
+
+function isJobOpenForApplicants(j: JobRow, viewerId: string | null): boolean {
+  if (j.owner_id === viewerId) return true
+  return vacancyOf(j) === 'open'
+}
 type AppRow = {
   id: string
   job_id: string
@@ -334,8 +343,53 @@ export function JobsPage() {
     return new Date(j.featured_until) > new Date()
   }
 
+  const employerStats = useMemo(() => {
+    if (!userId) return null
+    const mine = (listQuery.data ?? []).filter((j) => j.owner_id === userId)
+    if (mine.length === 0) return null
+    const count = (s: JobVacancyStatus) => mine.filter((j) => vacancyOf(j) === s).length
+    return {
+      total: mine.length,
+      open: count('open'),
+      filled: count('filled'),
+      notNeeded: count('closed_not_needed'),
+      otherClosed: count('closed_other'),
+    }
+  }, [listQuery.data, userId])
+
+  const pendingApplicantReviews = useMemo(() => {
+    let n = 0
+    for (const apps of appsByJobQuery.data?.values() ?? []) {
+      n += apps.filter((a) => a.status === 'submitted' || a.status === 'viewed').length
+    }
+    return n
+  }, [appsByJobQuery.data])
+
+  const patchJobVacancy = useMutation({
+    mutationFn: async (p: { id: string; vacancy_status: JobVacancyStatus; closed_reason?: string | null }) => {
+      const needReason = p.vacancy_status === 'closed_not_needed' || p.vacancy_status === 'closed_other'
+      const { error } = await supabase
+        .from('jobs')
+        .update({
+          vacancy_status: p.vacancy_status,
+          closed_reason: needReason ? p.closed_reason?.trim() || null : null,
+          closed_at: p.vacancy_status === 'open' ? null : new Date().toISOString(),
+        })
+        .eq('id', p.id)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['jobs'] })
+      toast(t('jobs.vacancyUpdated'), 'info')
+    },
+    onError: () => toast(t('common.error'), 'error'),
+  })
+
   const filteredJobs = useMemo(() => {
     let list = (listQuery.data ?? []).filter((j) => {
+      if (userId && j.owner_id !== userId && !isJobOpenForApplicants(j, userId)) {
+        return false
+      }
       if (workMode !== 'all') {
         const mode = (j.work_mode ?? 'any') as JobWorkMode
         if (mode !== 'any' && mode !== workMode) return false
@@ -366,7 +420,7 @@ export function JobsPage() {
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     })
     return list
-  }, [listQuery.data, employment, sphere, debouncedQ, sort, workMode])
+  }, [listQuery.data, employment, sphere, debouncedQ, sort, workMode, userId])
 
   const form = useForm<Form>({
     resolver: zodResolver(schema),
@@ -688,6 +742,35 @@ export function JobsPage() {
         </div>
       )}
 
+      {employerStats ? (
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
+          <div className="ushqn-card p-4">
+            <p className="text-[10px] font-bold uppercase tracking-wide text-[#6B778C]">{t('jobs.employerStats.myVacancies')}</p>
+            <p className="mt-1 text-2xl font-black text-[#172B4D]">{employerStats.total}</p>
+          </div>
+          <div className="ushqn-card p-4">
+            <p className="text-[10px] font-bold uppercase tracking-wide text-[#6B778C]">{t('jobs.employerStats.open')}</p>
+            <p className="mt-1 text-2xl font-black text-emerald-700">{employerStats.open}</p>
+          </div>
+          <div className="ushqn-card p-4">
+            <p className="text-[10px] font-bold uppercase tracking-wide text-[#6B778C]">{t('jobs.employerStats.filled')}</p>
+            <p className="mt-1 text-2xl font-black text-[#172B4D]">{employerStats.filled}</p>
+          </div>
+          <div className="ushqn-card p-4">
+            <p className="text-[10px] font-bold uppercase tracking-wide text-[#6B778C]">{t('jobs.employerStats.notNeeded')}</p>
+            <p className="mt-1 text-2xl font-black text-[#172B4D]">{employerStats.notNeeded}</p>
+          </div>
+          <div className="ushqn-card p-4">
+            <p className="text-[10px] font-bold uppercase tracking-wide text-[#6B778C]">{t('jobs.employerStats.otherClosed')}</p>
+            <p className="mt-1 text-2xl font-black text-[#172B4D]">{employerStats.otherClosed}</p>
+          </div>
+          <div className="ushqn-card p-4">
+            <p className="text-[10px] font-bold uppercase tracking-wide text-[#6B778C]">{t('jobs.employerStats.pendingReviews')}</p>
+            <p className="mt-1 text-2xl font-black text-[#0052CC]">{pendingApplicantReviews}</p>
+          </div>
+        </div>
+      ) : null}
+
       {/* Jobs list */}
       <QueryState
         query={listQuery}
@@ -747,6 +830,19 @@ export function JobsPage() {
                       {format(new Date(j.created_at), 'PP', { locale: dateLocale })}
                     </p>
                     <div className="mt-2 flex flex-wrap gap-1.5">
+                      {isOwner ? (
+                        <span
+                          className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                            vacancyOf(j) === 'open'
+                              ? 'bg-emerald-100 text-emerald-900'
+                              : vacancyOf(j) === 'filled'
+                                ? 'bg-blue-100 text-blue-900'
+                                : 'bg-[#F4F5F7] text-[#505F79]'
+                          }`}
+                        >
+                          {t(`jobs.vacancyStatus.${vacancyOf(j)}`)}
+                        </span>
+                      ) : null}
                       {isJobFeatured(j) ? (
                         <span
                           title={t('jobs.featuredExplained')}
@@ -792,6 +888,39 @@ export function JobsPage() {
                 {j.description ? (
                   <div className="px-5 pb-3">
                     <p className="line-clamp-3 text-sm text-[#6B778C]">{j.description}</p>
+                  </div>
+                ) : null}
+                {isOwner ? (
+                  <div className="flex flex-col gap-2 border-t border-[#f4f5f7] px-5 py-3 sm:flex-row sm:items-center">
+                    <label className="text-xs font-bold uppercase tracking-wide text-[#6B778C]">
+                      {t('jobs.vacancyLabel')}
+                    </label>
+                    <select
+                      className="ushqn-input max-w-xs py-1.5 text-xs"
+                      value={vacancyOf(j)}
+                      disabled={patchJobVacancy.isPending}
+                      onChange={(e) => {
+                        const v = e.target.value as JobVacancyStatus
+                        let closed_reason: string | undefined
+                        if (v === 'closed_not_needed' || v === 'closed_other') {
+                          const r = window.prompt(t('jobs.closeReasonPrompt'))
+                          if (r === null) return
+                          closed_reason = r
+                        }
+                        patchJobVacancy.mutate({ id: j.id, vacancy_status: v, closed_reason })
+                      }}
+                    >
+                      {(['open', 'filled', 'closed_not_needed', 'closed_other'] as const).map((s) => (
+                        <option key={s} value={s}>
+                          {t(`jobs.vacancyStatus.${s}`)}
+                        </option>
+                      ))}
+                    </select>
+                    {j.closed_reason && vacancyOf(j) !== 'open' ? (
+                      <span className="text-xs text-[#6B778C]">
+                        {t('jobs.closedNote')}: {j.closed_reason}
+                      </span>
+                    ) : null}
                   </div>
                 ) : null}
                 {isOwner && appsList.length > 0 ? (
@@ -858,7 +987,7 @@ export function JobsPage() {
                       className="rounded-lg border border-red-100 px-3 py-1.5 text-xs font-semibold text-red-500 hover:bg-red-50 transition">
                       {t('common.delete')}
                     </button>
-                  ) : (
+                  ) : isJobOpenForApplicants(j, userId) ? (
                     <button
                       type="button"
                       onClick={() => void applyToJob(j.id, j.owner_id)}
@@ -866,6 +995,8 @@ export function JobsPage() {
                     >
                       💬 {hasApplied ? t('jobs.openChat') : t('jobs.apply')}
                     </button>
+                  ) : (
+                    <span className="text-xs font-semibold text-[#6B778C]">{t(`jobs.vacancyBadge.${vacancyOf(j)}`)}</span>
                   )}
                   {!isOwner && userId ? (
                     <button

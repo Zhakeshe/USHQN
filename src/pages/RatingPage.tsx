@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import type { TFunction } from 'i18next'
+import { useMemo, useState } from 'react'
 import { AppPageMeta } from '../components/AppPageMeta'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -7,6 +8,7 @@ import { useAuth } from '../hooks/useAuth'
 import { QueryState } from '../components/QueryState'
 import { fetchLeaderboardTotals, type LeaderboardRow } from '../lib/leaderboard'
 import { supabase } from '../lib/supabase'
+import type { UserRole } from '../types/database'
 
 const AVATAR_COLORS = [
   'from-[#0052CC] to-[#2684FF]',
@@ -160,9 +162,93 @@ function Podium({ top3, userId, t }: { top3: LeaderboardRow[]; userId: string | 
 export function RatingPage() {
   const { userId } = useAuth()
   const { t } = useTranslation()
+  const [cityQ, setCityQ] = useState('')
+  const [classQ, setClassQ] = useState('')
+  const [groupFilterId, setGroupFilterId] = useState('')
+  const [applied, setApplied] = useState<{ city: string; klass: string; groupId: string }>({
+    city: '',
+    klass: '',
+    groupId: '',
+  })
+
+  const profileRoleQuery = useQuery({
+    queryKey: ['profile-role-lb', userId],
+    enabled: Boolean(userId),
+    queryFn: async () => {
+      const { data, error } = await supabase.from('profiles').select('role').eq('id', userId!).single()
+      if (error) throw error
+      return (data?.role as UserRole) ?? 'student'
+    },
+  })
+
+  const lbTeacherGroups = useQuery({
+    queryKey: ['lb-teacher-groups', userId],
+    enabled: Boolean(userId) && profileRoleQuery.data === 'teacher',
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('teacher_groups')
+        .select('id,title')
+        .eq('owner_id', userId!)
+        .eq('is_archived', false)
+      if (error) throw error
+      return data ?? []
+    },
+  })
+
+  const lbStudentGroups = useQuery({
+    queryKey: ['lb-student-groups', userId],
+    enabled: Boolean(userId) && (profileRoleQuery.data === 'student' || profileRoleQuery.data === 'pupil'),
+    queryFn: async () => {
+      const { data: mem, error: e1 } = await supabase
+        .from('teacher_group_members')
+        .select('group_id')
+        .eq('student_id', userId!)
+        .eq('is_active', true)
+      if (e1) throw e1
+      const ids = [...new Set((mem ?? []).map((m) => m.group_id as string))]
+      if (ids.length === 0) return [] as { id: string; title: string }[]
+      const { data: gr, error: e2 } = await supabase
+        .from('teacher_groups')
+        .select('id,title')
+        .in('id', ids)
+        .eq('is_archived', false)
+      if (e2) throw e2
+      return gr ?? []
+    },
+  })
+
+  const leaderboardGroupOptions = useMemo(() => {
+    const map = new Map<string, string>()
+    for (const g of lbTeacherGroups.data ?? []) map.set(g.id as string, g.title as string)
+    for (const g of lbStudentGroups.data ?? []) {
+      if (!map.has(g.id as string)) map.set(g.id as string, g.title as string)
+    }
+    return [...map.entries()].map(([id, title]) => ({ id, title }))
+  }, [lbTeacherGroups.data, lbStudentGroups.data])
+
   const leaderboardQuery = useQuery({
-    queryKey: ['leaderboard'],
-    queryFn: () => fetchLeaderboardTotals(supabase),
+    queryKey: ['leaderboard', applied.city, applied.klass, applied.groupId],
+    queryFn: () =>
+      fetchLeaderboardTotals(supabase, {
+        citySub: applied.city || undefined,
+        classSub: applied.klass || undefined,
+        teacherGroupId: applied.groupId || undefined,
+      }),
+  })
+
+  const ledgerQuery = useQuery({
+    queryKey: ['point-ledger', userId],
+    enabled: Boolean(userId),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('point_transactions')
+        .select('id,delta,created_at,category_id,achievement_categories(slug,label_ru)')
+        .eq('user_id', userId!)
+        .order('created_at', { ascending: false })
+        .limit(40)
+      if (error) throw error
+      return data ?? []
+    },
   })
 
   const rows = leaderboardQuery.data ?? []
@@ -179,6 +265,64 @@ export function RatingPage() {
             <h1 className="text-3xl font-black tracking-tight sm:text-4xl">{t('rating.title')}</h1>
             <p className="mt-2 max-w-xl text-sm leading-relaxed text-white/90">{t('rating.subtitle')}</p>
             <p className="mt-3 max-w-lg text-sm leading-relaxed text-white/80">{t('rating.leaderboardKicker')}</p>
+          </div>
+        </div>
+      </div>
+
+      <details className="ushqn-card rounded-2xl p-4 text-sm text-[var(--color-ushqn-text)]">
+        <summary className="cursor-pointer text-sm font-bold text-[#0052CC]">{t('rating.formulaTitle')}</summary>
+        <p className="mt-2 whitespace-pre-line text-[var(--color-ushqn-muted)]">{t('rating.formulaBody')}</p>
+      </details>
+
+      <div className="ushqn-card space-y-3 p-4">
+        <p className="text-xs font-bold uppercase tracking-wide text-[var(--color-ushqn-muted)]">{t('rating.filtersTitle')}</p>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <input
+            className="ushqn-input"
+            value={cityQ}
+            onChange={(e) => setCityQ(e.target.value)}
+            placeholder={t('rating.filterCityPh')}
+          />
+          <input
+            className="ushqn-input"
+            value={classQ}
+            onChange={(e) => setClassQ(e.target.value)}
+            placeholder={t('rating.filterClassPh')}
+          />
+          <select
+            className="ushqn-input"
+            value={groupFilterId}
+            onChange={(e) => setGroupFilterId(e.target.value)}
+          >
+            <option value="">{t('rating.filterGroupAll')}</option>
+            {leaderboardGroupOptions.map((g) => (
+              <option key={g.id} value={g.id}>
+                {g.title}
+              </option>
+            ))}
+          </select>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              className="rounded-xl bg-[#0052CC] px-4 py-2 text-xs font-bold text-white"
+              onClick={() =>
+                setApplied({ city: cityQ.trim(), klass: classQ.trim(), groupId: groupFilterId.trim() })
+              }
+            >
+              {t('rating.filtersApply')}
+            </button>
+            <button
+              type="button"
+              className="rounded-xl border border-[var(--color-ushqn-border)] px-4 py-2 text-xs font-bold"
+              onClick={() => {
+                setCityQ('')
+                setClassQ('')
+                setGroupFilterId('')
+                setApplied({ city: '', klass: '', groupId: '' })
+              }}
+            >
+              {t('rating.filtersReset')}
+            </button>
           </div>
         </div>
       </div>
@@ -263,6 +407,48 @@ export function RatingPage() {
           </>
         )}
       </QueryState>
+
+      {userId ? (
+        <section className="ushqn-card overflow-hidden p-0">
+          <div className="border-b border-[var(--color-ushqn-border)] px-5 py-3">
+            <h2 className="text-sm font-bold text-[var(--color-ushqn-text)]">{t('rating.pointsJournal')}</h2>
+            <p className="text-xs text-[var(--color-ushqn-muted)]">{t('rating.pointsJournalHint')}</p>
+          </div>
+          <QueryState
+            query={ledgerQuery}
+            skeleton={<div className="p-5 text-sm text-[var(--color-ushqn-muted)]">…</div>}
+          >
+            {(ledgerQuery.data ?? []).length === 0 ? (
+              <p className="p-5 text-sm text-[var(--color-ushqn-muted)]">{t('rating.journalEmpty')}</p>
+            ) : (
+              <ul className="divide-y divide-[var(--color-ushqn-border)]">
+                {(ledgerQuery.data ?? []).map((row) => {
+                  const rawCat = row.achievement_categories as
+                    | { slug?: string; label_ru?: string }
+                    | { slug?: string; label_ru?: string }[]
+                    | null
+                  const cat = Array.isArray(rawCat) ? rawCat[0] : rawCat
+                  const label = cat?.label_ru ?? cat?.slug ?? '—'
+                  const ts = row.created_at ? new Date(row.created_at).toLocaleString() : ''
+                  const d = Number(row.delta)
+                  return (
+                    <li key={row.id} className="flex flex-wrap items-center justify-between gap-2 px-5 py-3 text-sm">
+                      <div>
+                        <span className="font-semibold text-[var(--color-ushqn-text)]">{label}</span>
+                        <span className="ml-2 text-xs text-[var(--color-ushqn-muted)]">{ts}</span>
+                      </div>
+                      <span className={`font-black tabular-nums ${d >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                        {d >= 0 ? '+' : ''}
+                        {d}
+                      </span>
+                    </li>
+                  )
+                })}
+              </ul>
+            )}
+          </QueryState>
+        </section>
+      ) : null}
     </div>
   )
 }

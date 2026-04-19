@@ -31,6 +31,8 @@ type TeacherGroupRow = {
   join_code: string
   description: string | null
   is_archived: boolean
+  join_code_expires_at: string | null
+  invite_rotated_at: string | null
   created_at: string
 }
 
@@ -41,6 +43,7 @@ type TeacherGroupMemberRow = {
   joined_at: string
   left_at: string | null
   is_active: boolean
+  is_guest: boolean
 }
 
 export function ConnectionsPage() {
@@ -54,6 +57,7 @@ export function ConnectionsPage() {
   const [groupStudentId, setGroupStudentId] = useState('')
   const [groupJoinCode, setGroupJoinCode] = useState('')
   const [selectedTeacherId, setSelectedTeacherId] = useState('')
+  const [addAsGuest, setAddAsGuest] = useState(false)
 
   const roleQuery = useQuery({
     queryKey: ['connections-role', userId],
@@ -130,7 +134,7 @@ export function ConnectionsPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('teacher_groups')
-        .select('id,owner_id,title,kind,join_code,description,is_archived,created_at')
+        .select('id,owner_id,title,kind,join_code,description,is_archived,created_at,join_code_expires_at,invite_rotated_at')
         .eq('owner_id', userId!)
         .eq('is_archived', false)
         .order('created_at', { ascending: false })
@@ -148,7 +152,7 @@ export function ConnectionsPage() {
       const ids = groups.map((g) => g.id)
       const { data, error } = await supabase
         .from('teacher_group_members')
-        .select('id,group_id,student_id,joined_at,left_at,is_active')
+        .select('id,group_id,student_id,joined_at,left_at,is_active,is_guest')
         .in('group_id', ids)
         .eq('is_active', true)
       if (error) throw error
@@ -162,7 +166,7 @@ export function ConnectionsPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('teacher_group_members')
-        .select('id,group_id,student_id,joined_at,left_at,is_active')
+        .select('id,group_id,student_id,joined_at,left_at,is_active,is_guest')
         .eq('student_id', userId!)
         .eq('is_active', true)
       if (error) throw error
@@ -177,7 +181,7 @@ export function ConnectionsPage() {
       const ids = [...new Set((studentGroupMembersQuery.data ?? []).map((x) => x.group_id))]
       const { data, error } = await supabase
         .from('teacher_groups')
-        .select('id,owner_id,title,kind,join_code,description,is_archived,created_at')
+        .select('id,owner_id,title,kind,join_code,description,is_archived,created_at,join_code_expires_at,invite_rotated_at')
         .in('id', ids)
       if (error) throw error
       return (data ?? []) as TeacherGroupRow[]
@@ -207,6 +211,8 @@ export function ConnectionsPage() {
     onError: (e: Error) => toast(e.message, 'error'),
   })
 
+  const inviteExpiresIso = () => new Date(Date.now() + 30 * 86400000).toISOString()
+
   const createTeacherGroup = useMutation({
     mutationFn: async () => {
       const title = groupTitle.trim()
@@ -215,6 +221,7 @@ export function ConnectionsPage() {
         owner_id: userId!,
         title,
         kind: groupKind,
+        join_code_expires_at: inviteExpiresIso(),
       })
       if (error) throw error
     },
@@ -228,12 +235,13 @@ export function ConnectionsPage() {
   })
 
   const addStudentToGroup = useMutation({
-    mutationFn: async (p: { groupId: string; studentId: string }) => {
+    mutationFn: async (p: { groupId: string; studentId: string; isGuest: boolean }) => {
       if (!p.studentId) throw new Error(t('connections.groups.pickStudent'))
       const { error } = await supabase.from('teacher_group_members').insert({
         group_id: p.groupId,
         student_id: p.studentId,
         is_active: true,
+        is_guest: p.isGuest,
       })
       if (error) throw error
     },
@@ -241,6 +249,47 @@ export function ConnectionsPage() {
       void qc.invalidateQueries({ queryKey: ['teacher-group-members', userId] })
       void qc.invalidateQueries({ queryKey: ['student-group-memberships'] })
       toast(t('connections.groups.studentAdded'))
+      setAddAsGuest(false)
+    },
+    onError: (e: Error) => toast(e.message, 'error'),
+  })
+
+  const regenerateJoin = useMutation({
+    mutationFn: async (groupId: string) => {
+      const { error } = await supabase.rpc('regenerate_teacher_group_join_code', { p_group_id: groupId })
+      if (error) throw error
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['teacher-groups', userId] })
+      toast(t('connections.groups.codeRegenerated'))
+    },
+    onError: (e: Error) => toast(e.message, 'error'),
+  })
+
+  const removeMember = useMutation({
+    mutationFn: async (p: { groupId: string; studentId: string }) => {
+      const { error } = await supabase.rpc('remove_teacher_group_member', {
+        p_group_id: p.groupId,
+        p_student_id: p.studentId,
+      })
+      if (error) throw error
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['teacher-group-members', userId] })
+      toast(t('connections.groups.memberRemoved'))
+    },
+    onError: (e: Error) => toast(e.message, 'error'),
+  })
+
+  const leaveTeacherGroup = useMutation({
+    mutationFn: async (groupId: string) => {
+      const { error } = await supabase.rpc('leave_teacher_group', { p_group_id: groupId })
+      if (error) throw error
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['student-group-memberships', userId] })
+      void qc.invalidateQueries({ queryKey: ['student-group-cards'] })
+      toast(t('connections.groups.leftGroup'))
     },
     onError: (e: Error) => toast(e.message, 'error'),
   })
@@ -549,11 +598,21 @@ export function ConnectionsPage() {
                 ) : (
                   <ul className="divide-y divide-[var(--color-ushqn-border)]">
                     {(studentGroupCardsQuery.data ?? []).map((g) => (
-                      <li key={g.id} className="px-5 py-4">
-                        <p className="font-semibold text-[var(--color-ushqn-text)]">{g.title}</p>
-                        <p className="text-xs text-[var(--color-ushqn-muted)]">
-                          {t(`connections.groups.kind.${g.kind}`)} · {t('connections.groups.teacherLabel')}
-                        </p>
+                      <li key={g.id} className="flex flex-col gap-2 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                          <p className="font-semibold text-[var(--color-ushqn-text)]">{g.title}</p>
+                          <p className="text-xs text-[var(--color-ushqn-muted)]">
+                            {t(`connections.groups.kind.${g.kind}`)} · {t('connections.groups.teacherLabel')}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          disabled={leaveTeacherGroup.isPending}
+                          className="self-start rounded-lg border border-[var(--color-ushqn-border)] px-3 py-1.5 text-xs font-bold text-red-600"
+                          onClick={() => leaveTeacherGroup.mutate(g.id)}
+                        >
+                          {t('connections.groups.leaveGroup')}
+                        </button>
                       </li>
                     ))}
                   </ul>
@@ -687,19 +746,66 @@ export function ConnectionsPage() {
                                     type="button"
                                     disabled={addStudentToGroup.isPending}
                                     className="rounded-lg border border-[var(--color-ushqn-border)] px-3 py-1.5 text-xs font-bold"
-                                    onClick={() => addStudentToGroup.mutate({ groupId: g.id, studentId: groupStudentId })}
+                                    onClick={() =>
+                                      addStudentToGroup.mutate({
+                                        groupId: g.id,
+                                        studentId: groupStudentId,
+                                        isGuest: addAsGuest,
+                                      })
+                                    }
                                   >
                                     {t('connections.groups.addStudent')}
                                   </button>
+                                  <label className="flex items-center gap-2 text-xs font-semibold text-[var(--color-ushqn-text)]">
+                                    <input
+                                      type="checkbox"
+                                      checked={addAsGuest}
+                                      onChange={(e) => setAddAsGuest(e.target.checked)}
+                                      className="h-4 w-4 accent-[#0052CC]"
+                                    />
+                                    {t('connections.groups.guestMember')}
+                                  </label>
                                 </div>
+                                <p className="text-[11px] text-[var(--color-ushqn-muted)]">
+                                  {g.join_code_expires_at
+                                    ? t('connections.groups.inviteExpires', {
+                                        date: new Date(g.join_code_expires_at).toLocaleString(),
+                                      })
+                                    : t('connections.groups.inviteNoExpiry')}
+                                </p>
+                                <button
+                                  type="button"
+                                  disabled={regenerateJoin.isPending}
+                                  className="text-xs font-bold text-[#0052CC] hover:underline"
+                                  onClick={() => regenerateJoin.mutate(g.id)}
+                                >
+                                  {t('connections.groups.regenerateCode')}
+                                </button>
                                 {rows.length > 0 ? (
                                   <ul className="flex flex-wrap gap-2">
                                     {rows.map((m) => (
                                       <li
                                         key={m.id}
-                                        className="rounded-full border border-[var(--color-ushqn-border)] bg-[var(--color-ushqn-surface-muted)] px-3 py-1 text-xs font-semibold text-[var(--color-ushqn-text)]"
+                                        className="flex items-center gap-1 rounded-full border border-[var(--color-ushqn-border)] bg-[var(--color-ushqn-surface-muted)] px-2 py-1 text-xs font-semibold text-[var(--color-ushqn-text)]"
                                       >
-                                        {teacherNameMap.get(m.student_id) ?? m.student_id.slice(0, 8)}
+                                        <span>
+                                          {teacherNameMap.get(m.student_id) ?? m.student_id.slice(0, 8)}
+                                          {m.is_guest ? (
+                                            <span className="ml-1 text-[10px] font-bold uppercase text-[var(--color-ushqn-muted)]">
+                                              ({t('connections.groups.guestBadge')})
+                                            </span>
+                                          ) : null}
+                                        </span>
+                                        <button
+                                          type="button"
+                                          className="rounded-full px-1 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40"
+                                          title={t('connections.groups.removeMember')}
+                                          onClick={() =>
+                                            removeMember.mutate({ groupId: g.id, studentId: m.student_id })
+                                          }
+                                        >
+                                          ×
+                                        </button>
                                       </li>
                                     ))}
                                   </ul>

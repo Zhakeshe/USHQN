@@ -327,7 +327,18 @@
     "total": "барлығы",
     "loading": "Рейтинг жүктелуде…",
     "leaderboardKicker": "Ұпайлар жетістіктерден жиналады — белсенді болыңыз және сатыға көтеріліңіз.",
-    "fullBoard": "Толық кесте"
+    "fullBoard": "Толық кесте",
+    "formulaTitle": "Ұпай қалай есептеледі",
+    "formulaBody": "Жиынтық = барлық жетістік санаттары бойынша ұпайлар қосындысы.\n• Жаңа жетістік — ол санаттағы ұпайды қосады (әдетте санаттың әдепкі мәні).\n• Жетістікті жою — берілген ұпайды шегереді.\n• Онбордингті аяқтау «басқа» санатында бір реттік бонус беруі мүмкін.\nСүзгілер: қала — профильдегі қала жолына ішінара сәйкестік; сынып — мектеп/сынып жолына; мұғалім тобы — сол топ мүшелері арасындағы рейтинг.",
+    "filtersTitle": "Рейтинг сүзгілері",
+    "filterCityPh": "Қала (профильдегі орналасу)",
+    "filterClassPh": "Сынып / мектеп",
+    "filterGroupAll": "Барлық топтар",
+    "filtersApply": "Қолдану",
+    "filtersReset": "Тазалау",
+    "pointsJournal": "Ұпай журналы",
+    "pointsJournalHint": "Соңғы өзгерістер (санат бойынша).",
+    "journalEmpty": "Әзірге жазбалар жоқ."
   },
   "achievements": {
     "title": "🏅 Жетістіктер",
@@ -496,7 +507,31 @@
     "sortNew": "Алдымен жаңалары",
     "sortRelevance": "Сәйкестік бойынша",
     "searchInList": "Тізімнен іздеу…",
-    "clearFilters": "Сүзгілер мен іздеуді тазалау"
+    "clearFilters": "Сүзгілер мен іздеуді тазалау",
+    "employerStats": {
+      "myVacancies": "Менің жарнамаларым",
+      "open": "Ашық",
+      "filled": "Толтырылды",
+      "notNeeded": "Жабылды (қажет емес)",
+      "otherClosed": "Жабылды (басқа себеп)",
+      "pendingReviews": "Қарауға өтінімдер"
+    },
+    "vacancyLabel": "Мәртебе",
+    "vacancyUpdated": "Сақталды",
+    "closeReasonPrompt": "Жабу себебі (міндетті емес)",
+    "closedNote": "Себеп",
+    "vacancyStatus": {
+      "open": "Ашық",
+      "filled": "Толтырылды",
+      "closed_not_needed": "Жабылды — қажет емес",
+      "closed_other": "Жабылды — басқа"
+    },
+    "vacancyBadge": {
+      "open": "",
+      "filled": "Орын толты",
+      "closed_not_needed": "Жұмыссыз",
+      "closed_other": "Жабық"
+    }
   },
   "people": {
     "title": "👥 Адамдар",
@@ -1243,7 +1278,17 @@
       "joinByCodeBtn": "Топқа қосылу",
       "joinCodeRequired": "Топ кодын енгізіңіз",
       "joinedByCode": "Топқа қосылдыңыз",
-      "joinCodeLabel": "Қосылу коды"
+      "joinCodeLabel": "Қосылу коды",
+      "guestMember": "Қонақ / сыныптан тыс белгілеу",
+      "guestBadge": "қонақ",
+      "codeRegenerated": "Жаңа код (30 күн)",
+      "inviteExpires": "Код жарамдылығы: {{date}}",
+      "inviteNoExpiry": "Мерзімі көрсетілмеген (ескі)",
+      "regenerateCode": "Жаңа код + 30 күн",
+      "removeMember": "Топтан шығару",
+      "memberRemoved": "Қатысушы шығарылды",
+      "leaveGroup": "Шығу",
+      "leftGroup": "Сіз топтан шықтыңыз"
     },
     "currentTeacher": "Мұғалімді бекіту",
     "currentTeacherNow": "Қазіргі мұғалім",

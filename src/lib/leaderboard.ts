@@ -8,41 +8,41 @@ export type LeaderboardRow = {
   avatar_url: string | null
 }
 
-export async function fetchLeaderboardTotals(client: SupabaseClient): Promise<LeaderboardRow[]> {
-  const { data: scores, error: e1 } = await client.from('user_category_scores').select('user_id, points')
-  if (e1) throw e1
+export type LeaderboardFilters = {
+  /** Substring match on profiles.location (city / орналасу) */
+  citySub?: string
+  /** Substring match on profiles.school_or_org (sýnyptau / сынып белгісі) */
+  classSub?: string
+  /** Restrict to members of this teacher-led group */
+  teacherGroupId?: string
+}
 
-  const totals = new Map<string, number>()
-  for (const row of scores ?? []) {
-    const uid = row.user_id as string
-    const pts = (row.points as number) ?? 0
-    totals.set(uid, (totals.get(uid) ?? 0) + pts)
+export async function fetchLeaderboardTotals(
+  client: SupabaseClient,
+  filters?: LeaderboardFilters,
+): Promise<LeaderboardRow[]> {
+  const { data, error } = await client.rpc('leaderboard_totals', {
+    p_city_sub: filters?.citySub?.trim() || null,
+    p_class_sub: filters?.classSub?.trim() || null,
+    p_teacher_group_id: filters?.teacherGroupId || null,
+  })
+  if (error) throw error
+
+  type RpcRow = {
+    user_id: string
+    total_points: number | string
+    display_name: string
+    avatar_url: string | null
   }
 
-  const sorted = [...totals.entries()].sort((a, b) => b[1] - a[1])
-  if (sorted.length === 0) return []
-
-  const userIds = sorted.map(([id]) => id)
-  const { data: profiles, error: e2 } = await client
-    .from('profiles')
-    .select('id,display_name,avatar_url')
-    .in('id', userIds)
-  if (e2) throw e2
-
-  const profileMap = new Map(
-    (profiles ?? []).map((p) => [p.id as string, p as { display_name: string; avatar_url: string | null }]),
-  )
-
-  return sorted.map(([user_id, points], index) => {
-    const p = profileMap.get(user_id)
-    return {
-      rank: index + 1,
-      user_id,
-      points,
-      display_name: p?.display_name ?? 'Участник',
-      avatar_url: p?.avatar_url ?? null,
-    }
-  })
+  const rows = (data ?? []) as RpcRow[]
+  return rows.map((r, index) => ({
+    rank: index + 1,
+    user_id: r.user_id,
+    points: Number(r.total_points),
+    display_name: r.display_name?.trim() || '—',
+    avatar_url: r.avatar_url ?? null,
+  }))
 }
 
 export function findRankForUser(rows: LeaderboardRow[], userId: string | null): number | null {

@@ -327,7 +327,18 @@
     "total": "total",
     "loading": "Loading ranking??¦",
     "leaderboardKicker": "Points come from achievements ??? stay active and watch your rank rise.",
-    "fullBoard": "Full leaderboard"
+    "fullBoard": "Full leaderboard",
+    "formulaTitle": "How points work",
+    "formulaBody": "Total score = sum of points across achievement categories.\n• New achievement ??? adds that category's points (usually the category default).\n• Deleting an achievement subtracts the awarded points.\n• Finishing onboarding may add a one-time bonus (often in the ???other??? category).\nFilters match:\n??? city ??? substring of profile ???Location???;\n??? class/school ??? substring of ???School or organization???;\n??? teacher group ??? members of that class/club only.",
+    "filtersTitle": "Leaderboard filters",
+    "filterCityPh": "City (matches profile location)",
+    "filterClassPh": "Class / school (matches profile school/org)",
+    "filterGroupAll": "All groups (no filter)",
+    "filtersApply": "Apply",
+    "filtersReset": "Reset",
+    "pointsJournal": "Your point history",
+    "pointsJournalHint": "Recent score changes by category (from achievements and bonuses).",
+    "journalEmpty": "No transactions yet."
   },
   "achievements": {
     "title": "????? Achievements",
@@ -496,7 +507,31 @@
     "sortNew": "Newest first",
     "sortRelevance": "Best match",
     "searchInList": "Search in list??¦",
-    "clearFilters": "Clear filters & search"
+    "clearFilters": "Clear filters & search",
+    "employerStats": {
+      "myVacancies": "My vacancies",
+      "open": "Open",
+      "filled": "Filled",
+      "notNeeded": "Closed (not hiring)",
+      "otherClosed": "Closed (other)",
+      "pendingReviews": "Applications to review"
+    },
+    "vacancyLabel": "Vacancy status",
+    "vacancyUpdated": "Status saved",
+    "closeReasonPrompt": "Closing note (optional, stored for you)",
+    "closedNote": "Note",
+    "vacancyStatus": {
+      "open": "Open",
+      "filled": "Filled",
+      "closed_not_needed": "Closed ??? not hiring",
+      "closed_other": "Closed ??? other reason"
+    },
+    "vacancyBadge": {
+      "open": "",
+      "filled": "Filled position",
+      "closed_not_needed": "No longer hiring",
+      "closed_other": "Vacancy closed"
+    }
   },
   "people": {
     "title": "????? People",
@@ -1256,7 +1291,17 @@
         "debate": "Debate",
         "sports": "Sports",
         "other": "Other"
-      }
+      },
+      "guestMember": "Mark as guest / outside main class",
+      "guestBadge": "guest",
+      "codeRegenerated": "New code generated (valid 30 days)",
+      "inviteExpires": "Code valid until {{date}}",
+      "inviteNoExpiry": "No expiry on this code (legacy)",
+      "regenerateCode": "New code + 30 days",
+      "removeMember": "Remove from group",
+      "memberRemoved": "Member removed from group",
+      "leaveGroup": "Leave",
+      "leftGroup": "You left the group"
     }
   },
   "ui": {

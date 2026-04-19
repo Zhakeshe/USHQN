@@ -11,6 +11,7 @@ export type JobApplicationStatus =
   | 'rejected'
   | 'withdrawn'
 export type JobWorkMode = 'any' | 'remote' | 'onsite' | 'hybrid'
+export type JobVacancyStatus = 'open' | 'filled' | 'closed_not_needed' | 'closed_other'
 
 export interface Database {
   public: {
@@ -107,12 +108,15 @@ export interface Database {
           join_code: string
           description: string | null
           is_archived: boolean
+          join_code_expires_at: string | null
+          invite_rotated_at: string | null
           created_at: string
           updated_at: string
         }
         Insert: Partial<Database['public']['Tables']['teacher_groups']['Row']> & {
           owner_id: string
           title: string
+          join_code_expires_at?: string | null
         }
         Update: Partial<Database['public']['Tables']['teacher_groups']['Row']>
       }
@@ -124,6 +128,7 @@ export interface Database {
           joined_at: string
           left_at: string | null
           is_active: boolean
+          is_guest: boolean
         }
         Insert: Partial<Database['public']['Tables']['teacher_group_members']['Row']> & {
           group_id: string
@@ -213,6 +218,16 @@ export interface Database {
           points: number
         }
       }
+      point_transactions: {
+        Row: {
+          id: string
+          user_id: string
+          delta: number
+          category_id: string | null
+          reason_code: string
+          created_at: string
+        }
+      }
       listings: {
         Row: {
           id: string
@@ -251,6 +266,9 @@ export interface Database {
           work_mode: JobWorkMode
           company_name: string | null
           hide_company_until_applied: boolean
+          vacancy_status: JobVacancyStatus
+          closed_reason: string | null
+          closed_at: string | null
           created_at: string
           updated_at: string
         }
@@ -264,6 +282,9 @@ export interface Database {
           work_mode?: JobWorkMode
           company_name?: string | null
           hide_company_until_applied?: boolean
+          vacancy_status?: JobVacancyStatus
+          closed_reason?: string | null
+          closed_at?: string | null
         }
         Update: Partial<
           Omit<Database['public']['Tables']['jobs']['Row'], 'id' | 'owner_id' | 'created_at'>
@@ -550,6 +571,31 @@ export interface Database {
       }
       touch_activity_streak: {
         Args: Record<string, never>
+        Returns: void
+      }
+      leaderboard_totals: {
+        Args: {
+          p_city_sub?: string | null
+          p_class_sub?: string | null
+          p_teacher_group_id?: string | null
+        }
+        Returns: {
+          user_id: string
+          total_points: number
+          display_name: string
+          avatar_url: string | null
+        }[]
+      }
+      regenerate_teacher_group_join_code: {
+        Args: { p_group_id: string }
+        Returns: { join_code: string; join_code_expires_at: string }[]
+      }
+      leave_teacher_group: {
+        Args: { p_group_id: string }
+        Returns: void
+      }
+      remove_teacher_group_member: {
+        Args: { p_group_id: string; p_student_id: string }
         Returns: void
       }
     }

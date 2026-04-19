@@ -327,7 +327,18 @@
     "total": "всего",
     "loading": "Загрузка рейтинга…",
     "leaderboardKicker": "Баллы начисляются за достижения — будьте активны и поднимайтесь в таблице.",
-    "fullBoard": "Вся таблица"
+    "fullBoard": "Вся таблица",
+    "formulaTitle": "Как считаются очки",
+    "formulaBody": "Сумма = все категории достижений.\n• Новое достижение добавляет очки категории (обычно значение по умолчанию).\n• Удаление достижения вычитает начисленные очки.\n• Завершение онбординга может дать разовый бонус (часто в категории «другое»).\nФильтры: город — подстрока в поле профиля «локация»; класс — подстрока «школа / организация»; группа учителя — только участники этой группы.",
+    "filtersTitle": "Фильтры таблицы",
+    "filterCityPh": "Город (поле локации в профиле)",
+    "filterClassPh": "Класс / школа",
+    "filterGroupAll": "Все группы",
+    "filtersApply": "Применить",
+    "filtersReset": "Сбросить",
+    "pointsJournal": "Журнал очков",
+    "pointsJournalHint": "Последние изменения по категориям.",
+    "journalEmpty": "Пока без записей."
   },
   "achievements": {
     "title": "🏅 Достижения",
@@ -496,7 +507,31 @@
     "sortNew": "Сначала новые",
     "sortRelevance": "По совпадению",
     "searchInList": "Поиск в списке…",
-    "clearFilters": "Сбросить фильтры и поиск"
+    "clearFilters": "Сбросить фильтры и поиск",
+    "employerStats": {
+      "myVacancies": "Мои вакансии",
+      "open": "Открыты",
+      "filled": "Закрыты (найден)",
+      "notNeeded": "Закрыты — не нужны",
+      "otherClosed": "Закрыты — другое",
+      "pendingReviews": "Отклики на проверке"
+    },
+    "vacancyLabel": "Статус вакансии",
+    "vacancyUpdated": "Сохранено",
+    "closeReasonPrompt": "Причина закрытия (необязательно)",
+    "closedNote": "Примечание",
+    "vacancyStatus": {
+      "open": "Открыта",
+      "filled": "Закрыта (найден кандидат)",
+      "closed_not_needed": "Закрыта — не набираем",
+      "closed_other": "Закрыта — другое"
+    },
+    "vacancyBadge": {
+      "open": "",
+      "filled": "Закрыта",
+      "closed_not_needed": "Не набираем",
+      "closed_other": "Закрыта"
+    }
   },
   "people": {
     "title": "👥 Люди",
@@ -1251,7 +1286,17 @@
       "joinByCodeBtn": "Вступить",
       "joinCodeRequired": "Введите код группы",
       "joinedByCode": "Вы вступили в группу",
-      "joinCodeLabel": "Код вступления"
+      "joinCodeLabel": "Код вступления",
+      "guestMember": "Гость / вне основного класса",
+      "guestBadge": "гость",
+      "codeRegenerated": "Новый код (30 дней)",
+      "inviteExpires": "Код действует до {{date}}",
+      "inviteNoExpiry": "Без срока (старый код)",
+      "regenerateCode": "Новый код + 30 дней",
+      "removeMember": "Удалить из группы",
+      "memberRemoved": "Участник удалён",
+      "leaveGroup": "Выйти",
+      "leftGroup": "Вы вышли из группы"
     },
     "currentTeacher": "Назначение учителя",
     "currentTeacherNow": "Текущий учитель",
